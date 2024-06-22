@@ -16,29 +16,63 @@
 
 package moe.orangemc.osu.al1s.auth.credential;
 
+import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
 import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.Scope;
+import moe.orangemc.osu.al1s.util.URLUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CredentialBase implements Credential {
+    private int clientId;
+    private String clientSecret;
+    private List<Scope> scopes;
+
     @Override
     public Credential setClientId(int id) {
-        return null;
+        this.clientId = id;
+        return this;
     }
 
     @Override
     public Credential setClientSecret(String secret) {
-        return null;
+        this.clientSecret = secret;
+        return this;
     }
 
     @Override
     public Credential setScopes(Scope... scopes) {
-        return null;
+        this.scopes = List.of(scopes);
+        return this;
     }
 
     @Override
     public Credential setScopes(List<Scope> scopes) {
-        return null;
+        this.scopes = new ArrayList<>(scopes);
+        return this;
+    }
+
+    public AuthenticateType getGrantType() {
+        return AuthenticateType.CLIENT_CREDENTIALS;
+    }
+
+    public String toUrlEncodedForm() {
+        return "client_id=" + clientId + "&" +
+                "client_secret=" + URLUtil.encode(clientSecret) + "&" +
+                "scope=" + URLUtil.encode(scopes.stream().map(Scope::name).reduce((a, b) -> a + " " + b).orElseThrow(() -> new IllegalStateException("Unknown scope"))) + "&" +
+                "grant_type=" + URLUtil.encode(getGrantType().toString());
+    }
+
+    public List<Scope> getScopes() {
+        return scopes;
+    }
+
+    public int getClientId() {
+        return clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
     }
 }

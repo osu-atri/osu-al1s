@@ -29,7 +29,7 @@ public class CredentialProviderImpl implements CredentialProvider {
         return (T)switch (authenticateType) {
             case CLIENT_CREDENTIALS -> new CredentialBase();
             case AUTHORIZATION_CODE -> new AuthorizationCodeGrantCredentialImpl();
-            case REFRESH_TOKEN -> throw new UnsupportedOperationException("Unknown token to refresh");
+            case REFRESH_TOKEN -> throw new UnsupportedOperationException("Please use Token#refresh() to refresh a token");
         };
     }
 }

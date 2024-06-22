@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.util;
 
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 
 public class URLUtil {
     public static URL newURL(String url) {
@@ -26,5 +29,21 @@ public class URLUtil {
 
     public static URL concat(URL base, String path) {
         return SneakyExceptionHelper.call(() -> new URI(base.toURI() + path).toURL());
+    }
+
+    public static String encode(String target) {
+        if (target == null) {
+            return null;
+        }
+
+        return URLEncoder.encode(target, Charset.defaultCharset());
+    }
+
+    public static String decode(String target) {
+        if (target == null) {
+            return null;
+        }
+
+        return URLDecoder.decode(target, Charset.defaultCharset());
     }
 }

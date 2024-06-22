@@ -16,11 +16,26 @@
 
 package moe.orangemc.osu.al1s.auth.credential;
 
+import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
 import moe.orangemc.osu.al1s.api.auth.AuthorizationCodeGrantCredential;
+import moe.orangemc.osu.al1s.util.URLUtil;
 
 public class AuthorizationCodeGrantCredentialImpl extends CredentialBase implements AuthorizationCodeGrantCredential {
+    private String redirectUri;
+
     @Override
     public AuthorizationCodeGrantCredential setRedirectUri(String uri) {
-        return null;
+        this.redirectUri = uri;
+        return this;
+    }
+
+    @Override
+    public AuthenticateType getGrantType() {
+        return AuthenticateType.AUTHORIZATION_CODE;
+    }
+
+    @Override
+    public String toUrlEncodedForm() {
+        return super.toUrlEncodedForm() + "&redirect_uri=" + URLUtil.encode(redirectUri);
     }
 }

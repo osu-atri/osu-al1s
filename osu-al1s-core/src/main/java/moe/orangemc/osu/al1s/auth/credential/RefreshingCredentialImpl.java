@@ -16,7 +16,28 @@
 
 package moe.orangemc.osu.al1s.auth.credential;
 
+import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
+import moe.orangemc.osu.al1s.auth.token.TokenBase;
+import moe.orangemc.osu.al1s.util.URLUtil;
+
 public class RefreshingCredentialImpl extends CredentialBase {
-    public RefreshingCredentialImpl() {
+    private final TokenBase referer;
+
+    public RefreshingCredentialImpl(TokenBase referer) {
+        this.referer = referer;
+
+        this.setClientId(referer.getReferer().getClientId())
+                .setScopes(referer.getReferer().getScopes())
+                .setClientSecret(referer.getReferer().getClientSecret());
+    }
+
+    @Override
+    public AuthenticateType getGrantType() {
+        return AuthenticateType.REFRESH_TOKEN;
+    }
+
+    @Override
+    public String toUrlEncodedForm() {
+        return super.toUrlEncodedForm() + "&refresh_token=" + URLUtil.encode(referer.getServerAuthData().refreshToken());
     }
 }
