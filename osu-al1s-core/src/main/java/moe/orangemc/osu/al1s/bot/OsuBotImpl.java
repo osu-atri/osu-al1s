@@ -23,6 +23,7 @@ import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
+import moe.orangemc.osu.al1s.event.EventBusImpl;
 import org.apache.commons.lang3.Validate;
 
 import java.net.URL;
@@ -32,14 +33,17 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class OsuBotImpl implements OsuBot {
-    private TokenImpl token = null;
     private final URL baseURL;
+
     private final AuthenticationAPI authenticationAPI;
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() / 4);
+    private final EventBus eventBus = new EventBusImpl();
+
+    private TokenImpl token = null;
 
     public OsuBotImpl(URL baseURL) {
         this.baseURL = baseURL;
-        this.authenticationAPI = new AuthenticationAPI(baseURL);
+        this.authenticationAPI = new AuthenticationAPI(this, baseURL);
     }
 
     @Override
@@ -67,6 +71,6 @@ public class OsuBotImpl implements OsuBot {
 
     @Override
     public EventBus getEventBus() {
-        return null;
+        return eventBus;
     }
 }

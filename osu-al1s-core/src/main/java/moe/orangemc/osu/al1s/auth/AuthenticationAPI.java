@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.token.ServerTokenResponse;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.util.HttpUtil;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
@@ -29,10 +30,12 @@ import java.util.Set;
 public class AuthenticationAPI {
     private final Gson gson = new Gson();
 
+    private final OsuBotImpl requester;
     private final URL targetURL;
     private final URL userRequestURL;
 
-    public AuthenticationAPI(URL rootUrl) {
+    public AuthenticationAPI(OsuBotImpl requester, URL rootUrl) {
+        this.requester = requester;
         targetURL = URLUtil.concat(rootUrl, "oauth/token");
         userRequestURL = URLUtil.concat(rootUrl, "oauth/authorize");
     }
@@ -50,5 +53,9 @@ public class AuthenticationAPI {
 
     public URL getUserRequestURL() {
         return userRequestURL;
+    }
+
+    public OsuBotImpl getRequester() {
+        return requester;
     }
 }

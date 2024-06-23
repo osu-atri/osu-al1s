@@ -14,16 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event;
+package moe.orangemc.osu.al1s.event.asm;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface EventHandler {
-    HandlerOrder order() default HandlerOrder.NORMAL;
-    boolean ignoreCancelled() default false;
+class HandlerDispatcherClassLoader extends ClassLoader {
+    public Class<?> makeClass(String name, byte[] classBytes) {
+        return this.defineClass(name, classBytes, 0, classBytes.length);
+    }
 }

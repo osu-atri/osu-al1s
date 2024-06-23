@@ -18,20 +18,65 @@ package moe.orangemc.osu.al1s.event;
 
 import moe.orangemc.osu.al1s.api.event.Event;
 import moe.orangemc.osu.al1s.api.event.EventBus;
+import moe.orangemc.osu.al1s.api.event.EventHandler;
+import moe.orangemc.osu.al1s.api.event.HandlerOrder;
+import moe.orangemc.osu.al1s.event.asm.HandlerDispatcher;
+import moe.orangemc.osu.al1s.event.asm.HandlerDispatcherFactory;
+
+import java.lang.reflect.AccessFlag;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class EventBusImpl implements EventBus {
+    private HandlerDispatcherFactory factory = new HandlerDispatcherFactory();
+    private Map<Class<?>, List<Set<HandlerDispatcher<?>>>> handlers = new HashMap<>();
+
     @Override
     public void register(Object listener) {
+        Class<?> listenerClass = listener.getClass();
+        for (Method m : listenerClass.getMethods()) {
+            if (m.isSynthetic() || m.getParameterCount() != 1 || !m.accessFlags().contains(AccessFlag.PUBLIC)) {
+                continue;
+            }
 
+            EventHandler handlerAnnotation = m.getAnnotation(EventHandler.class);
+            if (handlerAnnotation == null) {
+                continue;
+            }
+
+            Class<?> param = m.getParameters()[0].getType();
+            if (!(Event.class.isAssignableFrom(param))) {
+                continue;
+            }
+
+            if (!handlers.containsKey(param)) {
+                handlers.put(param, new ArrayList<>());
+
+                for (int i = 0; i < HandlerOrder.values().length; i ++) {
+                    handlers.get(param).add(new HashSet<>());
+                }
+            }
+
+            handlers.get(param).get(handlerAnnotation.order().getId()).add(factory.createDispatcher(listener, m, param, handlerAnnotation.ignoreCancelled()));
+        }
     }
 
     @Override
     public void unregister(Object listener) {
-
+        handlers.forEach((_, evtHandlers) -> {
+            for (Set<HandlerDispatcher<?>> handlers : evtHandlers) {
+                handlers.removeIf(handler -> handler.getOwner() == listener);
+            }
+        });
     }
 
     @Override
     public void fire(Event event) {
-
+        handlers.getOrDefault(event.getClass(), Collections.emptyList()).forEach(handlers -> {
+            for (HandlerDispatcher<?> handler : handlers) {
+                HandlerDispatcher<Event> target = (HandlerDispatcher<Event>) handler;
+                target.dispatchEvent(event);
+            }
+        });
     }
 }

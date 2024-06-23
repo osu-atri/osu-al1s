@@ -14,16 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event;
+package moe.orangemc.osu.al1s.util;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.security.MessageDigest;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface EventHandler {
-    HandlerOrder order() default HandlerOrder.NORMAL;
-    boolean ignoreCancelled() default false;
+public class DigestUtil {
+    public static String sha256sum(String target) {
+        return SneakyExceptionHelper.call(() -> {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(target.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        });
+    }
 }

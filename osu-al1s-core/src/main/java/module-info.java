@@ -5,6 +5,7 @@ module moe.orangemc.osu.al1s {
     requires moe.orangemc.osu.al1s.api;
     requires com.google.gson;
     requires org.apache.commons.lang3;
+    requires org.objectweb.asm;
 
     exports moe.orangemc.osu.al1s;
     exports moe.orangemc.osu.al1s.auth;

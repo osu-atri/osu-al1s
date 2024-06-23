@@ -17,9 +17,19 @@
 package moe.orangemc.osu.al1s.api.event;
 
 public enum HandlerOrder {
-    FIRST,
-    EARLY,
-    NORMAL,
-    LATE,
-    LAST
+    FIRST(0),
+    EARLY(1),
+    NORMAL(2),
+    LATE(3),
+    LAST(4);
+
+    private final int id;
+
+    HandlerOrder(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 }
