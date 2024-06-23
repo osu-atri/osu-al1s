@@ -14,12 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.auth;
+package moe.orangemc.osu.al1s.api.event.auth;
+
+import moe.orangemc.osu.al1s.api.event.CancellableEvent;
 
 import java.net.InetSocketAddress;
 
-public interface AuthorizationCodeGrantCredential extends Credential {
-    AuthorizationCodeGrantCredential setRedirectUri(String uri);
+public class UserActionEvent extends CancellableEvent {
+    private final InetSocketAddress userAddr;
 
-    AuthorizationCodeGrantCredential setCallbackAddr(InetSocketAddress addr);
+    public UserActionEvent(InetSocketAddress userAddr) {
+        this.userAddr = userAddr;
+    }
+
+    public InetSocketAddress getUserAddr() {
+        return userAddr;
+    }
 }

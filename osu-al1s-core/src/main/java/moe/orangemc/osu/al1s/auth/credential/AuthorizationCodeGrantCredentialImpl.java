@@ -20,6 +20,10 @@ import com.sun.net.httpserver.HttpServer;
 import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
 import moe.orangemc.osu.al1s.api.auth.AuthorizationCodeGrantCredential;
 import moe.orangemc.osu.al1s.api.auth.Scope;
+import moe.orangemc.osu.al1s.api.event.EventBus;
+import moe.orangemc.osu.al1s.api.event.auth.UserAcceptAuthenticationEvent;
+import moe.orangemc.osu.al1s.api.event.auth.UserAuthenticationRequestEvent;
+import moe.orangemc.osu.al1s.api.event.auth.UserCsrfFailEvent;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
@@ -45,6 +49,7 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
         return this;
     }
 
+    @Override
     public AuthorizationCodeGrantCredential setCallbackAddr(InetSocketAddress addr) {
         this.callbackAddr = addr;
         return this;
@@ -91,19 +96,35 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
                 try {
                     codeLock.lock();
 
+                    // They might have a handler for customized interface.
+                    EventBus eventBus = api.getRequester().getEventBus();
+                    eventBus.fire(new UserAuthenticationRequestEvent(userRequestURL));
+
                     // HttpServer runs on another thread so we need to wait.
                     final Condition codeCondition = codeLock.newCondition();
                     HttpServer server = HttpServer.create(callbackAddr, 0);
                     server.createContext("/", exchange -> {
                         Map<String, String> params = URLUtil.extractQueryParams(exchange.getRequestURI().toURL());
                         if (!params.get("state").equals(state.toString())) {
-                            exchange.sendResponseHeaders(400, 0);
-                            exchange.close();
-                            return;
+                            UserCsrfFailEvent evt = new UserCsrfFailEvent(exchange.getRemoteAddress(), state, params.get("state"));
+                            eventBus.fire(evt);
+
+                            if (!evt.isCancelled()) {
+                                exchange.sendResponseHeaders(400, 0);
+                                exchange.close();
+                                return;
+                            }
                         }
                         code = params.get("code");
 
-                        String response = "<html><body><script>alert(\"Access Granted for AL-1S! Thanks for using!\");window.close();</script></body></html>";
+                        UserAcceptAuthenticationEvent event = new UserAcceptAuthenticationEvent(exchange.getRemoteAddress(), code, state);
+                        eventBus.fire(event);
+                        if (event.isCancelled()) {
+                            exchange.sendResponseHeaders(400, 0);
+                            return;
+                        }
+
+                        String response = event.getResponseHtml();
                         exchange.sendResponseHeaders(200, response.length());
                         try (OutputStream os = exchange.getResponseBody()) {
                             os.write(response.getBytes());

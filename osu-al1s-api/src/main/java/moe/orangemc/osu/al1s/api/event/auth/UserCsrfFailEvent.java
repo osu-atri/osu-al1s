@@ -14,12 +14,29 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.auth;
+package moe.orangemc.osu.al1s.api.event.auth;
+
+import moe.orangemc.osu.al1s.api.event.Event;
 
 import java.net.InetSocketAddress;
+import java.util.UUID;
 
-public interface AuthorizationCodeGrantCredential extends Credential {
-    AuthorizationCodeGrantCredential setRedirectUri(String uri);
+public class UserCsrfFailEvent extends UserActionEvent {
+    private final UUID expected;
+    private final String actual;
 
-    AuthorizationCodeGrantCredential setCallbackAddr(InetSocketAddress addr);
+    public UserCsrfFailEvent(InetSocketAddress userAddr, UUID expected, String actual) {
+        super(userAddr);
+
+        this.expected = expected;
+        this.actual = actual;
+    }
+
+    public UUID getExpected() {
+        return expected;
+    }
+
+    public String getActual() {
+        return actual;
+    }
 }
