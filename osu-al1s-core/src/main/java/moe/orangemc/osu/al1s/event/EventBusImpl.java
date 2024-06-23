@@ -14,18 +14,24 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.bot;
+package moe.orangemc.osu.al1s.event;
 
-import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.event.Event;
 import moe.orangemc.osu.al1s.api.event.EventBus;
-import moe.orangemc.osu.al1s.api.user.User;
 
-import java.util.concurrent.Future;
+public class EventBusImpl implements EventBus {
+    @Override
+    public void register(Object listener) {
 
-public interface OsuBot {
-    Future<Void> authenticate(Credential credential);
-    void authenticateSync(Credential credential);
-    User getAuthenticatedUser();
+    }
 
-    EventBus getEventBus();
+    @Override
+    public void unregister(Object listener) {
+
+    }
+
+    @Override
+    public void fire(Event event) {
+
+    }
 }

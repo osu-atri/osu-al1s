@@ -29,8 +29,8 @@ import java.util.Set;
 public class AuthenticationAPI {
     private final Gson gson = new Gson();
 
-    private URL targetURL;
-    private URL userRequestURL;
+    private final URL targetURL;
+    private final URL userRequestURL;
 
     public AuthenticationAPI(URL rootUrl) {
         targetURL = URLUtil.concat(rootUrl, "oauth/token");
