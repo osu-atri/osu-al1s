@@ -17,13 +17,13 @@
 package moe.orangemc.osu.al1s.auth.credential;
 
 import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
-import moe.orangemc.osu.al1s.auth.token.TokenBase;
+import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
 public class RefreshingCredentialImpl extends CredentialBase {
-    private final TokenBase referer;
+    private final TokenImpl referer;
 
-    public RefreshingCredentialImpl(TokenBase referer) {
+    public RefreshingCredentialImpl(TokenImpl referer) {
         this.referer = referer;
 
         this.setClientId(referer.getReferer().getClientId())

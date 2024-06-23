@@ -24,11 +24,11 @@ import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TokenBase implements Token {
+public class TokenImpl implements Token {
     private final CredentialBase referer;
     private final ServerTokenResponse serverAuthData;
 
-    public TokenBase(CredentialBase referer, ServerTokenResponse serverAuthData) {
+    public TokenImpl(CredentialBase referer, ServerTokenResponse serverAuthData) {
         this.referer = referer;
         this.serverAuthData = serverAuthData;
     }

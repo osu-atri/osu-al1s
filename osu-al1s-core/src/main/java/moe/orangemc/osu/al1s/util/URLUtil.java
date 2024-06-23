@@ -21,6 +21,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 public class URLUtil {
     public static URL newURL(String url) {
@@ -45,5 +47,23 @@ public class URLUtil {
         }
 
         return URLDecoder.decode(target, Charset.defaultCharset());
+    }
+
+    public static Map<String, String> extractQueryParams(URL url) {
+        Map<String, String> params = new HashMap<>();
+
+        String query = url.getQuery();
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] pair = param.split("=");
+                if (pair.length != 2) {
+                    continue;
+                }
+
+                params.put(pair[0], pair[1]);
+            }
+        }
+
+        return params;
     }
 }

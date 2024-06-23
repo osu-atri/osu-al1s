@@ -14,15 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.bot;
+package moe.orangemc.osu.al1s.api.event;
 
-import moe.orangemc.osu.al1s.api.auth.Credential;
-import moe.orangemc.osu.al1s.api.user.User;
-
-import java.util.concurrent.Future;
-
-public interface OsuBot {
-    Future<Void> authenticate(Credential credential);
-    void authenticateSync(Credential credential);
-    User getAuthenticatedUser();
+public interface EventBus {
+    void register(Object listener);
+    void unregister(Object listener);
+    void fire(Event event);
 }

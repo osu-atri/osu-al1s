@@ -14,15 +14,34 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.bot;
+package moe.orangemc.osu.al1s.bot;
 
 import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.user.User;
 
+import java.net.URL;
 import java.util.concurrent.Future;
 
-public interface OsuBot {
-    Future<Void> authenticate(Credential credential);
-    void authenticateSync(Credential credential);
-    User getAuthenticatedUser();
+public class OsuBotImpl implements OsuBot {
+    private final URL baseURL;
+
+    public OsuBotImpl(URL baseURL) {
+        this.baseURL = baseURL;
+    }
+
+    @Override
+    public Future<Void> authenticate(Credential credential) {
+        return null;
+    }
+
+    @Override
+    public void authenticateSync(Credential credential) {
+
+    }
+
+    @Override
+    public User getAuthenticatedUser() {
+        return null;
+    }
 }

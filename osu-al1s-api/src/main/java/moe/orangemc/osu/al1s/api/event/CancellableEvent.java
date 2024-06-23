@@ -14,15 +14,16 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.bot;
+package moe.orangemc.osu.al1s.api.event;
 
-import moe.orangemc.osu.al1s.api.auth.Credential;
-import moe.orangemc.osu.al1s.api.user.User;
+public class CancellableEvent extends Event {
+    private boolean cancelled;
 
-import java.util.concurrent.Future;
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
-public interface OsuBot {
-    Future<Void> authenticate(Credential credential);
-    void authenticateSync(Credential credential);
-    User getAuthenticatedUser();
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
 }
