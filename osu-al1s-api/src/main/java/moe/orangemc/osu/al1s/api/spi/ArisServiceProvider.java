@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.spi;
+package moe.orangemc.osu.al1s.api.spi;
 
 import java.util.ArrayList;
 import java.util.List;

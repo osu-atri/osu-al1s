@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.spi;
 
 import moe.orangemc.osu.al1s.api.bot.BotFactory;
+import moe.orangemc.osu.al1s.api.spi.BotFactoryProvider;
 import moe.orangemc.osu.al1s.bot.BotFactoryImpl;
 
 public class BotFactoryProviderImpl implements BotFactoryProvider {

@@ -20,4 +20,5 @@ import java.net.URL;
 
 public interface BotFactory {
     BotFactory withBaseURL(URL baseURL);
+    BotFactory withDebug(boolean debug);
 }

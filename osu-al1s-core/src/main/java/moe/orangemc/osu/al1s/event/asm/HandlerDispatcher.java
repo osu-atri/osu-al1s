@@ -21,4 +21,5 @@ import moe.orangemc.osu.al1s.api.event.Event;
 public interface HandlerDispatcher<T extends Event> {
     void dispatchEvent(T event);
     Object getOwner();
+    int getOrderIndex();
 }

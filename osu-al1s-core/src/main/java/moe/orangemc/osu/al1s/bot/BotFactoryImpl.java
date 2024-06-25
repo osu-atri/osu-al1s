@@ -24,13 +24,21 @@ import java.net.URL;
 
 public class BotFactoryImpl implements BotFactory {
     private URL baseUrl;
+    private boolean debug;
 
     public BotFactoryImpl() {
-        SneakyExceptionHelper.voidCall(() -> withBaseURL(new URI("https://osu.ppy.sh/").toURL()));
+        SneakyExceptionHelper.voidCall(() -> withBaseURL(new URI("https://osu.ppy.sh/").toURL())
+                .withDebug(false));
     }
 
     @Override
     public BotFactory withBaseURL(URL baseURL) {
+        return this;
+    }
+
+    @Override
+    public BotFactory withDebug(boolean debug) {
+        this.debug = debug;
         return this;
     }
 }

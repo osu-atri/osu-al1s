@@ -14,8 +14,11 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.spi;
+package moe.orangemc.osu.al1s.api.spi;
 
-public interface ArisBootstrapService {
-    void boot();
+import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
+import moe.orangemc.osu.al1s.api.auth.Credential;
+
+public interface CredentialProvider {
+    <T extends Credential> T newCredential(AuthenticateType authenticateType);
 }

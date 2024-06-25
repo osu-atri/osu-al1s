@@ -16,7 +16,7 @@
 
 package moe.orangemc.osu.al1s;
 
-import moe.orangemc.osu.al1s.spi.ArisBootstrapService;
+import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
 
 public class ArisBootstrapServiceImpl implements ArisBootstrapService {
     @Override

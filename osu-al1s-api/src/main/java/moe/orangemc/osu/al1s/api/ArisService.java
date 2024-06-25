@@ -17,9 +17,9 @@
 package moe.orangemc.osu.al1s.api;
 
 import moe.orangemc.osu.al1s.api.bot.BotFactory;
-import moe.orangemc.osu.al1s.spi.ArisBootstrapService;
-import moe.orangemc.osu.al1s.spi.ArisServiceProviderRegistry;
-import moe.orangemc.osu.al1s.spi.BotFactoryProvider;
+import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
+import moe.orangemc.osu.al1s.api.spi.ArisServiceProviderRegistry;
+import moe.orangemc.osu.al1s.api.spi.BotFactoryProvider;
 
 public class ArisService {
     static {

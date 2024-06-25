@@ -33,6 +33,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class OsuBotImpl implements OsuBot {
+    private final boolean debug;
+
     private final URL baseURL;
 
     private final AuthenticationAPI authenticationAPI;
@@ -41,7 +43,8 @@ public class OsuBotImpl implements OsuBot {
 
     private TokenImpl token = null;
 
-    public OsuBotImpl(URL baseURL) {
+    public OsuBotImpl(boolean debug, URL baseURL) {
+        this.debug = debug;
         this.baseURL = baseURL;
         this.authenticationAPI = new AuthenticationAPI(this, baseURL);
     }

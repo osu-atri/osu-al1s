@@ -14,10 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.spi;
+package moe.orangemc.osu.al1s.api.spi;
 
-public class NoSuchProviderException extends RuntimeException {
-    public NoSuchProviderException(Class<?> providerClass) {
-        super("No provider found for " + providerClass.getName());
-    }
+import moe.orangemc.osu.al1s.api.bot.BotFactory;
+
+public interface BotFactoryProvider {
+    BotFactory newBotFactory();
 }

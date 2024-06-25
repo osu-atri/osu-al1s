@@ -28,8 +28,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class EventBusImpl implements EventBus {
-    private HandlerDispatcherFactory factory = new HandlerDispatcherFactory();
-    private Map<Class<?>, List<Set<HandlerDispatcher<?>>>> handlers = new HashMap<>();
+    private final HandlerDispatcherFactory factory = new HandlerDispatcherFactory();
+    private final Map<Class<?>, Set<HandlerDispatcher<?>>> handlers = new HashMap<>();
 
     @Override
     public void register(Object listener) {
@@ -50,33 +50,40 @@ public class EventBusImpl implements EventBus {
             }
 
             if (!handlers.containsKey(param)) {
-                handlers.put(param, new ArrayList<>());
-
-                for (int i = 0; i < HandlerOrder.values().length; i ++) {
-                    handlers.get(param).add(new HashSet<>());
-                }
+                handlers.put(param, new HashSet<>());
             }
 
-            handlers.get(param).get(handlerAnnotation.order().getId()).add(factory.createDispatcher(listener, m, param, handlerAnnotation.ignoreCancelled()));
+            handlers.get(param).add(factory.createDispatcher(listener, m, param, handlerAnnotation.ignoreCancelled(), handlerAnnotation.order().getId()));
         }
     }
 
     @Override
     public void unregister(Object listener) {
         handlers.forEach((_, evtHandlers) -> {
-            for (Set<HandlerDispatcher<?>> handlers : evtHandlers) {
-                handlers.removeIf(handler -> handler.getOwner() == listener);
-            }
+            evtHandlers.removeIf(handler -> handler.getOwner() == listener);
         });
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void fire(Event event) {
-        handlers.getOrDefault(event.getClass(), Collections.emptyList()).forEach(handlers -> {
-            for (HandlerDispatcher<?> handler : handlers) {
-                HandlerDispatcher<Event> target = (HandlerDispatcher<Event>) handler;
-                target.dispatchEvent(event);
-            }
-        });
+        Class<?> evtClass = event.getClass();
+
+        List<Set<HandlerDispatcher<Event>>> layeredHandlers = new ArrayList<>();
+
+        for (int i = 0; i < HandlerOrder.values().length; i++) {
+            layeredHandlers.add(new HashSet<>());
+        }
+
+        while (Event.class.isAssignableFrom(evtClass)) {
+            handlers.getOrDefault(evtClass, Collections.emptySet()).forEach(handler -> {
+                layeredHandlers.get(handler.getOrderIndex()).add((HandlerDispatcher<Event>) handler);
+            });
+            evtClass = evtClass.getSuperclass();
+        }
+
+        for (Set<HandlerDispatcher<Event>> handlers : layeredHandlers) {
+            handlers.forEach(handler -> handler.dispatchEvent(event));
+        }
     }
 }

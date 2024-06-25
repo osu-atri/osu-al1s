@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.event.asm;
 
+import moe.orangemc.osu.al1s.api.event.Event;
 import moe.orangemc.osu.al1s.util.DigestUtil;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.apache.commons.lang3.Validate;
@@ -30,7 +31,7 @@ public class HandlerDispatcherFactory {
     private final Map<Method, Class<HandlerDispatcher<?>>> cache = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public HandlerDispatcher<?> createDispatcher(Object handler, Method m, Class<?> expectedParam, boolean ignoreCancelled) {
+    public HandlerDispatcher<?> createDispatcher(Object handler, Method m, Class<?> expectedParam, boolean ignoreCancelled, int orderIndex) {
         Validate.isTrue(handler.getClass() == m.getDeclaringClass(), "Invalid handler method: " + m);
         Validate.isTrue(m.getParameters()[0].getType() == expectedParam, "Invalid handler method: " + m);
 
@@ -40,31 +41,40 @@ public class HandlerDispatcherFactory {
 
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
-        String generatedName = "moe/orangemc/osu/al1s/event/asm/HandlerDispatcherImpl_" + DigestUtil.sha256sum(Type.getType(m.getDeclaringClass()) + "@" + Type.getMethodDescriptor(m));
+        String generatedName = "moe/orangemc/osu/al1s/event/asm/HandlerDispatcherImpl_" + DigestUtil.sha256sum(Type.getType(m.getDeclaringClass()) + "." + m.getName() + "@" + Type.getMethodDescriptor(m) + ":" + ignoreCancelled);
 
-        cw.visit(Opcodes.V21, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, generatedName, null, "java/lang/Object", new String[]{"moe/orangemc/osu/al1s/event/asm/HandlerDispatcher"});
+        cw.visit(Opcodes.V22, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, generatedName, null, "java/lang/Object", new String[]{"moe/orangemc/osu/al1s/event/asm/HandlerDispatcher"});
+        cw.visitSource("HandlerDispatcherFactory.java", null);
 
         /* handler */ {
             cw.visitField(Opcodes.ACC_PRIVATE, "handler", Type.getDescriptor(m.getDeclaringClass()), null, null);
         }
 
         /* <init>(handler) */ {
-            MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", Type.getMethodDescriptor(Type.getType(void.class), Type.getType(m.getDeclaringClass())), null, null);
+            MethodVisitor mv = new LineNumberedMethodVisitor(cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", Type.getMethodDescriptor(Type.getType(void.class), Type.getType(m.getDeclaringClass())), null, null));
 
             mv.visitCode();
+
             // this.handler = handler;
             mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitInsn(Opcodes.DUP);
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
             mv.visitVarInsn(Opcodes.ALOAD, 1);
             mv.visitFieldInsn(Opcodes.PUTFIELD, generatedName, "handler", Type.getDescriptor(m.getDeclaringClass()));
             mv.visitInsn(Opcodes.RETURN);
+
+            mv.visitMaxs(2, 2);
 
             mv.visitEnd();
         }
 
         /* dispatchEvent(Event event) */ {
-            MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "dispatchEvent", Type.getMethodDescriptor(Type.getType(void.class), Type.getType(Object.class)), null, null);
+            MethodVisitor mv = new LineNumberedMethodVisitor(cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "dispatchEvent", Type.getMethodDescriptor(Type.getType(void.class), Type.getType(Event.class)), null, null));
 
             mv.visitCode();
+
+            int stack = 2;
+            int locals = 2;
 
             if (ignoreCancelled) {
                 // if (event instanceof CancellableEvent)
@@ -81,7 +91,7 @@ public class HandlerDispatcherFactory {
                 /* if (((CancellableEvent) event).isCancelled()) */ {
                     // return;
                     mv.visitTypeInsn(Opcodes.CHECKCAST, "moe/orangemc/osu/al1s/api/event/CancellableEvent"); // We did a `dup` before
-                    mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "moe/orangemc/osu/al1s/api/event/CancellableEvent", "isCancelled", "()Z", true);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "moe/orangemc/osu/al1s/api/event/CancellableEvent", "isCancelled", "()Z", false);
                     mv.visitInsn(Opcodes.ICONST_0);
                     mv.visitJumpInsn(Opcodes.IF_ICMPEQ, end);
                     mv.visitInsn(Opcodes.RETURN);
@@ -92,6 +102,8 @@ public class HandlerDispatcherFactory {
                 mv.visitInsn(Opcodes.POP);
 
                 mv.visitLabel(end);
+
+                stack ++;
             }
 
             mv.visitVarInsn(Opcodes.ALOAD, 0);
@@ -100,18 +112,38 @@ public class HandlerDispatcherFactory {
             mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(expectedParam));
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(m.getDeclaringClass()), m.getName(), Type.getMethodDescriptor(m), false);
             mv.visitInsn(Opcodes.RETURN);
+
+            mv.visitMaxs(stack, locals);
+
+            mv.visitEnd();
         }
 
         /* getOwner */ {
-            MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "getOwner", Type.getMethodDescriptor(Type.getType(Object.class)), null, null);
+            MethodVisitor mv = new LineNumberedMethodVisitor(cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "getOwner", Type.getMethodDescriptor(Type.getType(Object.class)), null, null));
 
             mv.visitCode();
             mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitFieldInsn(Opcodes.GETFIELD, generatedName, "handler", Type.getDescriptor(m.getDeclaringClass()));
+            mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Object");
             mv.visitInsn(Opcodes.ARETURN);
+
+            mv.visitMaxs(1, 1);
+            mv.visitEnd();
+        }
+
+        /* getOrderIndex */ {
+            MethodVisitor mv = new LineNumberedMethodVisitor(cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "getOrderIndex", Type.getMethodDescriptor(Type.getType(int.class)), null, null));
+
+            mv.visitCode();
+            mv.visitLdcInsn(orderIndex);
+            mv.visitInsn(Opcodes.IRETURN);
+
+            mv.visitMaxs(1, 1);
+            mv.visitEnd();
         }
 
         byte[] classBytes = cw.toByteArray();
+
         Class<HandlerDispatcher<?>> clazz = (Class<HandlerDispatcher<?>>) classLoader.makeClass(generatedName.replace('/', '.'), classBytes);
         cache.put(m, clazz);
         return SneakyExceptionHelper.call(() -> clazz.getConstructor(handler.getClass()).newInstance(handler));

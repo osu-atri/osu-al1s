@@ -14,10 +14,8 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.spi;
+package moe.orangemc.osu.al1s.api.spi;
 
-import moe.orangemc.osu.al1s.api.bot.BotFactory;
-
-public interface BotFactoryProvider {
-    BotFactory newBotFactory();
+public interface ArisBootstrapService {
+    void boot();
 }
