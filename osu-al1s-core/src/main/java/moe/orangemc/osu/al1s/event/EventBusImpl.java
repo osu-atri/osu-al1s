@@ -59,9 +59,7 @@ public class EventBusImpl implements EventBus {
 
     @Override
     public void unregister(Object listener) {
-        handlers.forEach((_, evtHandlers) -> {
-            evtHandlers.removeIf(handler -> handler.getOwner() == listener);
-        });
+        handlers.forEach((_, evtHandlers) -> evtHandlers.removeIf(handler -> handler.getOwner() == listener));
     }
 
     @SuppressWarnings("unchecked")
@@ -76,9 +74,7 @@ public class EventBusImpl implements EventBus {
         }
 
         while (Event.class.isAssignableFrom(evtClass)) {
-            handlers.getOrDefault(evtClass, Collections.emptySet()).forEach(handler -> {
-                layeredHandlers.get(handler.getOrderIndex()).add((HandlerDispatcher<Event>) handler);
-            });
+            handlers.getOrDefault(evtClass, Collections.emptySet()).forEach(handler -> layeredHandlers.get(handler.getOrderIndex()).add((HandlerDispatcher<Event>) handler));
             evtClass = evtClass.getSuperclass();
         }
 

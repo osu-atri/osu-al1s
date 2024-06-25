@@ -16,8 +16,6 @@
 
 package moe.orangemc.osu.al1s.api.event.auth;
 
-import moe.orangemc.osu.al1s.api.event.Event;
-
 import java.net.InetSocketAddress;
 import java.util.UUID;
 

@@ -21,7 +21,7 @@ import java.util.List;
 public interface Token {
     AuthenticateType getAuthenticateType();
     List<Scope> getAllowedScopes();
-    long getExpire();
+    long getTimeToLive();
 
     void refresh();
 }

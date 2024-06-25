@@ -67,7 +67,7 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
 
     @Override
     public Set<Runnable> getPreHook(AuthenticationAPI api) {
-        return Set.of(() -> new CodeReceiver(api));
+        return Set.of(new CodeReceiver(api));
     }
 
     private class CodeReceiver implements Runnable {
@@ -102,42 +102,49 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
 
                     // HttpServer runs on another thread so we need to wait.
                     final Condition codeCondition = codeLock.newCondition();
-                    HttpServer server = HttpServer.create(callbackAddr, 0);
+                    HttpServer server = HttpServer.create(callbackAddr, 1);
                     server.createContext("/", exchange -> {
-                        Map<String, String> params = URLUtil.extractQueryParams(exchange.getRequestURI().toURL());
-                        if (!params.get("state").equals(state.toString())) {
-                            UserCsrfFailEvent evt = new UserCsrfFailEvent(exchange.getRemoteAddress(), state, params.get("state"));
-                            eventBus.fire(evt);
+                        try {
+                            Map<String, String> params = URLUtil.extractQueryParams(exchange.getRequestURI());
+                            if (!params.get("state").equals(state.toString())) {
+                                UserCsrfFailEvent evt = new UserCsrfFailEvent(exchange.getRemoteAddress(), state, params.get("state"));
+                                eventBus.fire(evt);
 
-                            if (!evt.isCancelled()) {
+                                if (!evt.isCancelled()) {
+                                    System.out.println(6);
+                                    exchange.sendResponseHeaders(400, 0);
+                                    exchange.close();
+                                    return;
+                                }
+                            }
+                            code = params.get("code");
+
+                            UserAcceptAuthenticationEvent event = new UserAcceptAuthenticationEvent(exchange.getRemoteAddress(), code, state);
+                            eventBus.fire(event);
+                            if (event.isCancelled()) {
                                 exchange.sendResponseHeaders(400, 0);
                                 exchange.close();
                                 return;
                             }
-                        }
-                        code = params.get("code");
 
-                        UserAcceptAuthenticationEvent event = new UserAcceptAuthenticationEvent(exchange.getRemoteAddress(), code, state);
-                        eventBus.fire(event);
-                        if (event.isCancelled()) {
-                            exchange.sendResponseHeaders(400, 0);
-                            return;
-                        }
+                            String response = event.getResponseHtml();
+                            exchange.sendResponseHeaders(200, response.length());
+                            try (OutputStream os = exchange.getResponseBody()) {
+                                os.write(response.getBytes());
+                            }
 
-                        String response = event.getResponseHtml();
-                        exchange.sendResponseHeaders(200, response.length());
-                        try (OutputStream os = exchange.getResponseBody()) {
-                            os.write(response.getBytes());
-                        }
+                            try {
+                                codeLock.lock();
+                                codeCondition.signalAll();
+                            } finally {
+                                codeLock.unlock();
+                            }
 
-                        try {
-                            codeLock.lock();
-                            codeCondition.signalAll();
-                        } finally {
-                            codeLock.unlock();
+                            exchange.close();
+                            server.stop(0);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-
-                        server.stop(0);
                     });
                     server.start();
                     while (code == null) {

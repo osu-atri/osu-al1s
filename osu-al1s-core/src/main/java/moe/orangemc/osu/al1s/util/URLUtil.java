@@ -49,7 +49,7 @@ public class URLUtil {
         return URLDecoder.decode(target, Charset.defaultCharset());
     }
 
-    public static Map<String, String> extractQueryParams(URL url) {
+    public static Map<String, String> extractQueryParams(URI url) {
         Map<String, String> params = new HashMap<>();
 
         String query = url.getQuery();

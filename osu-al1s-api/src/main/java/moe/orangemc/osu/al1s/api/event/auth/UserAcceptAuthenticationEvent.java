@@ -16,8 +16,6 @@
 
 package moe.orangemc.osu.al1s.api.event.auth;
 
-import moe.orangemc.osu.al1s.api.event.CancellableEvent;
-
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
@@ -25,7 +23,7 @@ public class UserAcceptAuthenticationEvent extends UserActionEvent {
     private final String code;
     private final UUID csrfToken;
 
-    private String responseHtml = "<html><body><script>alert(\"Access Granted for AL-1S! Thanks for using!\");window.close();</script></body></html>";
+    private String responseHtml = "<html><body><img src=\"https://storage.googleapis.com/sticker-prod/J4AagQnWMPrpcgB9S4Iu/11.thumb128.webp\"><br>Access granted for AL-1S! <br>You can safely close this tab now!</body></html>";
 
     public UserAcceptAuthenticationEvent(InetSocketAddress userAddr, String code, UUID csrfToken) {
         super(userAddr);

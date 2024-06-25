@@ -28,6 +28,8 @@ public class TokenImpl implements Token {
     private final CredentialBase referer;
     private final ServerTokenResponse serverAuthData;
 
+    private final long createTime = System.currentTimeMillis() / 1000;
+
     public TokenImpl(CredentialBase referer, ServerTokenResponse serverAuthData) {
         this.referer = referer;
         this.serverAuthData = serverAuthData;
@@ -44,8 +46,8 @@ public class TokenImpl implements Token {
     }
 
     @Override
-    public long getExpire() {
-        return serverAuthData.expires();
+    public long getTimeToLive() {
+        return createTime + serverAuthData.expires() - System.currentTimeMillis() / 1000;
     }
 
     @Override

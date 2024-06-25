@@ -32,8 +32,8 @@ public class LineNumberedMethodVisitor extends MethodVisitor {
 
         Label label = new Label();
         int lineNumber = Thread.currentThread().getStackTrace()[3].getLineNumber();
-        super.visitLineNumber(lineNumber, label);
         super.visitLabel(label);
+        super.visitLineNumber(lineNumber, label);
     }
 
     @Override
