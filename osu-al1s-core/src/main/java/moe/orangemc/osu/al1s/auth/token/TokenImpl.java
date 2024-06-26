@@ -19,18 +19,22 @@ package moe.orangemc.osu.al1s.auth.token;
 import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
 import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.auth.Token;
+import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
+import moe.orangemc.osu.al1s.auth.credential.RefreshingCredentialImpl;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TokenImpl implements Token {
+    private final AuthenticationAPI requester;
     private final CredentialBase referer;
-    private final ServerTokenResponse serverAuthData;
+    private ServerTokenResponse serverAuthData;
 
     private final long createTime = System.currentTimeMillis() / 1000;
 
-    public TokenImpl(CredentialBase referer, ServerTokenResponse serverAuthData) {
+    public TokenImpl(AuthenticationAPI requester, CredentialBase referer, ServerTokenResponse serverAuthData) {
+        this.requester = requester;
         this.referer = referer;
         this.serverAuthData = serverAuthData;
     }
@@ -55,6 +59,13 @@ public class TokenImpl implements Token {
         if (serverAuthData.refreshToken() == null) {
             throw new UnsupportedOperationException("Only tokens created with " + AuthenticateType.AUTHORIZATION_CODE + " or " + AuthenticateType.REFRESH_TOKEN + " can be refreshed.");
         }
+
+        RefreshingCredentialImpl refreshingCredential = new RefreshingCredentialImpl(this);
+        refreshingCredential.setClientId(referer.getClientId());
+        refreshingCredential.setClientSecret(referer.getClientSecret());
+        refreshingCredential.setScopes(referer.getScopes());
+
+        requester.refreshToken(refreshingCredential, (str) -> this.serverAuthData = str);
     }
 
     public CredentialBase getReferer() {

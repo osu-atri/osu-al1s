@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.api.bot;
 
 import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 
@@ -28,4 +29,6 @@ public interface OsuBot {
     User getAuthenticatedUser();
 
     EventBus getEventBus();
+
+    Token getToken();
 }

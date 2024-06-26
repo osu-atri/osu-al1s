@@ -20,6 +20,8 @@ import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.event.EventHandler;
 import moe.orangemc.osu.al1s.api.event.auth.UserAuthenticationRequestEvent;
 import moe.orangemc.osu.al1s.auth.credential.AuthorizationCodeGrantCredentialImpl;
+import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
+import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
@@ -58,6 +60,47 @@ public class AuthenticationAPITest {
         credential.setScopes(Scope.PUBLIC, Scope.IDENTIFY, Scope.CHAT.READ);
 
         Assertions.assertDoesNotThrow(() -> osuBot.authenticateSync(credential));
+    }
+
+    @Test
+    public void testClientCredentialsGrant() {
+        CredentialBase credentialBase = new CredentialBase();
+
+        File tmpCredentialFile = new File("tmpCredentialFile");
+        Assertions.assertTrue(tmpCredentialFile.exists(), "Credential file not found");
+
+        SneakyExceptionHelper.voidCallAutoClose(() -> new Scanner(tmpCredentialFile), scanner -> {
+            credentialBase.setClientId(scanner.nextInt());
+            scanner.nextLine();
+            credentialBase.setClientSecret(scanner.nextLine());
+        });
+        credentialBase.setScopes(Scope.PUBLIC);
+
+        Assertions.assertDoesNotThrow(() -> osuBot.authenticateSync(credentialBase));
+    }
+
+    @Test
+    public void testTokenRenewal() {
+        AuthorizationCodeGrantCredentialImpl credential = new AuthorizationCodeGrantCredentialImpl();
+
+        File tmpCredentialFile = new File("tmpCredentialFile");
+        Assertions.assertTrue(tmpCredentialFile.exists(), "Credential file not found");
+
+        SneakyExceptionHelper.voidCallAutoClose(() -> new Scanner(tmpCredentialFile), scanner -> {
+            credential.setClientId(scanner.nextInt());
+            scanner.nextLine();
+            credential.setClientSecret(scanner.nextLine());
+            credential.setRedirectUri(scanner.nextLine());
+        });
+
+        credential.setCallbackAddr(new InetSocketAddress("localhost", 4000));
+        credential.setScopes(Scope.PUBLIC, Scope.IDENTIFY, Scope.CHAT.READ);
+
+        osuBot.authenticateSync(credential);
+
+        TokenImpl token = (TokenImpl) osuBot.getToken();
+
+        Assertions.assertDoesNotThrow(token::refresh);
     }
 
     public static class Authenticator {

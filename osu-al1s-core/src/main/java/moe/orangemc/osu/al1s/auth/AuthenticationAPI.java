@@ -17,7 +17,9 @@
 package moe.orangemc.osu.al1s.auth;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
+import moe.orangemc.osu.al1s.auth.credential.RefreshingCredentialImpl;
 import moe.orangemc.osu.al1s.auth.token.ServerTokenResponse;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
@@ -26,9 +28,11 @@ import moe.orangemc.osu.al1s.util.URLUtil;
 
 import java.net.URL;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class AuthenticationAPI {
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().registerTypeAdapter(ServerTokenResponse.class, new ServerTokenResponse.Adapter()).create();
 
     private final OsuBotImpl requester;
     private final URL targetURL;
@@ -48,7 +52,12 @@ public class AuthenticationAPI {
         }
 
         ServerTokenResponse str = gson.fromJson(HttpUtil.post(targetURL, credential.toUrlEncodedForm()), ServerTokenResponse.class);
-        return new TokenImpl(credential, str);
+        return new TokenImpl(this, credential, str);
+    }
+
+    public void refreshToken(RefreshingCredentialImpl refreshingCredential, Consumer<ServerTokenResponse> updater) {
+        ServerTokenResponse str = gson.fromJson(HttpUtil.post(targetURL, refreshingCredential.toUrlEncodedForm()), ServerTokenResponse.class);
+        updater.accept(str);
     }
 
     public URL getUserRequestURL() {

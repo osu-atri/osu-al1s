@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.bot;
 
 import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
@@ -75,5 +76,10 @@ public class OsuBotImpl implements OsuBot {
     @Override
     public EventBus getEventBus() {
         return eventBus;
+    }
+
+    @Override
+    public Token getToken() {
+        return token;
     }
 }
