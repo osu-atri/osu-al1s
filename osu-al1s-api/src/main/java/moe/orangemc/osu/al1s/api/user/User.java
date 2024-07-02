@@ -16,12 +16,6 @@
 
 package moe.orangemc.osu.al1s.api.user;
 
-import java.net.URL;
-import java.util.Locale;
-
 public interface User {
-    int getId();
-    String getUsername();
-    URL getAvatarURL();
-    String getCountry();
+    <T> T getMetadata(String key);
 }

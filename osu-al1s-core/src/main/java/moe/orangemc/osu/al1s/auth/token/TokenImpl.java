@@ -75,4 +75,8 @@ public class TokenImpl implements Token {
     public ServerTokenResponse getServerAuthData() {
         return serverAuthData;
     }
+
+    public String toHttpToken() {
+        return "Bearer " + serverAuthData.accessToken();
+    }
 }

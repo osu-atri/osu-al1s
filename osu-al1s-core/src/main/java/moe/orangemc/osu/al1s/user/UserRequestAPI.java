@@ -14,20 +14,18 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.bot;
+package moe.orangemc.osu.al1s.user;
 
-import moe.orangemc.osu.al1s.api.auth.Credential;
-import moe.orangemc.osu.al1s.api.auth.Token;
-import moe.orangemc.osu.al1s.api.event.EventBus;
-import moe.orangemc.osu.al1s.api.user.User;
+import com.google.gson.Gson;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 
-import java.util.concurrent.Future;
+public class UserRequestAPI {
+    private OsuBotImpl referer;
+    private Gson gson = new Gson();
 
-public interface OsuBot extends User {
-    Future<Void> authenticate(Credential credential);
-    void authenticateSync(Credential credential);
+    public UserRequestAPI(OsuBotImpl referer) {
+        this.referer = referer;
+    }
 
-    EventBus getEventBus();
 
-    Token getToken();
 }

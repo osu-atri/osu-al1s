@@ -22,9 +22,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 public class HttpUtil {
     public static String post(URL targetURL, String urlParameters) {
+        return post(targetURL, urlParameters, Collections.emptyMap());
+    }
+
+    public static String post(URL targetURL, String urlParameters, Map<String, String> headers) {
         HttpURLConnection connection = null;
 
         try {
@@ -37,6 +43,8 @@ public class HttpUtil {
             connection.setRequestProperty("Content-Length",
                     Integer.toString(urlParameters.getBytes().length));
             connection.setRequestProperty("Content-Language", "en-US");
+
+            headers.forEach(connection::setRequestProperty);
 
             connection.setUseCaches(false);
             connection.setDoOutput(true);

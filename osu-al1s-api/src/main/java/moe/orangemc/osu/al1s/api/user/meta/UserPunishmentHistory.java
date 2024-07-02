@@ -14,20 +14,9 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.bot;
+package moe.orangemc.osu.al1s.api.user.meta;
 
-import moe.orangemc.osu.al1s.api.auth.Credential;
-import moe.orangemc.osu.al1s.api.auth.Token;
-import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 
-import java.util.concurrent.Future;
-
-public interface OsuBot extends User {
-    Future<Void> authenticate(Credential credential);
-    void authenticateSync(Credential credential);
-
-    EventBus getEventBus();
-
-    Token getToken();
+public record UserPunishmentHistory(User receiver, String description, int id, int length, boolean permanent, long awardTime, PunishmentType type) {
 }

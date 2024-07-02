@@ -14,20 +14,26 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.bot;
+package moe.orangemc.osu.al1s.user;
 
-import moe.orangemc.osu.al1s.api.auth.Credential;
-import moe.orangemc.osu.al1s.api.auth.Token;
-import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 
-import java.util.concurrent.Future;
+public class UserImpl implements User {
 
-public interface OsuBot extends User {
-    Future<Void> authenticate(Credential credential);
-    void authenticateSync(Credential credential);
+    public UserImpl() {
 
-    EventBus getEventBus();
+    }
 
-    Token getToken();
+    public UserImpl(int id) {
+
+    }
+
+    public UserImpl(String username) {
+
+    }
+
+    @Override
+    public <T> T getMetadata(String key) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -25,6 +25,7 @@ import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.event.EventBusImpl;
+import moe.orangemc.osu.al1s.user.UserImpl;
 import org.apache.commons.lang3.Validate;
 
 import java.net.URL;
@@ -43,6 +44,7 @@ public class OsuBotImpl implements OsuBot {
     private final EventBus eventBus = new EventBusImpl();
 
     private TokenImpl token = null;
+    private User botUser = new UserImpl();
 
     public OsuBotImpl(boolean debug, URL baseURL) {
         this.debug = debug;
@@ -69,11 +71,6 @@ public class OsuBotImpl implements OsuBot {
     }
 
     @Override
-    public User getAuthenticatedUser() {
-        return null;
-    }
-
-    @Override
     public EventBus getEventBus() {
         return eventBus;
     }
@@ -81,5 +78,10 @@ public class OsuBotImpl implements OsuBot {
     @Override
     public Token getToken() {
         return token;
+    }
+
+    @Override
+    public <T> T getMetadata(String key) {
+        return botUser.getMetadata(key);
     }
 }
