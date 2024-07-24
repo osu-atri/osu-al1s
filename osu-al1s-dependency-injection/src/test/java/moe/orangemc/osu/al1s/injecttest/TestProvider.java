@@ -14,10 +14,16 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.injecttest;
 
-import moe.orangemc.osu.al1s.api.bot.BotFactory;
+public class TestProvider {
+    private String test;
 
-public interface BotFactoryProvider {
-    BotFactory newBotFactory();
+    public TestProvider(String test) {
+        this.test = test;
+    }
+
+    public String getTest() {
+        return test;
+    }
 }

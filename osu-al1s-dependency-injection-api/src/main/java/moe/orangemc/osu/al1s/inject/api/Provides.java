@@ -14,8 +14,15 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.inject.api;
 
-public interface ArisBootstrapService {
-    void boot(String init);
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Provides {
+    String name() default "default";
 }

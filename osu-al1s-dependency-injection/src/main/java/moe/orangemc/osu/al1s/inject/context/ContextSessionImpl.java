@@ -14,24 +14,25 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s;
+package moe.orangemc.osu.al1s.inject.context;
 
-import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
-import moe.orangemc.osu.al1s.bot.BotFactoryModule;
 import moe.orangemc.osu.al1s.inject.InjectorImpl;
+import moe.orangemc.osu.al1s.inject.api.ContextSession;
 import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.Injector;
-import moe.orangemc.osu.al1s.util.GsonProvider;
 
-public class ArisBootstrapServiceImpl implements ArisBootstrapService {
+public class ContextSessionImpl implements ContextSession {
+    private final Injector currentInjector;
+
+    private final InjectionContext lastContext;
+
+    public ContextSessionImpl(Injector currentInjector, InjectionContext lastContext) {
+        this.currentInjector = currentInjector;
+        this.lastContext = lastContext;
+    }
+
     @Override
-    public void boot(String init) {
-        Injector injector = new InjectorImpl();
-
-        InjectionContext ctx = injector.getCurrentContext();
-        ctx.registerModule(new BotFactoryModule());
-        ctx.registerModule(new GsonProvider());
-
-        injector.bootstrap(init);
+    public void close() {
+        ((InjectorImpl) currentInjector).unsafeSetContext(lastContext);
     }
 }

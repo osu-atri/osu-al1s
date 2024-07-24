@@ -12,6 +12,8 @@
         <module>osu-al1s-api</module>
         <module>osu-al1s-core</module>
         <module>osu-al1s-console</module>
+        <module>osu-al1s-dependency-injection</module>
+        <module>osu-al1s-dependency-injection-api</module>
     </modules>
 
     <properties>

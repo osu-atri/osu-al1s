@@ -14,8 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.inject;
 
-public interface ArisBootstrapService {
-    void boot(String init);
+import moe.orangemc.osu.al1s.inject.api.Injector;
+import moe.orangemc.osu.al1s.inject.api.Provides;
+
+public class InjectorProvider {
+    private final InjectorImpl injector;
+
+    public InjectorProvider(InjectorImpl injector) {
+        this.injector = injector;
+    }
+
+    @Provides
+    public Injector create() {
+        return this.injector;
+    }
 }

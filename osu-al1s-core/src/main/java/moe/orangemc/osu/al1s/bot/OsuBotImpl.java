@@ -22,9 +22,11 @@ import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
+import moe.orangemc.osu.al1s.auth.AuthenticationAPIModule;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.event.EventBusImpl;
+import moe.orangemc.osu.al1s.inject.api.*;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import org.apache.commons.lang3.Validate;
 
@@ -36,20 +38,36 @@ import java.util.concurrent.TimeUnit;
 
 public class OsuBotImpl implements OsuBot {
     private final boolean debug;
-
     private final URL baseURL;
 
-    private final AuthenticationAPI authenticationAPI;
+    @Inject(when = InjectTiming.POST)
+    private AuthenticationAPI authenticationAPI;
+
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() / 4);
     private final EventBus eventBus = new EventBusImpl();
 
     private TokenImpl token = null;
     private User botUser = new UserImpl();
 
+    @Inject
+    private Injector injector;
+    private InjectionContext ctx;
+
     public OsuBotImpl(boolean debug, URL baseURL) {
         this.debug = debug;
         this.baseURL = baseURL;
-        this.authenticationAPI = new AuthenticationAPI(this, baseURL);
+
+        ctx = injector.derivativeContext();
+        ctx.registerModule(this);
+
+        try (var _ = injector.setContext(ctx)) {
+            ctx.registerModule(new AuthenticationAPIModule());
+        }
+    }
+
+    @Provides
+    public OsuBotImpl getBot() {
+        return this;
     }
 
     @Override
@@ -67,7 +85,9 @@ public class OsuBotImpl implements OsuBot {
         Validate.isTrue(token == null, "Already authenticated");
         Validate.isTrue(credential instanceof CredentialBase, "Invalid credential type");
 
-        this.token = authenticationAPI.authorize((CredentialBase) credential);
+        try (var _ = injector.setContext(ctx)) {
+            this.token = authenticationAPI.authorize((CredentialBase) credential);
+        }
     }
 
     @Override
@@ -83,5 +103,9 @@ public class OsuBotImpl implements OsuBot {
     @Override
     public <T> T getMetadata(String key) {
         return botUser.getMetadata(key);
+    }
+
+    public URL getBaseUrl() {
+        return this.baseURL;
     }
 }

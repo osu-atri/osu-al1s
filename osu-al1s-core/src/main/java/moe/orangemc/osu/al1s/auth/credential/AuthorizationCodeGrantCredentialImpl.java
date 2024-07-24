@@ -25,6 +25,7 @@ import moe.orangemc.osu.al1s.api.event.auth.UserAcceptAuthenticationEvent;
 import moe.orangemc.osu.al1s.api.event.auth.UserAuthenticationRequestEvent;
 import moe.orangemc.osu.al1s.api.event.auth.UserCsrfFailEvent;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
@@ -66,17 +67,15 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
     }
 
     @Override
-    public Set<Runnable> getPreHook(AuthenticationAPI api) {
-        return Set.of(new CodeReceiver(api));
+    public Set<Runnable> getPreHook() {
+        return Set.of(new CodeReceiver());
     }
 
     private class CodeReceiver implements Runnable {
         private final Lock codeLock = new ReentrantLock();
-        private final AuthenticationAPI api;
 
-        private CodeReceiver(AuthenticationAPI api) {
-            this.api = api;
-        }
+        @Inject
+        private AuthenticationAPI api;
 
         private URL makeUserRequestURL(UUID state) {
             return URLUtil.concat(api.getUserRequestURL(), "?" +

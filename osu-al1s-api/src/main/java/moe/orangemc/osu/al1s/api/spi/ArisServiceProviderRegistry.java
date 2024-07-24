@@ -33,7 +33,5 @@ public class ArisServiceProviderRegistry {
 
     static {
         register(ArisBootstrapService.class, "moe.orangemc.osu.al1s.ArisBootstrapServiceImpl");
-        register(BotFactoryProvider.class, "moe.orangemc.osu.al1s.bot.impl.DefaultBotFactoryProvider");
-        register(CredentialProvider.class, "moe.orangemc.osu.al1s.auth.CredentialProviderImpl");
     }
 }

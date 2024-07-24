@@ -14,8 +14,14 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.inject.api;
 
-public interface ArisBootstrapService {
-    void boot(String init);
+public class InvalidInjectModuleException extends IllegalArgumentException {
+    public InvalidInjectModuleException(Class<?> moduleClass, String reason) {
+        super(moduleClass.getName() + ": " + reason);
+    }
+
+    public InvalidInjectModuleException(Class<?> moduleClass, Exception e) {
+        super(moduleClass.getName(), e);
+    }
 }

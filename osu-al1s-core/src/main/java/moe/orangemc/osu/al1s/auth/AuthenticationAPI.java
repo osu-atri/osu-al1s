@@ -17,42 +17,43 @@
 package moe.orangemc.osu.al1s.auth;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.credential.RefreshingCredentialImpl;
 import moe.orangemc.osu.al1s.auth.token.ServerTokenResponse;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.util.HttpUtil;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
 import java.net.URL;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class AuthenticationAPI {
-    private final Gson gson = new GsonBuilder().registerTypeAdapter(ServerTokenResponse.class, new ServerTokenResponse.Adapter()).create();
+    @Inject
+    private Gson gson;
 
-    private final OsuBotImpl requester;
+    @Inject
+    private OsuBotImpl requester;
     private final URL targetURL;
     private final URL userRequestURL;
 
-    public AuthenticationAPI(OsuBotImpl requester, URL rootUrl) {
-        this.requester = requester;
+    public AuthenticationAPI() {
+        URL rootUrl = requester.getBaseUrl();
         targetURL = URLUtil.concat(rootUrl, "oauth/token");
         userRequestURL = URLUtil.concat(rootUrl, "oauth/authorize");
     }
 
     public TokenImpl authorize(CredentialBase credential) {
-        Set<Runnable> preHook = credential.getPreHook(this);
+        Set<Runnable> preHook = credential.getPreHook();
 
         for (Runnable runnable : preHook) {
             runnable.run();
         }
 
         ServerTokenResponse str = gson.fromJson(HttpUtil.post(targetURL, credential.toUrlEncodedForm()), ServerTokenResponse.class);
-        return new TokenImpl(this, credential, str);
+        return new TokenImpl(credential, str);
     }
 
     public void refreshToken(RefreshingCredentialImpl refreshingCredential, Consumer<ServerTokenResponse> updater) {

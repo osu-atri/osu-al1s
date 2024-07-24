@@ -14,8 +14,17 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.inject.api;
 
-public interface ArisBootstrapService {
-    void boot(String init);
+import java.util.Collection;
+
+public interface InjectionContext {
+    void registerModule(Object module);
+    Object mapField(Class<?> type, String name);
+    Class<?> getMappedClass(String name);
+
+    void addExternalClass(Class<?>... classes);
+    void addExternalClass(Collection<Class<?>> classes);
+
+    InjectionContext getParent();
 }

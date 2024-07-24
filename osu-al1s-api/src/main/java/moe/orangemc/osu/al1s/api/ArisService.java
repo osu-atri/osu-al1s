@@ -16,17 +16,11 @@
 
 package moe.orangemc.osu.al1s.api;
 
-import moe.orangemc.osu.al1s.api.bot.BotFactory;
 import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
 import moe.orangemc.osu.al1s.api.spi.ArisServiceProviderRegistry;
-import moe.orangemc.osu.al1s.api.spi.BotFactoryProvider;
 
 public class ArisService {
-    static {
-        ArisServiceProviderRegistry.get(ArisBootstrapService.class).defaultProvider().boot();
-    }
-
-    public static BotFactory newBotFactory() {
-        return ArisServiceProviderRegistry.get(BotFactoryProvider.class).defaultProvider().newBotFactory();
+    public static void boot(String init) {
+        ArisServiceProviderRegistry.get(ArisBootstrapService.class).defaultProvider().boot(init);
     }
 }

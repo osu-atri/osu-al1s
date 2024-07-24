@@ -14,8 +14,13 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.auth;
 
-public interface ArisBootstrapService {
-    void boot(String init);
+import moe.orangemc.osu.al1s.inject.api.Provides;
+
+public class AuthenticationAPIModule {
+    @Provides
+    public AuthenticationAPI create() {
+        return new AuthenticationAPI();
+    }
 }

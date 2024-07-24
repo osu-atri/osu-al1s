@@ -14,15 +14,9 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.spi;
+package moe.orangemc.osu.al1s.inject.api;
 
-import moe.orangemc.osu.al1s.api.bot.BotFactory;
-import moe.orangemc.osu.al1s.api.spi.BotFactoryProvider;
-import moe.orangemc.osu.al1s.bot.BotFactoryImpl;
-
-public class BotFactoryProviderImpl implements BotFactoryProvider {
-    @Override
-    public BotFactory newBotFactory() {
-        return new BotFactoryImpl();
-    }
+public enum InjectTiming {
+    PRE,
+    POST
 }

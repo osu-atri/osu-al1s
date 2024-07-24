@@ -19,7 +19,6 @@ package moe.orangemc.osu.al1s.auth.credential;
 import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
 import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.Scope;
-import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class CredentialBase implements Credential {
         return clientSecret;
     }
 
-    public Set<Runnable> getPreHook(AuthenticationAPI api) {
+    public Set<Runnable> getPreHook() {
         return Collections.emptySet();
     }
 }

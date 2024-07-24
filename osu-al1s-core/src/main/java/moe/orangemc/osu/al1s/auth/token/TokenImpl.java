@@ -22,19 +22,20 @@ import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.credential.RefreshingCredentialImpl;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TokenImpl implements Token {
-    private final AuthenticationAPI requester;
+    @Inject
+    private AuthenticationAPI requester;
     private final CredentialBase referer;
     private ServerTokenResponse serverAuthData;
 
     private final long createTime = System.currentTimeMillis() / 1000;
 
-    public TokenImpl(AuthenticationAPI requester, CredentialBase referer, ServerTokenResponse serverAuthData) {
-        this.requester = requester;
+    public TokenImpl(CredentialBase referer, ServerTokenResponse serverAuthData) {
         this.referer = referer;
         this.serverAuthData = serverAuthData;
     }

@@ -14,8 +14,18 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.util;
 
-public interface ArisBootstrapService {
-    void boot(String init);
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import moe.orangemc.osu.al1s.auth.token.ServerTokenResponse;
+import moe.orangemc.osu.al1s.inject.api.Provides;
+
+public class GsonProvider {
+    @Provides
+    public Gson provideGson() {
+        return new GsonBuilder()
+                .registerTypeAdapter(ServerTokenResponse.class, new ServerTokenResponse.Adapter())
+                .create();
+    }
 }
