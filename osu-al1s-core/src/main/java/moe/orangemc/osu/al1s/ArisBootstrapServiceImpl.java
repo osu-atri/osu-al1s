@@ -17,10 +17,12 @@
 package moe.orangemc.osu.al1s;
 
 import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
+import moe.orangemc.osu.al1s.auth.CredentialProviderModule;
 import moe.orangemc.osu.al1s.bot.BotFactoryModule;
 import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.Injector;
+import moe.orangemc.osu.al1s.user.UserRequestAPIModule;
 import moe.orangemc.osu.al1s.util.GsonProvider;
 
 public class ArisBootstrapServiceImpl implements ArisBootstrapService {
@@ -29,8 +31,11 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
         Injector injector = new InjectorImpl();
 
         InjectionContext ctx = injector.getCurrentContext();
-        ctx.registerModule(new BotFactoryModule());
+
         ctx.registerModule(new GsonProvider());
+        ctx.registerModule(new BotFactoryModule());
+        ctx.registerModule(new CredentialProviderModule());
+        ctx.registerModule(new UserRequestAPIModule());
 
         injector.bootstrap(init);
     }

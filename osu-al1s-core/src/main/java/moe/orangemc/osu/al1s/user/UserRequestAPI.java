@@ -17,15 +17,40 @@
 package moe.orangemc.osu.al1s.user;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.util.HttpUtil;
+import moe.orangemc.osu.al1s.util.URLUtil;
+
+import java.net.URL;
+import java.util.Map;
 
 public class UserRequestAPI {
+    @Inject
     private OsuBotImpl referer;
-    private Gson gson = new Gson();
 
-    public UserRequestAPI(OsuBotImpl referer) {
-        this.referer = referer;
+    @Inject
+    private Gson gson;
+
+    private final URL targetURL;
+
+    public UserRequestAPI() {
+        targetURL = URLUtil.concat(referer.getBaseUrl(), "users/");
     }
 
+    public Map<String, Object> getUserMetadata(int id) {
+        String response = HttpUtil.get(URLUtil.concat(targetURL, String.valueOf(id)));
+        return gson.fromJson(response, new TypeToken<>() {}.getType());
+    }
 
+    public Map<String, Object> getUserMetadata(String username) {
+        String response = HttpUtil.get(URLUtil.concat(targetURL, username + "?key=username"));
+        return gson.fromJson(response, new TypeToken<>() {}.getType());
+    }
+
+    public Map<String, Object> getSelfMetadata() {
+        String response = HttpUtil.get(URLUtil.concat(referer.getBaseUrl(), "me"));
+        return gson.fromJson(response, new TypeToken<>() {}.getType());
+    }
 }

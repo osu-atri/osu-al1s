@@ -14,11 +14,13 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.user;
 
-import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
-import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.inject.api.Provides;
 
-public interface CredentialProvider {
-    <T extends Credential> T newCredential(AuthenticateType authenticateType);
+public class UserRequestAPIModule {
+    @Provides
+    public UserRequestAPI create() {
+        return new UserRequestAPI();
+    }
 }

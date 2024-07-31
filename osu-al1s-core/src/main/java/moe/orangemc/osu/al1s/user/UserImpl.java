@@ -17,23 +17,46 @@
 package moe.orangemc.osu.al1s.user;
 
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.inject.api.Inject;
+
+import java.util.Map;
 
 public class UserImpl implements User {
+    private final int id;
+
+    @Inject
+    private UserRequestAPI api;
+    private final Map<String, Object> metadata;
+
 
     public UserImpl() {
-
+        metadata = api.getSelfMetadata();
+        this.id = getMetadata("id");
     }
 
     public UserImpl(int id) {
-
+        metadata = api.getUserMetadata(id);
+        this.id = getMetadata("id");
     }
 
     public UserImpl(String username) {
+        metadata = api.getUserMetadata(username);
+        this.id = getMetadata("id");
+    }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getMetadata(String key) {
+        return (T) metadata.get(key);
     }
 
     @Override
-    public <T> T getMetadata(String key) {
-        throw new UnsupportedOperationException();
+    public boolean equals(Object obj) {
+        return obj instanceof UserImpl && ((UserImpl) obj).id == id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

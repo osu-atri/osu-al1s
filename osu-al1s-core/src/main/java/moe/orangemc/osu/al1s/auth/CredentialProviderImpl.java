@@ -20,7 +20,7 @@ import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
 import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.auth.credential.AuthorizationCodeGrantCredentialImpl;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
-import moe.orangemc.osu.al1s.api.spi.CredentialProvider;
+import moe.orangemc.osu.al1s.api.auth.CredentialProvider;
 
 public class CredentialProviderImpl implements CredentialProvider {
     @SuppressWarnings("unchecked")
