@@ -14,13 +14,21 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.ruleset;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+public enum Ruleset {
+    OSU("osu!standard"),
+    TAIKO("osu!taiko"),
+    CATCH("osu!catch"),
+    MANIA("osu!mania");
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
+    private final String name;
 
-    <T> T getMetadata(String key);
+    Ruleset(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

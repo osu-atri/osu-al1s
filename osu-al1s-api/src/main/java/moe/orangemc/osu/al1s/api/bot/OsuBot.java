@@ -17,7 +17,9 @@
 package moe.orangemc.osu.al1s.api.bot;
 
 import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 
@@ -27,7 +29,15 @@ public interface OsuBot extends User {
     Future<Void> authenticate(Credential credential);
     void authenticateSync(Credential credential);
 
+    Future<Void> authenticate(IrcCredential credential);
+    void authenticateSync(IrcCredential credential);
+
     EventBus getEventBus();
+    Scheduler getScheduler();
 
     Token getToken();
+
+    boolean isIrcEnabled();
+    void enableIrc(String host, int port);
+    void enableIrc();
 }

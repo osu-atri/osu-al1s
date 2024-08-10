@@ -14,13 +14,21 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.event.chat;
 
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.user.User;
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
+public class MultiplayerRoomChatEvent extends ChannelChatEvent {
+    private final MultiplayerRoom room;
 
-    <T> T getMetadata(String key);
+    public MultiplayerRoomChatEvent(User sender, String message, boolean action, OsuChannel channel, MultiplayerRoom room) {
+        super(sender, message, action, channel);
+        this.room = room;
+    }
+
+    public MultiplayerRoom getRoom() {
+        return room;
+    }
 }

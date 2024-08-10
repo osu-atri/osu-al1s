@@ -19,6 +19,9 @@ package moe.orangemc.osu.al1s.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import moe.orangemc.osu.al1s.auth.token.ServerTokenResponse;
+import moe.orangemc.osu.al1s.chat.web.model.*;
+import moe.orangemc.osu.al1s.chat.web.model.websocket.WebsocketChatData;
+import moe.orangemc.osu.al1s.chat.web.model.websocket.WebsocketEvent;
 import moe.orangemc.osu.al1s.inject.api.Provides;
 
 public class GsonProvider {
@@ -26,6 +29,13 @@ public class GsonProvider {
     public Gson provideGson() {
         return new GsonBuilder()
                 .registerTypeAdapter(ServerTokenResponse.class, new ServerTokenResponse.Adapter())
+                .registerTypeAdapter(OutboundChannelMessage.class, new OutboundChannelMessage.Adapter())
+                .registerTypeAdapter(OutboundChannelJoin.class, new OutboundChannelJoin.Adapter())
+                .registerTypeAdapter(OutboundInitiatePrivateMessage.class, new OutboundInitiatePrivateMessage.Adapter())
+                .registerTypeAdapter(InboundWebChatChannel.class, new InboundWebChatChannel.Adapter())
+                .registerTypeAdapter(InboundChatMessage.class, new InboundChatMessage.Adapter())
+                .registerTypeAdapter(WebsocketChatData.class, new WebsocketChatData.Adapter())
+                .registerTypeAdapter(WebsocketEvent.class, new WebsocketEvent.Adapter())
                 .create();
     }
 }

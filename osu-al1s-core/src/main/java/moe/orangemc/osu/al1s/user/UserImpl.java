@@ -17,15 +17,22 @@
 package moe.orangemc.osu.al1s.user;
 
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.chat.ChatDriver;
+import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class UserImpl implements User {
+public class UserImpl extends OsuChannelImpl implements User {
     private final int id;
 
     @Inject
     private UserRequestAPI api;
+
+    @Inject
+    private ChatDriver chatDriver;
+
     private final Map<String, Object> metadata;
 
 
@@ -51,6 +58,16 @@ public class UserImpl implements User {
     }
 
     @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public String getUsername() {
+        return getMetadata("username");
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof UserImpl && ((UserImpl) obj).id == id;
     }
@@ -58,5 +75,10 @@ public class UserImpl implements User {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    @Override
+    public String asInternalChannel(String initMessage) {
+        return chatDriver.initializePrivateChannel(getUsername(), initMessage);
     }
 }

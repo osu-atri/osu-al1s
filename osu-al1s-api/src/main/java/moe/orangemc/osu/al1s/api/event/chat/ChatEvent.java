@@ -14,20 +14,31 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event.auth;
+package moe.orangemc.osu.al1s.api.event.chat;
 
 import moe.orangemc.osu.al1s.api.event.Event;
+import moe.orangemc.osu.al1s.api.user.User;
 
-import java.net.URL;
+public class ChatEvent extends Event {
+    private final User sender;
+    private final String message;
+    private final boolean action;
 
-public class UserAuthenticationRequestEvent extends Event {
-    private final URL requestURL;
-
-    public UserAuthenticationRequestEvent(URL requestURL) {
-        this.requestURL = requestURL;
+    public ChatEvent(User sender, String message, boolean action) {
+        this.sender = sender;
+        this.message = message;
+        this.action = action;
     }
 
-    public URL getRequestURL() {
-        return requestURL;
+    public User getSender() {
+        return sender;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public boolean isAction() {
+        return action;
     }
 }

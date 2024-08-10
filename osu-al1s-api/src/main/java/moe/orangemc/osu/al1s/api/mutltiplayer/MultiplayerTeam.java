@@ -14,13 +14,19 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.mutltiplayer;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+public enum MultiplayerTeam {
+    RED("red"),
+    BLUE("blue");
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
+    private final String id;
 
-    <T> T getMetadata(String key);
+    MultiplayerTeam(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
 }

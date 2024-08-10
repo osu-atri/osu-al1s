@@ -14,13 +14,16 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.chat.web.model;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
-
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
-
-    <T> T getMetadata(String key);
+public enum ChannelType {
+    PUBLIC,
+    PRIVATE,
+    MULTIPLAYER,
+    SPECTATOR,
+    @Deprecated
+    TEMPORARY,
+    PM,
+    GROUP,
+    ANNOUNCE
 }

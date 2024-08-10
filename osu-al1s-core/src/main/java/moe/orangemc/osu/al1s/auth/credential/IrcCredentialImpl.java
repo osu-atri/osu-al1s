@@ -14,21 +14,31 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api;
+package moe.orangemc.osu.al1s.auth.credential;
 
-public enum Ruleset {
-    OSU("osu!standard"),
-    TAIKO("osu!taiko"),
-    CATCH("osu!catch"),
-    MANIA("osu!mania");
+import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 
-    private final String name;
+public class IrcCredentialImpl implements IrcCredential {
+    private String username;
+    private String password;
 
-    Ruleset(String name) {
-        this.name = name;
+    @Override
+    public IrcCredential setIrcUsername(String username) {
+        this.username = username;
+        return this;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public IrcCredential setIrcPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

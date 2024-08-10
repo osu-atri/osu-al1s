@@ -25,10 +25,12 @@ import java.net.URL;
 public class BotFactoryImpl implements BotFactory {
     private URL baseUrl;
     private boolean debug;
+    private String serverBotName;
 
     public BotFactoryImpl() {
         SneakyExceptionHelper.voidCall(() -> withBaseURL(new URI("https://osu.ppy.sh/").toURL())
-                .withDebug(false));
+                .withDebug(false)
+                .withServerBotName("BanchoBot"));
     }
 
     @Override
@@ -39,6 +41,12 @@ public class BotFactoryImpl implements BotFactory {
     @Override
     public BotFactory withDebug(boolean debug) {
         this.debug = debug;
+        return this;
+    }
+
+    @Override
+    public BotFactory withServerBotName(String serverBotName) {
+        this.serverBotName = serverBotName;
         return this;
     }
 }

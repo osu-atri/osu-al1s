@@ -14,13 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.beatmap;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
-
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
-
-    <T> T getMetadata(String key);
+public interface Beatmap {
 }

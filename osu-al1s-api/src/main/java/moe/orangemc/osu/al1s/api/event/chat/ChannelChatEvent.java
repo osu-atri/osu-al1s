@@ -14,13 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.event.chat;
 
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+import moe.orangemc.osu.al1s.api.user.User;
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
+public class ChannelChatEvent extends ChatEvent {
+    private final OsuChannel channel;
 
-    <T> T getMetadata(String key);
+    public ChannelChatEvent(User sender, String message, boolean action, OsuChannel channel) {
+        super(sender, message, action);
+        this.channel = channel;
+    }
+
+    public OsuChannel getChannel() {
+        return channel;
+    }
 }

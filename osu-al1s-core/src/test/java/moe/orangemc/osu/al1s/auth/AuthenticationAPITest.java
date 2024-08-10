@@ -38,7 +38,7 @@ public class AuthenticationAPITest {
 
     @BeforeAll
     public static void setUp() {
-        osuBot = new OsuBotImpl(true, URLUtil.newURL("http://osu.ppy.sh/"));
+        osuBot = new OsuBotImpl(true, URLUtil.newURL("http://osu.ppy.sh/"), "BanchoBot");
         osuBot.getEventBus().register(new Authenticator());
     }
 

@@ -14,13 +14,21 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.mutltiplayer;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+public enum WinCondition {
+    SCORE(0),
+    ACCURACY(1),
+    COMBO(2),
+    SCORE_V2(3);
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
+    private final int id;
 
-    <T> T getMetadata(String key);
+    WinCondition(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 }

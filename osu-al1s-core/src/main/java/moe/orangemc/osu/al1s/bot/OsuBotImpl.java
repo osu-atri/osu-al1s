@@ -17,14 +17,21 @@
 package moe.orangemc.osu.al1s.bot;
 
 import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPIModule;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
+import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
+import moe.orangemc.osu.al1s.chat.ChatDriver;
+import moe.orangemc.osu.al1s.chat.irc.IrcDriver;
+import moe.orangemc.osu.al1s.chat.web.WebDriver;
+import moe.orangemc.osu.al1s.concurrent.SchedulerImpl;
 import moe.orangemc.osu.al1s.event.EventBusImpl;
 import moe.orangemc.osu.al1s.inject.api.*;
 import moe.orangemc.osu.al1s.user.UserImpl;
@@ -43,19 +50,26 @@ public class OsuBotImpl implements OsuBot {
     @Inject(when = InjectTiming.POST)
     private AuthenticationAPI authenticationAPI;
 
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() / 4);
+    private final SchedulerImpl scheduler = new SchedulerImpl();
     private final EventBus eventBus = new EventBusImpl();
 
     private TokenImpl token = null;
-    private User botUser = new UserImpl();
+    private final User botUser = new UserImpl();
 
     @Inject
     private Injector injector;
-    private InjectionContext ctx;
+    private final InjectionContext ctx;
 
-    public OsuBotImpl(boolean debug, URL baseURL) {
+    private String ircHost = null;
+    private int ircPort;
+
+    private ChatDriver chatDriver;
+    private final User serverBot;
+
+    public OsuBotImpl(boolean debug, URL baseURL, String serverBotName) {
         this.debug = debug;
         this.baseURL = baseURL;
+        this.serverBot = new UserImpl(serverBotName);
 
         ctx = injector.derivativeContext();
         ctx.registerModule(this);
@@ -70,14 +84,16 @@ public class OsuBotImpl implements OsuBot {
         return this;
     }
 
+    @Provides(name="server-bot")
+    public User getServerBot() {
+        return serverBot;
+    }
+
     @Override
     public Future<Void> authenticate(Credential credential) {
-        FutureTask<Void> future = new FutureTask<>(() -> {
+        return scheduler.runTask(() -> {
             authenticateSync(credential);
-            return null;
         });
-        executor.schedule(future, 0, TimeUnit.MILLISECONDS);
-        return future;
     }
 
     @Override
@@ -87,17 +103,49 @@ public class OsuBotImpl implements OsuBot {
 
         try (var _ = injector.setContext(ctx)) {
             this.token = authenticationAPI.authorize((CredentialBase) credential);
+            this.chatDriver = new WebDriver();
         }
     }
 
+    @Override
+    public Future<Void> authenticate(IrcCredential credential) {
+        return scheduler.runTask(() -> {
+            authenticateSync(credential);
+        });
+    }
+
+    @Override
+    public void authenticateSync(IrcCredential credential) {
+        try (var _ = injector.setContext(ctx)) {
+            this.chatDriver = new IrcDriver(ircHost, ircPort, (IrcCredentialImpl) credential);
+        }
+    }
+
+    @Provides
     @Override
     public EventBus getEventBus() {
         return eventBus;
     }
 
+    @Provides
+    @Override
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
+
+    @Provides
+    public ChatDriver getChatDriver() {
+        return chatDriver;
+    }
+
     @Override
     public Token getToken() {
         return token;
+    }
+
+    @Override
+    public int getId() {
+        return botUser.getId();
     }
 
     @Override
@@ -107,5 +155,35 @@ public class OsuBotImpl implements OsuBot {
 
     public URL getBaseUrl() {
         return this.baseURL;
+    }
+
+    @Override
+    public boolean isIrcEnabled() {
+        return ircHost != null;
+    }
+
+    @Override
+    public void enableIrc(String host, int port) {
+        if (isIrcEnabled()) {
+            throw new IllegalStateException("IRC is already enabled");
+        }
+
+        this.ircHost = host;
+        this.ircPort = port;
+    }
+
+    @Override
+    public void enableIrc() {
+        enableIrc("irc.ppy.sh", 6667);
+    }
+
+    @Override
+    public void sendMessage(String message) {
+        throw new UnsupportedOperationException("You cannot talk to yourself (┙>∧<)┙へ┻┻");
+    }
+
+    @Override
+    public String getUsername() {
+        return botUser.getUsername();
     }
 }

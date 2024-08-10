@@ -14,13 +14,21 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.mutltiplayer;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+public enum TeamMode {
+    HEAD_TO_HEAD(0),
+    TAG_COOP(1),
+    TEAM_VS(2),
+    TAG_TEAM_VS(3);
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
+    private final int id;
 
-    <T> T getMetadata(String key);
+    TeamMode(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 }

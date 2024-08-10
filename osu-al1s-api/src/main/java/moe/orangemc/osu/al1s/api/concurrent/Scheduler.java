@@ -14,13 +14,18 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.api.concurrent;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
+public interface Scheduler {
+    <T> Future<T> runTask(Supplier<T> task);
+    Future<Void> runTask(Runnable task);
 
-    <T> T getMetadata(String key);
+    <T> Future<T> runTaskLater(Supplier<T> task, long delay, TimeUnit unit);
+    Future<Void> runTaskLater(Runnable task, long delay, TimeUnit unit);
+
+    void runTaskTimer(Runnable task, long delay, long period, TimeUnit unit);
 }

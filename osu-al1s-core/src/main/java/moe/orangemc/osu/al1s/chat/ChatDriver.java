@@ -14,13 +14,12 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.chat;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
-
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
-
-    <T> T getMetadata(String key);
+public interface ChatDriver {
+    void sendMessage(String channel, String message);
+    void joinChannel(String channel);
+    void leaveChannel(String channel);
+    String initializePrivateChannel(String user, String initialMessage);
+    String issueBanchoCommand(String command);
 }
