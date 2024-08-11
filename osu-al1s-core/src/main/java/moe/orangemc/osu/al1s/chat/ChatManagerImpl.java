@@ -105,6 +105,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
         String channelName = channel.getChannelName();
         channelsNameMap.put(channelName, (OsuChannelImpl) channel);
         reverseChannelsNameMap.put((OsuChannelImpl) channel, channelName);
+        this.driver.get().joinChannel(channelName);
         return channelName;
     }
 
