@@ -16,23 +16,14 @@
 
 package moe.orangemc.osu.al1s.chat.irc;
 
-import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.chat.ChatDriver;
-import moe.orangemc.osu.al1s.inject.api.Inject;
-import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
+import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
+import moe.orangemc.osu.al1s.user.UserImpl;
 import org.kitteh.irc.client.library.Client;
-
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 
 public class IrcDriver implements ChatDriver {
     private final Client client;
-    private final Queue<CompletableFuture<String>> commandResponseQueue = new LinkedList<>();
-
-    @Inject(name="server-bot")
-    private User serverBot;
 
     public IrcDriver(String host, int port, IrcCredentialImpl credential) {
         this.client = Client.builder()
@@ -45,7 +36,6 @@ public class IrcDriver implements ChatDriver {
                 .password(credential.getPassword())
                 .then()
                 .buildAndConnect();
-        this.client.getEventManager().registerEventListener(new IrcListener(commandResponseQueue));
     }
 
     @Override
@@ -64,16 +54,18 @@ public class IrcDriver implements ChatDriver {
     }
 
     @Override
-    public String initializePrivateChannel(String user, String initialMessage) {
-        client.sendMessage(user, initialMessage);
-        return user;
+    public String initializePrivateChannel(UserImpl user, String initialMessage) {
+        client.sendMessage(user.getUsername(), initialMessage);
+        return user.getUsername();
     }
 
     @Override
-    public String issueBanchoCommand(String command) {
-        serverBot.sendMessage(command);
-        CompletableFuture<String> response = new CompletableFuture<>();
-        commandResponseQueue.add(response);
-        return SneakyExceptionHelper.call(response::get);
+    public void setMessageHandler(ChatMessageHandler handler) {
+        this.client.getEventManager().registerEventListener(new IrcListener(handler));
+    }
+
+    @Override
+    public void shutdown() {
+        this.client.shutdown();
     }
 }

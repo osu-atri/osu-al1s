@@ -20,6 +20,7 @@ import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
+import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
@@ -28,9 +29,7 @@ import moe.orangemc.osu.al1s.auth.AuthenticationAPIModule;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
-import moe.orangemc.osu.al1s.chat.ChatDriver;
-import moe.orangemc.osu.al1s.chat.irc.IrcDriver;
-import moe.orangemc.osu.al1s.chat.web.WebDriver;
+import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.concurrent.SchedulerImpl;
 import moe.orangemc.osu.al1s.event.EventBusImpl;
 import moe.orangemc.osu.al1s.inject.api.*;
@@ -39,9 +38,6 @@ import org.apache.commons.lang3.Validate;
 
 import java.net.URL;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class OsuBotImpl implements OsuBot {
     private final boolean debug;
@@ -60,33 +56,25 @@ public class OsuBotImpl implements OsuBot {
     private Injector injector;
     private final InjectionContext ctx;
 
-    private String ircHost = null;
-    private int ircPort;
+    private final ChatManagerImpl chatManager;
 
-    private ChatDriver chatDriver;
-    private final User serverBot;
-
-    public OsuBotImpl(boolean debug, URL baseURL, String serverBotName) {
+    public OsuBotImpl(boolean debug, URL baseURL, String serverBotName, String ircServer, int ircPort) {
         this.debug = debug;
         this.baseURL = baseURL;
-        this.serverBot = new UserImpl(serverBotName);
 
         ctx = injector.derivativeContext();
         ctx.registerModule(this);
 
         try (var _ = injector.setContext(ctx)) {
             ctx.registerModule(new AuthenticationAPIModule());
+            this.chatManager = new ChatManagerImpl(serverBotName);
+            this.chatManager.setIrcServer(ircServer, ircPort);
         }
     }
 
     @Provides
     public OsuBotImpl getBot() {
         return this;
-    }
-
-    @Provides(name="server-bot")
-    public User getServerBot() {
-        return serverBot;
     }
 
     @Override
@@ -103,7 +91,6 @@ public class OsuBotImpl implements OsuBot {
 
         try (var _ = injector.setContext(ctx)) {
             this.token = authenticationAPI.authorize((CredentialBase) credential);
-            this.chatDriver = new WebDriver();
         }
     }
 
@@ -117,7 +104,7 @@ public class OsuBotImpl implements OsuBot {
     @Override
     public void authenticateSync(IrcCredential credential) {
         try (var _ = injector.setContext(ctx)) {
-            this.chatDriver = new IrcDriver(ircHost, ircPort, (IrcCredentialImpl) credential);
+            chatManager.authenticateIrc((IrcCredentialImpl) credential);
         }
     }
 
@@ -134,8 +121,9 @@ public class OsuBotImpl implements OsuBot {
     }
 
     @Provides
-    public ChatDriver getChatDriver() {
-        return chatDriver;
+    @Override
+    public ChatManager getChatManager() {
+        return this.chatManager;
     }
 
     @Override
@@ -155,31 +143,6 @@ public class OsuBotImpl implements OsuBot {
 
     public URL getBaseUrl() {
         return this.baseURL;
-    }
-
-    @Override
-    public boolean isIrcEnabled() {
-        return ircHost != null;
-    }
-
-    @Override
-    public void enableIrc(String host, int port) {
-        if (isIrcEnabled()) {
-            throw new IllegalStateException("IRC is already enabled");
-        }
-
-        this.ircHost = host;
-        this.ircPort = port;
-    }
-
-    @Override
-    public void enableIrc() {
-        enableIrc("irc.ppy.sh", 6667);
-    }
-
-    @Override
-    public void sendMessage(String message) {
-        throw new UnsupportedOperationException("You cannot talk to yourself (┙>∧<)┙へ┻┻");
     }
 
     @Override

@@ -25,12 +25,18 @@ import java.net.URL;
 public class BotFactoryImpl implements BotFactory {
     private URL baseUrl;
     private boolean debug;
+
     private String serverBotName;
+
+    private String ircHost;
+    private int ircPort;
 
     public BotFactoryImpl() {
         SneakyExceptionHelper.voidCall(() -> withBaseURL(new URI("https://osu.ppy.sh/").toURL())
                 .withDebug(false)
-                .withServerBotName("BanchoBot"));
+                .withServerBotName("BanchoBot")
+                .withIrcServer("irc.ppy.sh", 6667)
+        );
     }
 
     @Override
@@ -47,6 +53,25 @@ public class BotFactoryImpl implements BotFactory {
     @Override
     public BotFactory withServerBotName(String serverBotName) {
         this.serverBotName = serverBotName;
+        return this;
+    }
+
+    @Override
+    public BotFactory withIrcServer(String host, int port) {
+        this.ircHost = host;
+        this.ircPort = port;
+        return this;
+    }
+
+    @Override
+    public BotFactory withIrcServer(String host) {
+        this.ircHost = host;
+        return this;
+    }
+
+    @Override
+    public BotFactory withIrcServer(int port) {
+        this.ircPort = port;
         return this;
     }
 }

@@ -19,7 +19,6 @@ package moe.orangemc.osu.al1s.concurrent;
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -42,6 +41,7 @@ public class SchedulerImpl implements Scheduler {
         return executor.schedule(task::get, delay, unit);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Future<Void> runTaskLater(Runnable task, long delay, TimeUnit unit) {
         return (Future<Void>) executor.schedule(task, delay, unit);

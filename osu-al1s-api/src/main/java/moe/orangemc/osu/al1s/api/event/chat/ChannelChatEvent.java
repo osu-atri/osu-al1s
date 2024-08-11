@@ -22,8 +22,8 @@ import moe.orangemc.osu.al1s.api.user.User;
 public class ChannelChatEvent extends ChatEvent {
     private final OsuChannel channel;
 
-    public ChannelChatEvent(User sender, String message, boolean action, OsuChannel channel) {
-        super(sender, message, action);
+    public ChannelChatEvent(User sender, String message, OsuChannel channel) {
+        super(sender, message);
         this.channel = channel;
     }
 

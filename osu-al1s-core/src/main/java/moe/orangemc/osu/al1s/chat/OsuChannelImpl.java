@@ -16,36 +16,41 @@
 
 package moe.orangemc.osu.al1s.chat;
 
+import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
-import java.util.Objects;
+import java.util.*;
 
 public abstract class OsuChannelImpl implements OsuChannel {
     @Inject
-    private ChatDriver driver;
+    private ChatManager chatManager;
 
-    private String channelName = null;
+    private final Map<Long, List<String>> serverMessages = new HashMap<>();
 
     @Override
     public void sendMessage(String message) {
-        if (channelName == null) {
-            channelName = asInternalChannel(message);
-            return;
-        }
-
-        driver.sendMessage(channelName, message);
+        chatManager.sendMessage(this, message);
     }
 
-    public abstract String asInternalChannel(String initMessage);
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof OsuChannelImpl && ((OsuChannelImpl) obj).channelName.equals(channelName);
+    public void pushServerMessage(String message) {
+        long time = System.currentTimeMillis() / 1000;
+        serverMessages.computeIfAbsent(time, _ -> new ArrayList<>()).add(message);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(channelName);
+    public List<String> getServerMessages(long time) {
+        return Collections.unmodifiableList(serverMessages.getOrDefault(time, Collections.emptyList()));
+    }
+
+    @Override
+    public List<String> getLatestServerMessages() {
+        long latestTime = serverMessages.keySet().stream().max(Long::compareTo).orElse(0L);
+        return getServerMessages(latestTime);
+    }
+
+    @Override
+    public void clearServerMessages() {
+        serverMessages.clear();
     }
 }

@@ -16,10 +16,15 @@
 
 package moe.orangemc.osu.al1s.chat;
 
+import moe.orangemc.osu.al1s.user.UserImpl;
+
 public interface ChatDriver {
     void sendMessage(String channel, String message);
     void joinChannel(String channel);
     void leaveChannel(String channel);
-    String initializePrivateChannel(String user, String initialMessage);
-    String issueBanchoCommand(String command);
+    String initializePrivateChannel(UserImpl user, String initialMessage);
+
+    void setMessageHandler(ChatMessageHandler handler);
+
+    void shutdown();
 }

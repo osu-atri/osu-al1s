@@ -48,7 +48,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private final String password;
 
     public RoomImpl(String roomName) {
-        String response = chatDriver.issueBanchoCommand(roomName);
+        String response = "";
         Pattern pattern = Pattern.compile("(\\d+)");
 
         this.id = Integer.parseInt(pattern.matcher(response).group(1));
@@ -216,11 +216,5 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public @NotNull OsuBot getManagingBot() {
         return manager;
-    }
-
-    @Override
-    public String asInternalChannel(String initMessage) {
-        chatDriver.sendMessage("#mp_" + id, initMessage);
-        return "#mp_" + id;
     }
 }

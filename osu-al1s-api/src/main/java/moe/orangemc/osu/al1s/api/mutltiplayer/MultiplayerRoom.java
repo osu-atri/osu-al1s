@@ -71,4 +71,9 @@ public interface MultiplayerRoom extends OsuChannel {
     void close();
 
     @NotNull OsuBot getManagingBot();
+
+    @Override
+    default String getChannelName() {
+        return "#mp_" + getId();
+    }
 }

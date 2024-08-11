@@ -18,12 +18,13 @@ package moe.orangemc.osu.al1s.chat.web;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
 import moe.orangemc.osu.al1s.chat.web.model.InboundChatMessage;
 import moe.orangemc.osu.al1s.chat.web.model.websocket.WebsocketEvent;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.util.HttpUtil;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
@@ -31,30 +32,30 @@ import moe.orangemc.osu.al1s.util.URLUtil;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-public class WebsocketMessageReceiver implements WebSocket.Listener {
-    private final Queue<CompletableFuture<String>> commandResponseQueue = new LinkedList<>();
+public class WebsocketMessageReceiver implements WebSocket.Listener, AutoCloseable {
+    private final ChatMessageHandler handler;
 
     @Inject
     private OsuBotImpl bot;
     @Inject
     private Gson gson;
-    @Inject(name="server-bot")
-    private User banchobot;
 
-    public WebsocketMessageReceiver(Queue<CompletableFuture<String>> commandResponseQueue) {
+    private final HttpClient hc = HttpClient.newHttpClient();
+    private final WebSocket ws;
+
+    public WebsocketMessageReceiver(ChatMessageHandler handler) {
+        this.handler = handler;
+
         Map<String, ?> notifications = gson.fromJson(HttpUtil.get(URLUtil.concat(bot.getBaseUrl(), "/api/v2/notifications")), new TypeToken<>() {});
         URL notificationEndpoint = URLUtil.newURL(notifications.get("notification_endpoint").toString());
-        WebSocket receiver = SneakyExceptionHelper.callAutoClose(HttpClient::newHttpClient, client -> client.newWebSocketBuilder()
+        ws = SneakyExceptionHelper.call(() -> hc.newWebSocketBuilder()
                 .header("Authorization", ((TokenImpl) bot.getToken()).toHttpToken())
                 .buildAsync(notificationEndpoint.toURI(), this)
                 .join());
-        receiver.sendText("{\"event\": \"chat.start\"}", true);
+        ws.sendText("{\"event\": \"chat.start\"}", true);
     }
 
     @Override
@@ -65,16 +66,16 @@ public class WebsocketMessageReceiver implements WebSocket.Listener {
             return null;
         }
 
-        if (!evt.data().who().contains(banchobot)) {
-            return null;
-        }
-
         for (InboundChatMessage msg : evt.data().messages()) {
-            if (msg.senderUid() == banchobot.getId() && !commandResponseQueue.isEmpty()) {
-                commandResponseQueue.poll().complete(msg.message());
-            }
+            handler.handle(String.valueOf(msg.channelId()), new UserImpl(msg.senderUid()), msg.message());
         }
 
         return null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        ws.sendClose(WebSocket.NORMAL_CLOSURE, "{\"event\": \"chat.stop\"}");
+        hc.close();
     }
 }

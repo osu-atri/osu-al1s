@@ -22,12 +22,10 @@ import moe.orangemc.osu.al1s.api.user.User;
 public class ChatEvent extends Event {
     private final User sender;
     private final String message;
-    private final boolean action;
 
-    public ChatEvent(User sender, String message, boolean action) {
+    public ChatEvent(User sender, String message) {
         this.sender = sender;
         this.message = message;
-        this.action = action;
     }
 
     public User getSender() {
@@ -36,9 +34,5 @@ public class ChatEvent extends Event {
 
     public String getMessage() {
         return message;
-    }
-
-    public boolean isAction() {
-        return action;
     }
 }

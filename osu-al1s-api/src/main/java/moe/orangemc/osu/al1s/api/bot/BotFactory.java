@@ -23,4 +23,10 @@ public interface BotFactory {
     BotFactory withDebug(boolean debug);
 
     BotFactory withServerBotName(String serverBotName);
+
+    BotFactory withIrcServer(String host, int port);
+
+    BotFactory withIrcServer(String host);
+
+    BotFactory withIrcServer(int port);
 }

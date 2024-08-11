@@ -21,7 +21,6 @@ import moe.orangemc.osu.al1s.chat.ChatDriver;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class UserImpl extends OsuChannelImpl implements User {
@@ -75,10 +74,5 @@ public class UserImpl extends OsuChannelImpl implements User {
     @Override
     public int hashCode() {
         return id;
-    }
-
-    @Override
-    public String asInternalChannel(String initMessage) {
-        return chatDriver.initializePrivateChannel(getUsername(), initMessage);
     }
 }

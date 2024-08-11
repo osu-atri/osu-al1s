@@ -14,18 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.user;
+package moe.orangemc.osu.al1s.chat;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+import moe.orangemc.osu.al1s.user.UserImpl;
 
-public interface User extends OsuChannel {
-    int getId();
-    String getUsername();
-
-    <T> T getMetadata(String key);
-
-    @Override
-    default String getChannelName() {
-        throw new UnsupportedOperationException();
-    }
+public interface ChatMessageHandler {
+    void handle(String channel, UserImpl user, String message);
 }

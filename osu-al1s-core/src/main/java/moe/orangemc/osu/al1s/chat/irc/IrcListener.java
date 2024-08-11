@@ -16,36 +16,31 @@
 
 package moe.orangemc.osu.al1s.chat.irc;
 
-import moe.orangemc.osu.al1s.api.user.User;
-import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
+import moe.orangemc.osu.al1s.user.UserImpl;
 import net.engio.mbassy.listener.Handler;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
 import org.kitteh.irc.client.library.event.user.PrivateMessageEvent;
 
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-
 public class IrcListener {
-    private final Queue<CompletableFuture<String>> commandResponseQueue;
-    @Inject(name="server-bot")
-    private User serverBot;
+    private final ChatMessageHandler handler;
 
-    public IrcListener(Queue<CompletableFuture<String>> commandResponseQueue) {
-        this.commandResponseQueue = commandResponseQueue;
+    public IrcListener(ChatMessageHandler handler) {
+        this.handler = handler;
     }
 
     @Handler
     public void onChannelMessage(ChannelMessageEvent event) {
         String channelName = event.getChannel().getName();
+        String message = event.getMessage();
+        String sender = event.getActor().getName();
+        handler.handle(channelName, new UserImpl(sender), message);
     }
 
     @Handler
     public void onPrivateMessage(PrivateMessageEvent event) {
         String message = event.getMessage();
         String sender = event.getActor().getName();
-
-        if (sender.toLowerCase().equals(serverBot.getUsername().toLowerCase()) && !commandResponseQueue.isEmpty()) {
-            commandResponseQueue.poll().complete(message);
-        }
+        handler.handle(sender, new UserImpl(sender), message);
     }
 }

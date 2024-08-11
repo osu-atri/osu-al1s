@@ -19,10 +19,12 @@ package moe.orangemc.osu.al1s.api.bot;
 import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
+import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 public interface OsuBot extends User {
@@ -34,10 +36,29 @@ public interface OsuBot extends User {
 
     EventBus getEventBus();
     Scheduler getScheduler();
+    ChatManager getChatManager();
 
     Token getToken();
 
-    boolean isIrcEnabled();
-    void enableIrc(String host, int port);
-    void enableIrc();
+    @Override
+    default String getChannelName() {
+        throw new UnsupportedOperationException("I'm a osu!bot");
+    }
+
+    default void sendMessage(String message) {
+        throw new UnsupportedOperationException("I cannot chat to myself");
+    }
+
+    default List<String> getServerMessages(long time) {
+        throw new UnsupportedOperationException("I didn't do anything to the server");
+    }
+
+    default List<String> getLatestServerMessages() {
+        return getServerMessages(0);
+    }
+
+    @Override
+    default void clearServerMessages() {
+        getLatestServerMessages();
+    }
 }

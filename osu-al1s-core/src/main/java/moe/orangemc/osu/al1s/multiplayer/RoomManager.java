@@ -16,7 +16,7 @@
 
 package moe.orangemc.osu.al1s.multiplayer;
 
-import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.util.HashSet;
@@ -24,14 +24,11 @@ import java.util.Set;
 
 public class RoomManager {
     @Inject
-    private OsuBotImpl osuBot;
+    private ChatManager chatManager;
 
     private final Set<RoomImpl> managedRooms = new HashSet<>();
 
     public RoomImpl createRoom(String roomName) {
-        if (!osuBot.isIrcEnabled()) {
-            throw new UnsupportedOperationException("Contact pe@ppy.sh for lazer room management.");
-        }
         RoomImpl result = new RoomImpl(roomName);
         managedRooms.add(result);
         return result;

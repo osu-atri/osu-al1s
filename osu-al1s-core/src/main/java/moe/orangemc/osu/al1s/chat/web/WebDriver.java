@@ -18,9 +18,9 @@ package moe.orangemc.osu.al1s.chat.web;
 
 import com.google.gson.Gson;
 import moe.orangemc.osu.al1s.api.auth.Scope;
-import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.ChatDriver;
+import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
 import moe.orangemc.osu.al1s.chat.web.model.InboundWebChatChannel;
 import moe.orangemc.osu.al1s.chat.web.model.OutboundChannelJoin;
 import moe.orangemc.osu.al1s.chat.web.model.OutboundChannelMessage;
@@ -28,30 +28,24 @@ import moe.orangemc.osu.al1s.chat.web.model.OutboundInitiatePrivateMessage;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.util.HttpUtil;
-import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class WebDriver implements ChatDriver {
-    private final Queue<CompletableFuture<String>> commandResponseQueue = new LinkedList<>();
-
     @Inject
     private OsuBotImpl bot;
     @Inject
     private Gson gson;
 
-    @Inject(name="server-bot")
-    private User banchobot;
+    private final Set<WebsocketMessageReceiver> receivers = new HashSet<>();
 
     public WebDriver() {
         bot.getScheduler().runTaskTimer(this::keepAlive, 30, 30, TimeUnit.SECONDS);
-        new WebsocketMessageReceiver(commandResponseQueue);
     }
 
     private void keepAlive() {
@@ -92,25 +86,29 @@ public class WebDriver implements ChatDriver {
     }
 
     @Override
-    public String initializePrivateChannel(String user, String initialMessage) {
+    public String initializePrivateChannel(UserImpl user, String initialMessage) {
         if (!bot.getToken().getAllowedScopes().contains(Scope.CHAT.WRITE)) {
             throw new UnsupportedOperationException("Bot does not have permission to write to chat");
         }
 
         URL channelUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/new");
-        String created = HttpUtil.post(channelUrl, gson.toJson(new OutboundInitiatePrivateMessage(new UserImpl(user), initialMessage, false)), Map.of("Content-Type", "application/json"));
+        String created = HttpUtil.post(channelUrl, gson.toJson(new OutboundInitiatePrivateMessage(user, initialMessage, false)), Map.of("Content-Type", "application/json"));
         return String.valueOf(gson.fromJson(created, InboundWebChatChannel.class).id());
     }
 
     @Override
-    public String issueBanchoCommand(String command) {
-        if (!bot.getToken().getAllowedScopes().contains(Scope.CHAT.WRITE)) {
-            throw new UnsupportedOperationException("Bot does not have permission to write to chat");
-        }
+    public void setMessageHandler(ChatMessageHandler handler) {
+        receivers.add(new WebsocketMessageReceiver(handler));
+    }
 
-        banchobot.sendMessage(command);
-        CompletableFuture<String> response = new CompletableFuture<>();
-        commandResponseQueue.add(response);
-        return SneakyExceptionHelper.call(response::get);
+    @Override
+    public void shutdown() {
+        for (WebsocketMessageReceiver receiver : receivers) {
+            try {
+                receiver.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
