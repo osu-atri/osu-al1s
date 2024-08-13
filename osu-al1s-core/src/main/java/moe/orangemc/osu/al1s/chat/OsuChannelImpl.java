@@ -54,6 +54,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
         List<Long> availableTimes = new ArrayList<>(Collections.emptyList());
         for (Map.Entry<Long, List<String>> entry: serverMessages.entrySet())
         {
+            // TODO: Would this work?
             if (entry.getValue().contains(msg))
                 availableTimes.add(entry.getKey());
         }

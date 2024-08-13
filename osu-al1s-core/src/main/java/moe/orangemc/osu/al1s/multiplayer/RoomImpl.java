@@ -92,6 +92,31 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     }
 
     @Override
+    public Map<String, String> getSettings() {
+        Map<String, String> roomInfo = new java.util.HashMap<>(Collections.emptyMap());
+        this.sendMessage("!mp settings");
+        try { wait(1000); } catch (Exception ignored) {}
+        long requestTime = this.getMessageTimes("!mp settings", true, false).getFirst();
+        List<String> infoStr = this.getServerMessagesTillNow(requestTime, true);
+        for (String i : infoStr)
+        {
+            String[] infoPair = i.split(":");
+            // Add more arguments here
+            switch (infoPair[0]) {
+                case "Active mods":
+                    roomInfo.computeIfAbsent("Mods", _ -> infoPair[1].trim());
+                    break;
+                // Team mode: HeadToHead, Win condition: Score
+                case "Team mode":
+                    roomInfo.computeIfAbsent("TeamMode", _ -> infoPair[1].split(",")[0].trim());
+                    roomInfo.computeIfAbsent("WinCondition", _ -> infoPair[2].trim());
+                    break;
+            }
+        }
+        return roomInfo;
+    }
+
+    @Override
     public Map<Integer, User> getPlayers() {
         return Map.of();
     }
