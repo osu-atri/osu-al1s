@@ -50,6 +50,26 @@ public abstract class OsuChannelImpl implements OsuChannel {
     }
 
     @Override
+    public List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed) {
+        List<String> inRangeMessages = Collections.emptyList();
+        for (Map.Entry<Long, List<String>> entry: serverMessages.entrySet())
+        {
+            if (entry.getKey() >= startTime && entry.getKey() <= endTime)
+            {
+                // List messages: Top to Bottom, adding all of them
+                inRangeMessages.addAll(entry.getValue());
+            }
+        }
+        return inRangeMessages;
+    }
+
+    @Override
+    public List<String> getServerMessagesTillNow(long startTime, boolean reversed) {
+        long latestTime = serverMessages.keySet().stream().max(Long::compareTo).orElse(0L);
+        return getServerMessagesInRange(startTime, latestTime, reversed);
+    }
+
+    @Override
     public void clearServerMessages() {
         serverMessages.clear();
     }
