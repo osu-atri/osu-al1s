@@ -16,14 +16,17 @@
 
 package moe.orangemc.osu.al1s;
 
+import moe.orangemc.osu.al1s.api.bot.InitEntry;
 import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
 import moe.orangemc.osu.al1s.auth.CredentialProviderModule;
 import moe.orangemc.osu.al1s.bot.BotFactoryModule;
 import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.Injector;
-import moe.orangemc.osu.al1s.user.UserRequestAPIModule;
 import moe.orangemc.osu.al1s.util.GsonProvider;
+import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
+
+import java.lang.reflect.Constructor;
 
 public class ArisBootstrapServiceImpl implements ArisBootstrapService {
     @Override
@@ -36,6 +39,19 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
         ctx.registerModule(new BotFactoryModule());
         ctx.registerModule(new CredentialProviderModule());
 
-        injector.bootstrap(init);
+        Class<?> initClass = injector.bootstrap(init);
+        if (!InitEntry.class.isAssignableFrom(initClass)) {
+            throw new IllegalArgumentException("Init class must implement InitEntry");
+        }
+
+        Constructor<?> entryConstructor;
+        try {
+            entryConstructor = initClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Init class must have a public no-args constructor", e);
+        }
+
+        InitEntry entry = (InitEntry) SneakyExceptionHelper.call(entryConstructor::newInstance);
+        entry.main();
     }
 }
