@@ -36,7 +36,6 @@ public class InjectClassTransformer extends ClassVisitor {
 
     private final Map<InjectTiming, Set<FieldToInject>> fieldToInject = new HashMap<>();
 
-    private final Set<FieldToInject> fieldSet = new HashSet<>();
     private String me;
     private String superName;
 
@@ -133,8 +132,9 @@ public class InjectClassTransformer extends ClassVisitor {
             super(Opcodes.ASM9, methodVisitor);
         }
 
-        private void putFieldsInjectInstruction(Set<FieldToInject> fieldSet) {
-            if (fieldSet.isEmpty()) {
+        private void putFieldsInjectInstruction(InjectTiming timing) {
+            Set<FieldToInject> fieldSet = fieldToInject.get(timing);
+            if (!fieldToInject.containsKey(timing) || fieldSet.isEmpty()) {
                 return;
             }
 
@@ -179,7 +179,7 @@ public class InjectClassTransformer extends ClassVisitor {
         @Override
         public void visitInsn(int opcode) {
             if (opcode == Opcodes.RETURN) {
-                putFieldsInjectInstruction(fieldToInject.get(InjectTiming.POST));
+                putFieldsInjectInstruction(InjectTiming.POST);
 
                 super.visitInsn(opcode);
 
@@ -200,7 +200,7 @@ public class InjectClassTransformer extends ClassVisitor {
         public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
             if (opcode == Opcodes.INVOKESPECIAL && name.equals("<init>") && owner.equals(superName)) {
                 super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-                putFieldsInjectInstruction(fieldToInject.get(InjectTiming.PRE));
+                putFieldsInjectInstruction(InjectTiming.PRE);
 
                 return;
             }
