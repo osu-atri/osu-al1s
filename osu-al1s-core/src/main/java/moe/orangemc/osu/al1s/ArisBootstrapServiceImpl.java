@@ -35,7 +35,6 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
         ctx.registerModule(new GsonProvider());
         ctx.registerModule(new BotFactoryModule());
         ctx.registerModule(new CredentialProviderModule());
-        ctx.registerModule(new UserRequestAPIModule());
 
         injector.bootstrap(init);
     }

@@ -34,6 +34,7 @@ import moe.orangemc.osu.al1s.concurrent.SchedulerImpl;
 import moe.orangemc.osu.al1s.event.EventBusImpl;
 import moe.orangemc.osu.al1s.inject.api.*;
 import moe.orangemc.osu.al1s.user.UserImpl;
+import moe.orangemc.osu.al1s.user.UserRequestAPIModule;
 import org.apache.commons.lang3.Validate;
 
 import java.net.URL;
@@ -66,6 +67,7 @@ public class OsuBotImpl implements OsuBot {
         ctx.registerModule(this);
 
         try (var _ = injector.setContext(ctx)) {
+            ctx.registerModule(new UserRequestAPIModule());
             ctx.registerModule(new AuthenticationAPIModule());
             this.chatManager = new ChatManagerImpl(serverBotName);
             this.chatManager.setIrcServer(ircServer, ircPort);
