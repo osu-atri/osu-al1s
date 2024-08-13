@@ -175,6 +175,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     public Set<User> getReferees() {
         Set<User> users = new java.util.HashSet<>(Collections.emptySet());
         this.sendMessage("!mp listrefs");
+        try { wait(1000); } catch (Exception ignored) {}
         // Wait when?
         List<Long> times = this.getMessageTimes("BanchoBot: Match referees:", true, false);
         List<String> msgToNow = this.getServerMessagesTillNow(times.getFirst(), true);
