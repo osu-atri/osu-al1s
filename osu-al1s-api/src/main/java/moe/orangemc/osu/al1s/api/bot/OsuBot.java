@@ -53,6 +53,18 @@ public interface OsuBot extends User {
         throw new UnsupportedOperationException("I didn't do anything to the server");
     }
 
+    default List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed) {
+        throw new UnsupportedOperationException("I'm not the right one to interact with.");
+    }
+
+    default List<String> getServerMessagesTillNow(long startTime, boolean reversed) {
+        throw new UnsupportedOperationException("Try asking the Channel, it knows.");
+    }
+
+    default List<Long> getMessageTimes(String msg, boolean reversed, boolean strict) {
+        throw new UnsupportedOperationException("Don't blame me.");
+    }
+
     default List<String> getLatestServerMessages() {
         return getServerMessages(0);
     }

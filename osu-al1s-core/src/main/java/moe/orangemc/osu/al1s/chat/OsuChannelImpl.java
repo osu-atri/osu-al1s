@@ -50,8 +50,21 @@ public abstract class OsuChannelImpl implements OsuChannel {
     }
 
     @Override
+    public List<Long> getMessageTimes(String msg, boolean reversed, boolean strict) {
+        List<Long> availableTimes = new ArrayList<>(Collections.emptyList());
+        for (Map.Entry<Long, List<String>> entry: serverMessages.entrySet())
+        {
+            if (entry.getValue().contains(msg))
+                availableTimes.add(entry.getKey());
+        }
+        // From oldest to latest, reverse it in case we need that
+        if (reversed) availableTimes.sort(Collections.reverseOrder());
+        return availableTimes;
+    }
+
+    @Override
     public List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed) {
-        List<String> inRangeMessages = Collections.emptyList();
+        List<String> inRangeMessages = new ArrayList<>(Collections.emptyList());
         for (Map.Entry<Long, List<String>> entry: serverMessages.entrySet())
         {
             if (entry.getKey() >= startTime && entry.getKey() <= endTime)
@@ -60,7 +73,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
                 inRangeMessages.addAll(entry.getValue());
             }
         }
-        return inRangeMessages;
+        return reversed ? inRangeMessages.reversed() : inRangeMessages;
     }
 
     @Override

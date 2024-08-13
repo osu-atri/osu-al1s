@@ -27,10 +27,13 @@ import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.ChatDriver;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.user.UserImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -170,7 +173,17 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public Set<User> getReferees() {
-        return Set.of();
+        Set<User> users = new java.util.HashSet<>(Collections.emptySet());
+        this.sendMessage("!mp listrefs");
+        // Wait when?
+        List<Long> times = this.getMessageTimes("BanchoBot: Match referees:", true, false);
+        List<String> msgToNow = this.getServerMessagesTillNow(times.getFirst(), true);
+        msgToNow.removeLast();
+        for (String i : msgToNow) {
+            String trimmedStr = i.split(":")[1].trim();
+            users.add(new UserImpl(trimmedStr));
+        }
+        return users;
     }
 
     @Override

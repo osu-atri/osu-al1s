@@ -24,6 +24,7 @@ public interface OsuChannel {
     List<String> getLatestServerMessages();
     List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed);
     List<String> getServerMessagesTillNow(long startTime, boolean reversed);
+    List<Long> getMessageTimes(String msg, boolean reversed, boolean strict);
     void clearServerMessages();
 
     String getChannelName();
