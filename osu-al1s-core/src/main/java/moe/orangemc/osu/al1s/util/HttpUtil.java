@@ -158,7 +158,11 @@ public class HttpUtil {
     }
 
     private static String readResponse(HttpURLConnection connection) throws IOException {
-        connection.setDoInput(true);
+        try {
+            connection.setDoInput(true);
+        } catch (IllegalStateException _) {
+
+        }
 
         InputStream is = connection.getInputStream();
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));

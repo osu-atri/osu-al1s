@@ -17,7 +17,6 @@
 package moe.orangemc.osu.al1s.chat.web;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
@@ -25,14 +24,11 @@ import moe.orangemc.osu.al1s.chat.web.model.InboundChatMessage;
 import moe.orangemc.osu.al1s.chat.web.model.websocket.WebsocketEvent;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
-import moe.orangemc.osu.al1s.util.HttpUtil;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
-import moe.orangemc.osu.al1s.util.URLUtil;
 
-import java.net.URL;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 public class WebsocketMessageReceiver implements WebSocket.Listener, AutoCloseable {
@@ -49,11 +45,12 @@ public class WebsocketMessageReceiver implements WebSocket.Listener, AutoCloseab
     public WebsocketMessageReceiver(ChatMessageHandler handler) {
         this.handler = handler;
 
-        Map<String, ?> notifications = gson.fromJson(HttpUtil.get(URLUtil.concat(bot.getBaseUrl(), "/api/v2/notifications")), new TypeToken<>() {});
-        URL notificationEndpoint = URLUtil.newURL(notifications.get("notification_endpoint").toString());
+        // Just can't programmatically get the notification endpoint
+//        Map<String, ?> notifications = gson.fromJson(HttpUtil.get(URLUtil.concat(bot.getBaseUrl(), "api/v2/notifications")), new TypeToken<>() {});
+//        URL notificationEndpoint = URLUtil.newURL(notifications.get("notification_endpoint").toString());
         ws = SneakyExceptionHelper.call(() -> hc.newWebSocketBuilder()
                 .header("Authorization", ((TokenImpl) bot.getToken()).toHttpToken())
-                .buildAsync(notificationEndpoint.toURI(), this)
+                .buildAsync(new URI("wss://notify.ppy.sh/"), this)
                 .join());
         ws.sendText("{\"event\": \"chat.start\"}", true);
     }
