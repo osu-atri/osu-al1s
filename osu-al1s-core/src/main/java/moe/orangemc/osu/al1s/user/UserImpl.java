@@ -17,7 +17,6 @@
 package moe.orangemc.osu.al1s.user;
 
 import moe.orangemc.osu.al1s.api.user.User;
-import moe.orangemc.osu.al1s.chat.ChatDriver;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
@@ -28,9 +27,6 @@ public class UserImpl extends OsuChannelImpl implements User {
 
     @Inject
     private UserRequestAPI api;
-
-    @Inject
-    private ChatDriver chatDriver;
 
     private final Map<String, Object> metadata;
 

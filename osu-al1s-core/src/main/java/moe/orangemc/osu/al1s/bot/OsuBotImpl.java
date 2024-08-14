@@ -41,17 +41,16 @@ import java.net.URL;
 import java.util.concurrent.Future;
 
 public class OsuBotImpl implements OsuBot {
-    private final boolean debug;
+    public final boolean debug;
     private final URL baseURL;
 
-    @Inject(when = InjectTiming.POST)
-    private AuthenticationAPI authenticationAPI;
+    private final AuthenticationAPI authenticationAPI;
 
     private final SchedulerImpl scheduler = new SchedulerImpl();
-    private final EventBus eventBus = new EventBusImpl();
+    private final EventBus eventBus;
 
     private TokenImpl token = null;
-    private final User botUser = new UserImpl();
+    private User botUser;
 
     @Inject
     private Injector injector;
@@ -69,8 +68,10 @@ public class OsuBotImpl implements OsuBot {
         try (var _ = injector.setContext(ctx)) {
             ctx.registerModule(new UserRequestAPIModule());
             ctx.registerModule(new AuthenticationAPIModule());
+            this.authenticationAPI = (AuthenticationAPI) ctx.mapField(AuthenticationAPI.class, "default");
             this.chatManager = new ChatManagerImpl(serverBotName);
             this.chatManager.setIrcServer(ircServer, ircPort);
+            this.eventBus = new EventBusImpl();
         }
     }
 
@@ -93,6 +94,8 @@ public class OsuBotImpl implements OsuBot {
 
         try (var _ = injector.setContext(ctx)) {
             this.token = authenticationAPI.authorize((CredentialBase) credential);
+
+            this.botUser = new UserImpl();
         }
     }
 

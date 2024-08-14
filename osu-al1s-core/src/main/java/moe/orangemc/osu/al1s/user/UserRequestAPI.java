@@ -36,7 +36,7 @@ public class UserRequestAPI {
     private final URL targetURL;
 
     public UserRequestAPI() {
-        targetURL = URLUtil.concat(referer.getBaseUrl(), "users/");
+        targetURL = URLUtil.concat(referer.getBaseUrl(), "api/v2/users/");
     }
 
     public Map<String, Object> getUserMetadata(int id) {
@@ -50,7 +50,7 @@ public class UserRequestAPI {
     }
 
     public Map<String, Object> getSelfMetadata() {
-        String response = HttpUtil.get(URLUtil.concat(referer.getBaseUrl(), "me"));
+        String response = HttpUtil.get(URLUtil.concat(referer.getBaseUrl(), "api/v2/me"));
         return gson.fromJson(response, new TypeToken<>() {}.getType());
     }
 }
