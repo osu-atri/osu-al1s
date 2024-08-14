@@ -31,6 +31,8 @@ import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 public class InjectorClassLoader extends ClassLoader {
+    private static final boolean DEBUG = false;
+
     private static final List<File> classPath = Stream.of(System.getProperty("java.class.path").split(File.pathSeparator)).map(File::new).toList();
     private final Map<String, Class<?>> cache = new HashMap<>();
     private final InjectorImpl injector;
@@ -93,7 +95,9 @@ public class InjectorClassLoader extends ClassLoader {
 
         cr.accept(new InjectClassTransformer(new CheckClassAdapter(cw)), 0);
 
-        return cw.toByteArray();
+        byte[] clsBytes = cw.toByteArray();
+        dumpClass(clsBytes);
+        return clsBytes;
     }
 
     private byte[] readClassFromFile(File classFile) {
@@ -122,5 +126,22 @@ public class InjectorClassLoader extends ClassLoader {
 
     public Injector getInjector() {
         return injector;
+    }
+
+    private void dumpClass(byte[] data) {
+        if (!DEBUG) {
+            return;
+        }
+
+        try {
+            File tmp = File.createTempFile("dump", ".class");
+            System.out.println("Dumping class to " + tmp.getAbsolutePath());
+
+            try (FileOutputStream fos = new FileOutputStream(tmp)) {
+                fos.write(data);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

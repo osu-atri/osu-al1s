@@ -17,16 +17,25 @@
 package moe.orangemc.osu.al1s.event.asm;
 
 import moe.orangemc.osu.al1s.api.event.Event;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.util.DigestUtil;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.apache.commons.lang3.Validate;
 import org.objectweb.asm.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 public class HandlerDispatcherFactory {
+    @Inject
+    private OsuBotImpl osuBot;
+
     private final HandlerDispatcherClassLoader classLoader = new HandlerDispatcherClassLoader();
     private final Map<Method, Class<HandlerDispatcher<?>>> cache = new HashMap<>();
 
@@ -143,9 +152,28 @@ public class HandlerDispatcherFactory {
         }
 
         byte[] classBytes = cw.toByteArray();
+        dumpClass(classBytes);
 
         Class<HandlerDispatcher<?>> clazz = (Class<HandlerDispatcher<?>>) classLoader.makeClass(generatedName.replace('/', '.'), classBytes);
         cache.put(m, clazz);
+
         return SneakyExceptionHelper.call(() -> clazz.getConstructor(handler.getClass()).newInstance(handler));
+    }
+
+    private void dumpClass(byte[] data) {
+        if (!osuBot.debug) {
+            return;
+        }
+
+        try {
+            File tmp = File.createTempFile("dump", ".class");
+            System.out.println("Dumping class to " + tmp.getAbsolutePath());
+
+            try (FileOutputStream fos = new FileOutputStream(tmp)) {
+                fos.write(data);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

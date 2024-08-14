@@ -158,13 +158,15 @@ public class HttpUtil {
     }
 
     private static String readResponse(HttpURLConnection connection) throws IOException {
+        connection.setDoInput(true);
+
         InputStream is = connection.getInputStream();
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));
         StringBuilder response = new StringBuilder();
         String line;
         while ((line = rd.readLine()) != null) {
             response.append(line);
-            response.append('\r');
+            response.append('\n');
         }
         rd.close();
         return response.toString();

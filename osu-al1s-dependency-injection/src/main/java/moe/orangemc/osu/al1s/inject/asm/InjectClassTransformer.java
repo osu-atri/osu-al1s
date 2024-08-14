@@ -38,6 +38,7 @@ public class InjectClassTransformer extends ClassVisitor {
 
     private String me;
     private String superName;
+    private boolean hasClInit = false;
 
     protected InjectClassTransformer(ClassVisitor classVisitor) {
         super(Opcodes.ASM9, classVisitor);
@@ -48,6 +49,10 @@ public class InjectClassTransformer extends ClassVisitor {
         me = name;
         this.superName = superName;
         super.visit(version, access, name, signature, superName, interfaces);
+
+        if ((access & Opcodes.ACC_INTERFACE) != Opcodes.ACC_INTERFACE) {
+            super.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "injectorContext@" + me.hashCode(), contextType.getDescriptor(), null, null);
+        }
     }
 
     @Override
@@ -57,11 +62,28 @@ public class InjectClassTransformer extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (name.equals("<init>")) {
-            return new ConstructorTransformer(super.visitMethod(access, name, descriptor, signature, exceptions));
+        if (name.equals("<clinit>")) {
+            hasClInit = true;
+        }
+
+        if (name.equals("<init>") || name.equals("<clinit>")) {
+            return new ConstructorTransformer(super.visitMethod(access, name, descriptor, signature, exceptions), name.equals("<clinit>"));
         }
 
         return super.visitMethod(access, name, descriptor, signature, exceptions);
+    }
+
+    @Override
+    public void visitEnd() {
+        if (!hasClInit) {
+            MethodVisitor clInit = this.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
+            clInit.visitCode();
+            clInit.visitInsn(Opcodes.RETURN);
+            clInit.visitMaxs(1, 0);
+            clInit.visitEnd();
+        }
+
+        super.visitEnd();
     }
 
     private class FieldIdentifier extends FieldVisitor {
@@ -127,9 +149,11 @@ public class InjectClassTransformer extends ClassVisitor {
 
     private class ConstructorTransformer extends MethodVisitor {
         private final Label invalidInjectionLabel = new Label();
+        private final boolean statis;
 
-        protected ConstructorTransformer(MethodVisitor methodVisitor) {
+        protected ConstructorTransformer(MethodVisitor methodVisitor, boolean statis) {
             super(Opcodes.ASM9, methodVisitor);
+            this.statis = statis;
         }
 
         private void putFieldsInjectInstruction(InjectTiming timing) {
@@ -151,19 +175,21 @@ public class InjectClassTransformer extends ClassVisitor {
             super.visitTypeInsn(Opcodes.CHECKCAST, loaderType.getInternalName());
             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, loaderType.getInternalName(), "getInjector", Type.getMethodDescriptor(injectorType), false);
             super.visitMethodInsn(Opcodes.INVOKEINTERFACE, injectorType.getInternalName(), "getCurrentContext", Type.getMethodDescriptor(contextType), true);
-            super.visitVarInsn(Opcodes.ASTORE, 1);
+            super.visitFieldInsn(Opcodes.PUTSTATIC, me, "injectorContext@" + me.hashCode(), contextType.getDescriptor());
 
             for (FieldToInject field : fieldSet) {
                 int putFieldOpcode = Opcodes.PUTFIELD;
                 if ((field.access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC) {
                     putFieldOpcode = Opcodes.PUTSTATIC;
-                } else {
+                } else if (!statis) {
                     super.visitVarInsn(Opcodes.ALOAD, 0);
+                } else {
+                    continue;
                 }
 
                 Type fieldType = Type.getType(field.descriptor());
 
-                super.visitVarInsn(Opcodes.ALOAD, 1);
+                super.visitFieldInsn(Opcodes.GETSTATIC, me, "injectorContext@" + me.hashCode(), contextType.getDescriptor());
                 super.visitLdcInsn(fieldType.getClassName());
                 super.visitMethodInsn(Opcodes.INVOKESTATIC, reflectionClassType.getInternalName(), "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
 
@@ -206,6 +232,15 @@ public class InjectClassTransformer extends ClassVisitor {
             }
 
             super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+        }
+
+        @Override
+        public void visitCode() {
+            super.visitCode();
+
+            if (statis) {
+                putFieldsInjectInstruction(InjectTiming.PRE);
+            }
         }
 
         @Override

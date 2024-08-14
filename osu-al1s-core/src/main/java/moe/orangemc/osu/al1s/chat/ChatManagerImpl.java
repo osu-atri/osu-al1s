@@ -37,7 +37,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
     private final Map<String, OsuChannelImpl> channelsNameMap = new HashMap<>();
     private final Map<OsuChannelImpl, String> reverseChannelsNameMap = new HashMap<>();
 
-    private final UserImpl serverBot;
+    private final String serverBotName;
 
     @Inject
     private EventBus eventBus;
@@ -52,7 +52,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
     private int ircPort;
 
     public ChatManagerImpl(String serverBotName) {
-        serverBot = new UserImpl(serverBotName);
+        this.serverBotName = serverBotName;
     }
 
     public void setIrcServer(String host, int port) {
@@ -75,7 +75,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
             return;
         }
 
-        if (user.equals(serverBot)) {
+        if (user.getUsername().equals(serverBotName)) {
             osuChannel.pushServerMessage(message);
             return;
         }

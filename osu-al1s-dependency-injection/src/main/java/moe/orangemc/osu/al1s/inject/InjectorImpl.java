@@ -28,11 +28,15 @@ public class InjectorImpl implements Injector {
     private final InjectorClassLoader classLoader = new InjectorClassLoader(getClass().getClassLoader(), this);
 
     private InjectionContextImpl context = root;
+    private boolean selfProvided = false;
 
 
     @Override
     public Class<?> bootstrap(String rootClass) {
-        root.registerModule(new InjectorProvider(this));
+        if (!selfProvided) {
+            selfProvided = true;
+            root.registerModule(new InjectorProvider(this));
+        }
         try {
             return classLoader.loadClass(rootClass);
         } catch (ClassNotFoundException e) {
@@ -68,5 +72,9 @@ public class InjectorImpl implements Injector {
     @Override
     public InjectionContext getCurrentContext() {
         return context;
+    }
+
+    public InjectorClassLoader getClassLoader() {
+        return classLoader;
     }
 }

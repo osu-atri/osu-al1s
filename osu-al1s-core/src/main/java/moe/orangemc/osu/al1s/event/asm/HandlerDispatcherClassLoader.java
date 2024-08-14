@@ -18,9 +18,14 @@ package moe.orangemc.osu.al1s.event.asm;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.RecursiveTask;
 
 class HandlerDispatcherClassLoader extends ClassLoader {
     private final Map<String, Class<?>> madeClassCache = new HashMap<>();
+
+    public HandlerDispatcherClassLoader() {
+        super(HandlerDispatcher.class.getClassLoader());
+    }
 
     public Class<?> makeClass(String name, byte[] classBytes) {
         if (madeClassCache.containsKey(name)) {
