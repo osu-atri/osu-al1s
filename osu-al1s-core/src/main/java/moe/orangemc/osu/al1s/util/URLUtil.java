@@ -38,7 +38,7 @@ public class URLUtil {
             return null;
         }
 
-        return URLEncoder.encode(target, Charset.defaultCharset());
+        return URLEncoder.encode(target, Charset.defaultCharset()).replaceAll("\\+", "%20");
     }
 
     public static String decode(String target) {

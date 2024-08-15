@@ -59,6 +59,8 @@ public record WebsocketEvent(String event, WebsocketChatData data) {
                         try {
                             data = gf.gson.fromJson(jsonReader, WebsocketChatData.class);
                         } catch (Exception e) {
+                            e.printStackTrace(); // TODO: Remove
+                            jsonReader.skipValue();
                             data = null;
                         }
                         break;

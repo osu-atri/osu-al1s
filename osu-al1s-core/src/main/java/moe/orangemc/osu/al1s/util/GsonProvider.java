@@ -34,6 +34,7 @@ public class GsonProvider {
                 .registerTypeAdapter(OutboundInitiatePrivateMessage.class, new OutboundInitiatePrivateMessage.Adapter())
                 .registerTypeAdapter(InboundWebChatChannel.class, new InboundWebChatChannel.Adapter())
                 .registerTypeAdapter(InboundChatMessage.class, new InboundChatMessage.Adapter())
+                .registerTypeAdapter(InboundPrivateMessageCreation.class, new InboundPrivateMessageCreation.Adapter())
                 .registerTypeAdapter(WebsocketChatData.class, new WebsocketChatData.Adapter())
                 .registerTypeAdapter(WebsocketEvent.class, new WebsocketEvent.Adapter())
                 .create();

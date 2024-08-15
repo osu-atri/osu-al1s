@@ -23,12 +23,16 @@ import moe.orangemc.osu.al1s.inject.asm.InjectorClassLoader;
 import moe.orangemc.osu.al1s.inject.context.ContextSessionImpl;
 import moe.orangemc.osu.al1s.inject.context.InjectionContextImpl;
 
+import java.util.Stack;
+
 public class InjectorImpl implements Injector {
     private final InjectionContextImpl root = new InjectionContextImpl();
     private final InjectorClassLoader classLoader = new InjectorClassLoader(getClass().getClassLoader(), this);
 
     private InjectionContextImpl context = root;
     private boolean selfProvided = false;
+
+    private final Stack<InjectionContextImpl> contextStack = new Stack<>();
 
 
     @Override
@@ -59,14 +63,18 @@ public class InjectorImpl implements Injector {
             throw new IllegalArgumentException("Unclaimed context");
         }
 
-        InjectionContext last = this.context;
-        this.unsafeSetContext(ctx);
+        this.pushContext(ctx);
 
-        return new ContextSessionImpl(this, last);
+        return new ContextSessionImpl(this);
     }
 
-    public void unsafeSetContext(InjectionContext context) {
-        this.context = (InjectionContextImpl) context;
+    private void pushContext(InjectionContextImpl ctx) {
+        contextStack.push(this.context);
+        this.context = ctx;
+    }
+
+    public void popContext() {
+        this.context = contextStack.pop();
     }
 
     @Override

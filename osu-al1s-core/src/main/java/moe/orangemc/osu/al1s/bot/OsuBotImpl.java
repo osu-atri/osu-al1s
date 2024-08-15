@@ -69,9 +69,10 @@ public class OsuBotImpl implements OsuBot {
             ctx.registerModule(new UserRequestAPIModule());
             ctx.registerModule(new AuthenticationAPIModule());
             this.authenticationAPI = (AuthenticationAPI) ctx.mapField(AuthenticationAPI.class, "default");
+            this.eventBus = new EventBusImpl();
+            ctx.registerModule(this, true);
             this.chatManager = new ChatManagerImpl(serverBotName);
             this.chatManager.setIrcServer(ircServer, ircPort);
-            this.eventBus = new EventBusImpl();
             ctx.registerModule(this, true);
         }
     }
@@ -159,6 +160,7 @@ public class OsuBotImpl implements OsuBot {
     @Override
     public void execute(Runnable runnable) {
         try (var _ = injector.setContext(ctx)) {
+            ctx.registerModule(this, true);
             runnable.run();
         }
     }

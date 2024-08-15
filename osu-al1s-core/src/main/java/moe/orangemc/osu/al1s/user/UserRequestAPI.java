@@ -45,7 +45,7 @@ public class UserRequestAPI {
     }
 
     public Map<String, Object> getUserMetadata(String username) {
-        String response = HttpUtil.get(URLUtil.concat(targetURL, username + "?key=username"));
+        String response = HttpUtil.get(URLUtil.concat(targetURL, URLUtil.encode(username) + "?key=username"));
         return gson.fromJson(response, new TypeToken<>() {}.getType());
     }
 

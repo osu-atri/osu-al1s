@@ -20,14 +20,18 @@ import moe.orangemc.osu.al1s.api.event.Event;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.EventHandler;
 import moe.orangemc.osu.al1s.api.event.HandlerOrder;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.event.asm.HandlerDispatcher;
 import moe.orangemc.osu.al1s.event.asm.HandlerDispatcherFactory;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.lang.reflect.AccessFlag;
 import java.lang.reflect.Method;
 import java.util.*;
 
 public class EventBusImpl implements EventBus {
+    @Inject
+    private OsuBotImpl bot;
     private final HandlerDispatcherFactory factory = new HandlerDispatcherFactory();
     private final Map<Class<?>, Set<HandlerDispatcher<?>>> handlers = new HashMap<>();
 
@@ -79,7 +83,7 @@ public class EventBusImpl implements EventBus {
         }
 
         for (Set<HandlerDispatcher<Event>> handlers : layeredHandlers) {
-            handlers.forEach(handler -> handler.dispatchEvent(event));
+            bot.execute(() -> handlers.forEach(handler -> handler.dispatchEvent(event)));
         }
     }
 }
