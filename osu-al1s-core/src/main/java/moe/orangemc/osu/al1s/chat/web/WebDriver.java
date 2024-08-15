@@ -21,10 +21,7 @@ import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.ChatDriver;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
-import moe.orangemc.osu.al1s.chat.web.model.InboundWebChatChannel;
-import moe.orangemc.osu.al1s.chat.web.model.OutboundChannelJoin;
-import moe.orangemc.osu.al1s.chat.web.model.OutboundChannelMessage;
-import moe.orangemc.osu.al1s.chat.web.model.OutboundInitiatePrivateMessage;
+import moe.orangemc.osu.al1s.chat.web.model.*;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.util.HttpUtil;
@@ -43,10 +40,6 @@ public class WebDriver implements ChatDriver {
     private Gson gson;
 
     private final Set<WebsocketMessageReceiver> receivers = new HashSet<>();
-
-    public WebDriver() {
-        bot.getScheduler().runTaskTimer(this::keepAlive, 30, 30, TimeUnit.SECONDS);
-    }
 
     private void keepAlive() {
         URL keepAliveUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/ack");
@@ -93,7 +86,7 @@ public class WebDriver implements ChatDriver {
 
         URL channelUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/new");
         String created = HttpUtil.post(channelUrl, gson.toJson(new OutboundInitiatePrivateMessage(user, initialMessage, false)), Map.of("Content-Type", "application/json"));
-        return String.valueOf(gson.fromJson(created, InboundWebChatChannel.class).id());
+        return String.valueOf(gson.fromJson(created, InboundPrivateMessageCreation.class).newChannelId());
     }
 
     @Override

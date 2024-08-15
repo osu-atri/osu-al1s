@@ -81,7 +81,7 @@ public class InjectionContextImpl implements InjectionContext {
             if (parent != null) {
                 return parent.mapField(clazz, name);
             }
-            throw new NoSuchElementException("No such value in: " + clazz.getName() + ":" + name);
+            throw new NoSuchElementException("No such value in: " + clazz.getName() + ":" + name + ", loaded by " + clazz.getClassLoader());
         }
 
         return fieldMap.get(clazz).get(name);

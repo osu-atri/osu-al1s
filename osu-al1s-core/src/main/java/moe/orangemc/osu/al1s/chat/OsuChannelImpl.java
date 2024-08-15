@@ -19,6 +19,7 @@ package moe.orangemc.osu.al1s.chat;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.inject.api.InjectTiming;
 
 import java.util.*;
 

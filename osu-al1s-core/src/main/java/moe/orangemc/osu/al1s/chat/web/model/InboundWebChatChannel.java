@@ -22,7 +22,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 
-public record InboundWebChatChannel(int id, String name, String description, ChannelType type, int maxLength, boolean restircted) {
+public record InboundWebChatChannel(int id, String name, String description, ChannelType type, int maxLength, boolean restricted) {
     public static class Adapter extends TypeAdapter<InboundWebChatChannel> {
         @Override
         public void write(JsonWriter jsonWriter, InboundWebChatChannel inboundWebChatChannel) throws IOException {
@@ -32,7 +32,7 @@ public record InboundWebChatChannel(int id, String name, String description, Cha
             jsonWriter.name("description").value(inboundWebChatChannel.description());
             jsonWriter.name("type").value(inboundWebChatChannel.type().name());
             jsonWriter.name("message_length_limit").value(inboundWebChatChannel.maxLength());
-            jsonWriter.name("moderated").value(inboundWebChatChannel.restircted());
+            jsonWriter.name("moderated").value(inboundWebChatChannel.restricted());
             jsonWriter.endObject();
         }
 

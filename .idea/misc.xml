@@ -5,9 +5,10 @@
     <groovy codeStyle="LEGACY" />
   </component>
   <component name="EntryPointsManager">
-    <list size="2">
-      <item index="0" class="java.lang.String" itemvalue="moe.orangemc.osu.al1s.inject.api.Provides" />
-      <item index="1" class="java.lang.String" itemvalue="net.engio.mbassy.listener.Handler" />
+    <list size="3">
+      <item index="0" class="java.lang.String" itemvalue="moe.orangemc.osu.al1s.api.event.EventHandler" />
+      <item index="1" class="java.lang.String" itemvalue="moe.orangemc.osu.al1s.inject.api.Provides" />
+      <item index="2" class="java.lang.String" itemvalue="net.engio.mbassy.listener.Handler" />
     </list>
     <writeAnnotations>
       <writeAnnotation name="moe.orangemc.osu.al1s.inject.api.Inject" />

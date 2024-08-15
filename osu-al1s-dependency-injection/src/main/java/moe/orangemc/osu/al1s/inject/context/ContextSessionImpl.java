@@ -24,15 +24,12 @@ import moe.orangemc.osu.al1s.inject.api.Injector;
 public class ContextSessionImpl implements ContextSession {
     private final Injector currentInjector;
 
-    private final InjectionContext lastContext;
-
-    public ContextSessionImpl(Injector currentInjector, InjectionContext lastContext) {
+    public ContextSessionImpl(Injector currentInjector) {
         this.currentInjector = currentInjector;
-        this.lastContext = lastContext;
     }
 
     @Override
     public void close() {
-        ((InjectorImpl) currentInjector).unsafeSetContext(lastContext);
+        ((InjectorImpl) currentInjector).popContext();
     }
 }

@@ -18,6 +18,10 @@ package moe.orangemc.osu.al1s.chat;
 
 import moe.orangemc.osu.al1s.TestLaunchNeedle;
 import moe.orangemc.osu.al1s.api.auth.Scope;
+import moe.orangemc.osu.al1s.api.event.EventHandler;
+import moe.orangemc.osu.al1s.api.event.chat.ChannelChatEvent;
+import moe.orangemc.osu.al1s.api.event.chat.ChatEvent;
+import moe.orangemc.osu.al1s.api.event.chat.MultiplayerRoomChatEvent;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPITest;
 import moe.orangemc.osu.al1s.auth.credential.AuthorizationCodeGrantCredentialImpl;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
@@ -44,6 +48,7 @@ public class ChatTest {
     private static OsuBotImpl osuBot;
     private static final boolean enabled = true;
     private static String targetUser;
+    private static Thread testThread;
 
     @Inject
     private static Injector injector;
@@ -74,6 +79,7 @@ public class ChatTest {
 
         Assertions.assertDoesNotThrow(() -> osuBot.authenticateSync(credential));
         ircCredential.setIrcUsername(osuBot.getUsername());
+        osuBot.execute(() -> osuBot.getEventBus().register(new MessageListener()));
     }
 
     private void checkEnabled() {
@@ -85,6 +91,7 @@ public class ChatTest {
         } catch (InterruptedException e) {
 
         }
+        testThread = Thread.currentThread();
     }
 
     @Test
@@ -93,7 +100,32 @@ public class ChatTest {
 
         osuBot.execute(() -> {
             UserImpl target = new UserImpl(targetUser);
-            target.sendMessage("Test message via web API.");
+            target.sendMessage("Test message via web API. Please respond me.");
         });
+        try {
+            Thread.sleep(2147483647);
+        } catch (InterruptedException e) {
+
+        }
+    }
+
+    public static class MessageListener {
+        @EventHandler
+        public void onChat(ChatEvent event) {
+            System.out.println("Received message: " + event.getMessage() + " from " + event.getSender().getUsername());
+            if (testThread != null && event.getSender().getUsername().equals(targetUser)) {
+                testThread.interrupt();
+            }
+        }
+
+        @EventHandler
+        public void onChat(MultiplayerRoomChatEvent event) {
+            System.out.println("Received message: " + event.getMessage() + " from " + event.getSender().getUsername() + " in room " + event.getRoom().getName());
+        }
+
+        @EventHandler
+        public void onChat(ChannelChatEvent event) {
+            System.out.println("Received message: " + event.getMessage() + " from " + event.getSender().getUsername() + " in channel " + event.getChannel().getChannelName());
+        }
     }
 }
