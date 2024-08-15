@@ -40,6 +40,8 @@ public interface OsuBot extends User {
 
     Token getToken();
 
+    void execute(Runnable runnable);
+
     @Override
     default String getChannelName() {
         throw new UnsupportedOperationException("I'm a osu!bot");

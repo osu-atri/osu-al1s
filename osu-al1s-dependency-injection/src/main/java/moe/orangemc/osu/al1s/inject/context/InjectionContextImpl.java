@@ -43,6 +43,11 @@ public class InjectionContextImpl implements InjectionContext {
 
     @Override
     public void registerModule(Object module) {
+        registerModule(module, false);
+    }
+
+    @Override
+    public void registerModule(Object module, boolean reload) {
         for (Method method : module.getClass().getMethods()) {
             Provides providesAnnotation = method.getAnnotation(Provides.class);
             if (providesAnnotation == null) {
@@ -59,7 +64,7 @@ public class InjectionContextImpl implements InjectionContext {
                 method.setAccessible(true);
                 Object value = method.invoke(module);
                 Map<String, Object> map = fieldMap.computeIfAbsent(clazz, _ -> new HashMap<>());
-                if (map.containsKey(name)) {
+                if (map.containsKey(name) && !reload) {
                     throw new InvalidInjectModuleException(module.getClass(), "Duplicate @Provides name: " + clazz.getName() + ":" + name);
                 }
 

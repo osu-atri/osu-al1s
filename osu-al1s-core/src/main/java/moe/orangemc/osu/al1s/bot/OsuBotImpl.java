@@ -72,6 +72,7 @@ public class OsuBotImpl implements OsuBot {
             this.chatManager = new ChatManagerImpl(serverBotName);
             this.chatManager.setIrcServer(ircServer, ircPort);
             this.eventBus = new EventBusImpl();
+            ctx.registerModule(this, true);
         }
     }
 
@@ -153,5 +154,12 @@ public class OsuBotImpl implements OsuBot {
     @Override
     public String getUsername() {
         return botUser.getUsername();
+    }
+
+    @Override
+    public void execute(Runnable runnable) {
+        try (var _ = injector.setContext(ctx)) {
+            runnable.run();
+        }
     }
 }

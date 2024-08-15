@@ -33,17 +33,17 @@ public class UserImpl extends OsuChannelImpl implements User {
 
     public UserImpl() {
         metadata = api.getSelfMetadata();
-        this.id = getMetadata("id");
+        this.id = (int)((double) getMetadata("id"));
     }
 
     public UserImpl(int id) {
         metadata = api.getUserMetadata(id);
-        this.id = getMetadata("id");
+        this.id = (int)((double) getMetadata("id"));
     }
 
     public UserImpl(String username) {
         metadata = api.getUserMetadata(username);
-        this.id = getMetadata("id");
+        this.id = (int)((double) getMetadata("id"));
     }
 
     @SuppressWarnings("unchecked")
