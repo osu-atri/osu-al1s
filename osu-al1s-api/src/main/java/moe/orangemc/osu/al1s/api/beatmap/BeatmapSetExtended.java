@@ -16,17 +16,18 @@
 
 package moe.orangemc.osu.al1s.api.beatmap;
 
-import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
+/*
+* Just messed up.
+* I don't understand why the 'tags' attribute also exists in BeatmapSet.
+* Is this intentional? And the former is nullable?
+* Maybe we should remove the nullable optional attributes from Basic interface.
+* */
 
-public interface Beatmap {
-    // Basic attributes for a beatmap.
-    BeatmapSet getMapSet();
-    int getMapSetID();
-    int getMapID();
-    float getStarRating();
-    Ruleset getMode();
-    RankStatus getRankStatus();
-    int getLength();
-    int getMapperID();
-    String getVersion();
+public interface BeatmapSetExtended extends BeatmapSet {
+    float getBPM();
+    boolean getDownloadAvailability();
+
+    // Timestamps.
+    long getSubmittedDate();
+    long getRankedDate();
 }
