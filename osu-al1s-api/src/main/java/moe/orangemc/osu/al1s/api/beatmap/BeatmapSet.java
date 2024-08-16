@@ -27,9 +27,6 @@ public interface BeatmapSet {
     String getArtistUnicode();
     String getSource();
     User getMapper();
-    // Can use User Interface for this.
-    String getMapperName();
-    int getMapperID();
     RankStatus getRankStatus();
     int getPlayCount();
     int getFavouriteCount();
@@ -38,9 +35,11 @@ public interface BeatmapSet {
     int getOffset();
 
     // Optional attributes.
-    // We need to check their types or comment they out.
+    // We need to check their types or comment them out.
+    float getBPM();
     String getLanguage();
     String getGenre();
     String[] getTags();
     float getRatings();
+    boolean getDownloadAvailability();
 }

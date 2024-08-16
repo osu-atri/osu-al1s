@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.api.beatmap;
 
 import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
+import moe.orangemc.osu.al1s.api.user.User;
 
 public interface Beatmap {
     // Basic attributes for a beatmap.
@@ -27,6 +28,22 @@ public interface Beatmap {
     Ruleset getMode();
     RankStatus getRankStatus();
     int getLength();
-    int getMapperID();
-    String getVersion();
+    User getMapper();
+
+    String getURL();
+
+    float getCS();
+    float getHP(); // float drain
+    float getAR();
+    float getOD(); // float accuracy
+
+    long getLastUpdatedTime();
+    boolean getIsConvert();
+
+    int getPassCount();
+    int getPlayCount();
+
+    int getCircleCount();
+    int getSliderCount();
+    int getSpinnerCount();
 }
