@@ -17,9 +17,10 @@
 package moe.orangemc.osu.al1s.api.ruleset;
 
 public enum Ruleset {
+    // Naming based on API ruleset names.
     OSU("osu!standard"),
     TAIKO("osu!taiko"),
-    CATCH("osu!catch"),
+    FRUITS("osu!catch"),
     MANIA("osu!mania");
 
     private final String name;
