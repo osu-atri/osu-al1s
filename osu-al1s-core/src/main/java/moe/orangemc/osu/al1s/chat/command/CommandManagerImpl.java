@@ -34,6 +34,10 @@ public class CommandManagerImpl implements CommandManager {
     private final Map<String, CommandBase> commandMap = new HashMap<>();
     private final CommandExecutorFactory executorFactory = new CommandExecutorFactory();
 
+    public CommandManagerImpl() {
+        registerBuiltinAdapters();
+    }
+
     private void registerBuiltinAdapters() {
         registerAdapter(int.class, new IntegerTypeAdapter());
         registerAdapter(Integer.class, new IntegerTypeAdapter());
@@ -55,6 +59,7 @@ public class CommandManagerImpl implements CommandManager {
     public void executeCommand(UserImpl sender, OsuChannelImpl where, String command) {
         StringReader reader = new StringReader(command);
         String cmdName = reader.getRootCommand();
+        reader.skip();
         CommandBase cmd = commandMap.get(cmdName);
         if (cmd == null) {
             return;

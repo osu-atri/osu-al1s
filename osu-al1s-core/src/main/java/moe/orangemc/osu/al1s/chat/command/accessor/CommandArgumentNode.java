@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.chat.command.accessor;
 
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -49,8 +50,11 @@ public class CommandArgumentNode {
         for (Method method : methods) {
             Class<?>[] parameters = method.getParameterTypes();
             CommandArgumentNode current = root;
-            for (int i = 1; i < parameters.length; i++) { // Skip 1st sender argument
+            for (int i = 2; i < parameters.length; i++) { // Skip 1st sender argument
                 Class<?> parameter = parameters[i];
+                if (parameter.isPrimitive()) {
+                    parameter = MethodType.methodType(parameter).wrap().returnType();
+                }
                 CommandArgumentNode next = current.children.get(parameter);
                 if (next == null) {
                     next = new CommandArgumentNode(parameter);
@@ -61,5 +65,14 @@ public class CommandArgumentNode {
             current.method = method;
         }
         return root;
+    }
+
+    @Override
+    public String toString() {
+        return "CommandArgumentNode{" +
+                "method=" + method +
+                ", children=" + children +
+                ", parameter=" + parameter +
+                '}';
     }
 }

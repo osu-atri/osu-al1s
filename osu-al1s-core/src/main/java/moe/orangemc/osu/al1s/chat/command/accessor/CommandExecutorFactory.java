@@ -27,7 +27,9 @@ import moe.orangemc.osu.al1s.chat.command.CommandManagerImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.objectweb.asm.*;
+import org.objectweb.asm.util.CheckClassAdapter;
 
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -44,8 +46,10 @@ public class CommandExecutorFactory {
         }
 
         CommandArgumentNode tree = CommandArgumentNode.build(Arrays.stream(commandBase.getClass().getMethods()).filter(method -> method.getAnnotation(Command.class) != null).toList());
+        System.out.println(tree);
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        ClassWriter cwo = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        CheckClassAdapter cw = new CheckClassAdapter(cwo);
 
         String generatedName = "moe/orangemc/osu/al1s/chat/command/accessor/GeneratedCommandExecutorImpl@" + commandBase.getClass().getName().replace(".", "_");
         cw.visit(Opcodes.V22, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, generatedName, null, "java/lang/Object", new String[]{"moe/orangemc/osu/al1s/chat/command/accessor/GeneratedCommandExecutor"});
@@ -62,6 +66,12 @@ public class CommandExecutorFactory {
             mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
             mv.visitVarInsn(Opcodes.ALOAD, 1);
             mv.visitFieldInsn(Opcodes.PUTFIELD, generatedName, "commandBase", commandBaseType.getDescriptor());
+
+            // Magic class loading. Avoids ClassCastException.
+            mv.visitLdcInsn(GeneratedCommandExecutor.class.getName());
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Class", "forName", Type.getMethodDescriptor(Type.getType(Class.class), Type.getType(String.class)), false);
+            mv.visitInsn(Opcodes.POP);
+
             mv.visitInsn(Opcodes.RETURN);
         }
         mv.visitMaxs(2, 2);
@@ -72,14 +82,16 @@ public class CommandExecutorFactory {
 
         int depth;
         {
-            depth = buildCommandInvocation(mv, tree, 0);
+            depth = buildCommandInvocation(mv, tree, 0, generatedName);
+            mv.visitInsn(Opcodes.RETURN);
         }
+        mv.visitMaxs(depth + 3, depth + 5);
         mv.visitEnd();
 
         cw.visitEnd();
 
-        byte[] bytes = cw.toByteArray();
-        Class<?> clazz = classLoader.makeClass(generatedName, bytes);
+        byte[] bytes = cwo.toByteArray();
+        Class<?> clazz = classLoader.makeClass(generatedName.replaceAll("/", "."), bytes);
         GeneratedCommandExecutor executor = SneakyExceptionHelper.call(() -> {
             Constructor<? extends GeneratedCommandExecutor> constructor = (Constructor<? extends GeneratedCommandExecutor>) clazz.getConstructor(commandBase.getClass());
             return constructor.newInstance(commandBase);
@@ -89,25 +101,48 @@ public class CommandExecutorFactory {
         return executor;
     }
 
-    private int buildCommandInvocation(MethodVisitor mv, CommandArgumentNode node, int depth) {
-        if (node.getParameter() == null) {// root
+    private int buildCommandInvocation(MethodVisitor mv, CommandArgumentNode node, int depth, String name) {
+        if (depth == 0) {// root
             int maxDepth = 0;
+
+            if (node.getMethod() != null) {
+                Label lengthCheckpoint = new Label();
+
+                mv.visitVarInsn(Opcodes.ALOAD, 4);
+
+                Type stringReaderType = Type.getType(StringReader.class);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "canRead", Type.getMethodDescriptor(Type.BOOLEAN_TYPE), false);
+                mv.visitInsn(Opcodes.ICONST_0);
+                mv.visitJumpInsn(Opcodes.IF_ICMPNE, lengthCheckpoint);
+
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                mv.visitFieldInsn(Opcodes.GETFIELD, name, "commandBase", Type.getDescriptor(node.getMethod().getDeclaringClass()));
+                mv.visitVarInsn(Opcodes.ALOAD, 1); // user
+                mv.visitVarInsn(Opcodes.ALOAD, 2); // channel
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(node.getMethod().getDeclaringClass()), node.getMethod().getName(), Type.getMethodDescriptor(node.getMethod()), false);
+                mv.visitInsn(Opcodes.RETURN);
+
+                mv.visitLabel(lengthCheckpoint);
+            }
+
             for (CommandArgumentNode child : node.getChildren()) {
-                maxDepth = Math.max(buildCommandInvocation(mv, child, depth + 1), maxDepth);
+                maxDepth = Math.max(buildCommandInvocation(mv, child, depth + 1, name), maxDepth);
             }
             return maxDepth;
         }
 
         Type commandManagerImplType = Type.getType(CommandManagerImpl.class);
         Type typeAdapterType = Type.getType(ArgumentTypeAdapter.class);
+        Type stringReaderType = Type.getType(StringReader.class);
+
         mv.visitVarInsn(Opcodes.ALOAD, 3);
-        mv.visitLdcInsn(node.getParameter());
+        mv.visitLdcInsn(node.getParameter().getName());
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Class", "forName", Type.getMethodDescriptor(Type.getType(Class.class), Type.getType(String.class)), false);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, commandManagerImplType.getInternalName(), "getAdapter", Type.getMethodDescriptor(Type.getType(ArgumentTypeAdapter.class), Type.getType(Class.class)), false);
 
         Label tryStart = new Label();
         Label tryEnd = new Label();
         Label catchStart = new Label();
-        Label catchEnd = new Label();
 
         mv.visitTryCatchBlock(tryStart, tryEnd, catchStart, "java/lang/IllegalArgumentException");
         mv.visitLabel(tryStart);
@@ -115,11 +150,14 @@ public class CommandExecutorFactory {
         mv.visitVarInsn(Opcodes.ALOAD, 4);
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, typeAdapterType.getInternalName(), "parse", Type.getMethodDescriptor(SneakyExceptionHelper.call(() -> ArgumentTypeAdapter.class.getMethod("parse", StringReader.class))), true);
 
+        mv.visitVarInsn(Opcodes.ALOAD, 4);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "skip", Type.getMethodDescriptor(Type.VOID_TYPE), false);
+
         mv.visitInsn(Opcodes.DUP);
         mv.visitTypeInsn(Opcodes.INSTANCEOF, Type.getInternalName(node.getParameter()));
-        mv.visitInsn(Opcodes.ICONST_0);
 
         Label typeCheckpoint = new Label();
+        mv.visitInsn(Opcodes.ICONST_0);
         mv.visitJumpInsn(Opcodes.IF_ICMPEQ, typeCheckpoint);
 
         mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(node.getParameter()));
@@ -128,14 +166,18 @@ public class CommandExecutorFactory {
 
         int maxDepth = depth;
         for (CommandArgumentNode child : node.getChildren()) {
-            maxDepth = Math.max(buildCommandInvocation(mv, child, depth + 1), depth);
+            maxDepth = Math.max(buildCommandInvocation(mv, child, depth + 1, name), depth);
         }
 
         if (node.getMethod() != null) {
             mv.visitVarInsn(Opcodes.ALOAD, 0);
-            mv.visitFieldInsn(Opcodes.GETFIELD, "moe/orangemc/osu/al1s/chat/command/accessor/GeneratedCommandExecutorImpl", "commandBase", Type.getDescriptor(node.getMethod().getDeclaringClass()));
-            for (int i = 0; i <= maxDepth; i++) {
-                mv.visitVarInsn(Opcodes.ALOAD, 4 + i);
+            mv.visitFieldInsn(Opcodes.GETFIELD, name, "commandBase", Type.getDescriptor(node.getMethod().getDeclaringClass()));
+            mv.visitVarInsn(Opcodes.ALOAD, 1); // user
+            mv.visitVarInsn(Opcodes.ALOAD, 2); // channel
+            for (int i = 0; i < depth; i++) {
+                mv.visitVarInsn(Opcodes.ALOAD, 5 + i);
+                Class<?> parameterType = node.getMethod().getParameterTypes()[i + 2];
+                visitConversion(mv, parameterType);
             }
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(node.getMethod().getDeclaringClass()), node.getMethod().getName(), Type.getMethodDescriptor(node.getMethod()), false);
             mv.visitInsn(Opcodes.RETURN);
@@ -150,5 +192,29 @@ public class CommandExecutorFactory {
         mv.visitLabel(catchStart);
         mv.visitLabel(typeCheckpoint);
         return maxDepth;
+    }
+
+    private void visitConversion(MethodVisitor mv, Class<?> parameterType) {
+        if (parameterType.isPrimitive()) {
+            if (parameterType == int.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", Type.getMethodDescriptor(Type.INT_TYPE), false);
+            } else if (parameterType == long.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", Type.getMethodDescriptor(Type.LONG_TYPE), false);
+            } else if (parameterType == float.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Float", "floatValue", Type.getMethodDescriptor(Type.FLOAT_TYPE), false);
+            } else if (parameterType == double.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", Type.getMethodDescriptor(Type.DOUBLE_TYPE), false);
+            } else if (parameterType == short.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Short", "shortValue", Type.getMethodDescriptor(Type.SHORT_TYPE), false);
+            } else if (parameterType == byte.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Byte", "byteValue", Type.getMethodDescriptor(Type.BYTE_TYPE), false);
+            } else if (parameterType == char.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Character", "charValue", Type.getMethodDescriptor(Type.CHAR_TYPE), false);
+            } else if (parameterType == boolean.class) {
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", Type.getMethodDescriptor(Type.BOOLEAN_TYPE), false);
+            }
+        } else {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(parameterType));
+        }
     }
 }

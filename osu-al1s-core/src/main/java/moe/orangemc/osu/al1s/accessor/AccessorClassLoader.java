@@ -36,6 +36,24 @@ public class AccessorClassLoader extends ClassLoader {
         super(GeneratedHandlerDispatcher.class.getClassLoader());
     }
 
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        if (madeClassCache.containsKey(name)) {
+            return madeClassCache.get(name);
+        }
+
+        return Class.forName(name);
+    }
+
+    @Override
+    protected Class<?> findClass(String moduleName, String name) {
+        try {
+            return this.findClass(name);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
     private void dumpClass(byte[] data) {
         if (!osuBot.debug) {
             return;

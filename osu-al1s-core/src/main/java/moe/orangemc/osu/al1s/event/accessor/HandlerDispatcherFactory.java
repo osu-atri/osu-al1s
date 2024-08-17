@@ -25,9 +25,6 @@ import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.apache.commons.lang3.Validate;
 import org.objectweb.asm.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;

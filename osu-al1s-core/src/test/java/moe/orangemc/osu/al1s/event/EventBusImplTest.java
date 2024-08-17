@@ -16,20 +16,36 @@
 
 package moe.orangemc.osu.al1s.event;
 
+import moe.orangemc.osu.al1s.TestLaunchNeedle;
+import moe.orangemc.osu.al1s.accessor.AccessorModule;
 import moe.orangemc.osu.al1s.api.event.CancellableEvent;
 import moe.orangemc.osu.al1s.api.event.Event;
 import moe.orangemc.osu.al1s.api.event.EventHandler;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.event.accessor.LineNumberedMethodVisitor;
+import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.inject.api.Injector;
+import moe.orangemc.osu.al1s.util.GsonProvider;
+import moe.orangemc.osu.al1s.util.URLUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(TestLaunchNeedle.class)
 class EventBusImplTest {
     private static EventBusImpl eventBus;
     private static MyObject handler;
 
+    @Inject
+    private static Injector injector;
+
     @BeforeAll
     static void setup() {
+        injector.getCurrentContext().registerModule(new GsonProvider());
+        injector.getCurrentContext().registerModule(new OsuBotImpl(true, URLUtil.newURL("https://osu.ppy.sh/"), "BanchoBot", "irc.ppy.sh", 6667), true);
+        injector.getCurrentContext().registerModule(new AccessorModule());
+
         eventBus = new EventBusImpl();
         handler = new MyObject();
 
