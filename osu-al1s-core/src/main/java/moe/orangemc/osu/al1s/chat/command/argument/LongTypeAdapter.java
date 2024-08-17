@@ -14,15 +14,14 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.inject.api;
+package moe.orangemc.osu.al1s.chat.command.argument;
 
-import java.util.Collection;
+import moe.orangemc.osu.al1s.api.chat.command.ArgumentTypeAdapter;
+import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 
-public interface InjectionContext {
-    void registerModule(Object module);
-    void registerModule(Object module, boolean reload);
-    Object mapField(Class<?> type, String name);
-    Class<?> getMappedClass(String name);
-
-    InjectionContext getParent();
+public class LongTypeAdapter implements ArgumentTypeAdapter<Long> {
+    @Override
+    public Long parse(StringReader reader) {
+        return Long.parseLong(reader.readString());
+    }
 }

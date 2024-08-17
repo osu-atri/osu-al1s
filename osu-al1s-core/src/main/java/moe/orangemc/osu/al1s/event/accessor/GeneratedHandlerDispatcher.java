@@ -14,15 +14,12 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.inject.api;
+package moe.orangemc.osu.al1s.event.accessor;
 
-import java.util.Collection;
+import moe.orangemc.osu.al1s.api.event.Event;
 
-public interface InjectionContext {
-    void registerModule(Object module);
-    void registerModule(Object module, boolean reload);
-    Object mapField(Class<?> type, String name);
-    Class<?> getMappedClass(String name);
-
-    InjectionContext getParent();
+public interface GeneratedHandlerDispatcher<T extends Event> {
+    void dispatchEvent(T event);
+    Object getOwner();
+    int getOrderIndex();
 }

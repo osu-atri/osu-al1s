@@ -14,21 +14,22 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event.chat;
+package moe.orangemc.osu.al1s.chat.command.argument;
 
-import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+import moe.orangemc.osu.al1s.api.chat.command.ArgumentTypeAdapter;
+import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.user.UserImpl;
 
-// TODO: Differences between web api & irc.
-public class ChannelChatEvent extends ChatEvent {
-    private final OsuChannel channel;
+public class UserTypeAdapter implements ArgumentTypeAdapter<User> {
+    @Override
+    public User parse(StringReader reader) {
+        String userArg = reader.readString();
 
-    public ChannelChatEvent(User sender, String message, OsuChannel channel) {
-        super(sender, message);
-        this.channel = channel;
-    }
-
-    public OsuChannel getChannel() {
-        return channel;
+        try {
+            return new UserImpl(Integer.parseInt(userArg));
+        } catch (NumberFormatException e) {
+            return new UserImpl(userArg);
+        }
     }
 }

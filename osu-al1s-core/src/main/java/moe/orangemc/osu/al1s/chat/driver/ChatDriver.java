@@ -14,15 +14,18 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.inject.api;
+package moe.orangemc.osu.al1s.chat.driver;
 
-import java.util.Collection;
+import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
+import moe.orangemc.osu.al1s.user.UserImpl;
 
-public interface InjectionContext {
-    void registerModule(Object module);
-    void registerModule(Object module, boolean reload);
-    Object mapField(Class<?> type, String name);
-    Class<?> getMappedClass(String name);
+public interface ChatDriver {
+    void sendMessage(String channel, String message);
+    void joinChannel(String channel);
+    void leaveChannel(String channel);
+    String initializePrivateChannel(UserImpl user, String initialMessage);
 
-    InjectionContext getParent();
+    void setMessageHandler(ChatMessageHandler handler);
+
+    void shutdown();
 }

@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.bot;
 
+import moe.orangemc.osu.al1s.accessor.AccessorModule;
 import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
@@ -70,6 +71,7 @@ public class OsuBotImpl implements OsuBot {
             ctx.registerModule(new BeatmapRequestAPIModule());
             ctx.registerModule(new UserRequestAPIModule());
             ctx.registerModule(new AuthenticationAPIModule());
+            ctx.registerModule(new AccessorModule());
             this.authenticationAPI = (AuthenticationAPI) ctx.mapField(AuthenticationAPI.class, "default");
             this.eventBus = new EventBusImpl();
             ctx.registerModule(this, true);

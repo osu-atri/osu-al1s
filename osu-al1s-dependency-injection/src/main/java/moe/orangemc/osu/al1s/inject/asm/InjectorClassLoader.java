@@ -56,37 +56,41 @@ public class InjectorClassLoader extends ClassLoader {
             return cache.get(name);
         }
 
-        Class<?> found = null;
-        for (File file : classPath) {
-            if (file.isDirectory()) {
-                File classFile = new File(file, name.replace('.', File.separatorChar) + ".class");
+        try {
+            Class<?> found = null;
+            for (File file : classPath) {
+                if (file.isDirectory()) {
+                    File classFile = new File(file, name.replace('.', File.separatorChar) + ".class");
 
-                if (classFile.exists()) {
-                    byte[] bytes = readClassFromFile(classFile);
+                    if (classFile.exists()) {
+                        byte[] bytes = readClassFromFile(classFile);
+                        if (bytes == null) {
+                            continue;
+                        }
+
+                        byte[] finalData = transform(bytes);
+                        found = defineClass(name, finalData, 0, finalData.length);
+                    }
+                }
+                if (file.getName().endsWith(".jar") || file.getName().endsWith(".war")) {
+                    byte[] bytes = readClassFromJar(file, name);
                     if (bytes == null) {
                         continue;
                     }
-
                     byte[] finalData = transform(bytes);
                     found = defineClass(name, finalData, 0, finalData.length);
                 }
             }
-            if (file.getName().endsWith(".jar") || file.getName().endsWith(".war")) {
-                byte[] bytes = readClassFromJar(file, name);
-                if (bytes == null) {
-                    continue;
-                }
-                byte[] finalData = transform(bytes);
-                found = defineClass(name, finalData, 0, finalData.length);
+
+            if (found == null) {
+                found = getParent().loadClass(name);
             }
-        }
 
-        if (found == null) {
-            found = getParent().loadClass(name);
+            cache.put(name, found);
+            return found;
+        } catch (Exception e) {
+            throw new ClassNotFoundException(name, e);
         }
-
-        cache.put(name, found);
-        return found;
     }
 
     private byte[] transform(byte[] from) {

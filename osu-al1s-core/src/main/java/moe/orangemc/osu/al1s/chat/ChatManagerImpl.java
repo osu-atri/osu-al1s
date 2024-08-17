@@ -23,8 +23,9 @@ import moe.orangemc.osu.al1s.api.event.chat.ChannelChatEvent;
 import moe.orangemc.osu.al1s.api.event.chat.ChatEvent;
 import moe.orangemc.osu.al1s.api.event.chat.MultiplayerRoomChatEvent;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
-import moe.orangemc.osu.al1s.chat.irc.IrcDriver;
-import moe.orangemc.osu.al1s.chat.web.WebDriver;
+import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
+import moe.orangemc.osu.al1s.chat.driver.irc.IrcDriver;
+import moe.orangemc.osu.al1s.chat.driver.web.WebDriver;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.multiplayer.RoomImpl;
 import moe.orangemc.osu.al1s.user.UserImpl;
@@ -97,7 +98,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
         if (channel instanceof UserImpl user) {
             ChatDriver driver = this.driver.get();
             if (driver instanceof IrcDriver) {
-                return user.getUsername();
+                return user.getUsername().replaceAll(" ", "_");
             }
             throw new IllegalStateException("Send a message to them first!");
         }

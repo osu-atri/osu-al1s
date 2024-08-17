@@ -17,15 +17,22 @@
 package moe.orangemc.osu.al1s.api.event.chat;
 
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
-import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.api.event.Event;
 
-// TODO: Differences between web api & irc.
-public class ChannelChatEvent extends ChatEvent {
+import java.util.Collections;
+import java.util.List;
+
+public class SystemMessagePoll extends Event {
+    private final List<String> messages;
     private final OsuChannel channel;
 
-    public ChannelChatEvent(User sender, String message, OsuChannel channel) {
-        super(sender, message);
+    public SystemMessagePoll(List<String> messages, OsuChannel channel) {
+        this.messages = messages;
         this.channel = channel;
+    }
+
+    public List<String> getMessages() {
+        return Collections.unmodifiableList(this.messages);
     }
 
     public OsuChannel getChannel() {

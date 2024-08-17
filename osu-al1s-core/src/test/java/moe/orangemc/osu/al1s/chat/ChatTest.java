@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.chat;
 
 import moe.orangemc.osu.al1s.TestLaunchNeedle;
+import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.event.EventHandler;
 import moe.orangemc.osu.al1s.api.event.chat.ChannelChatEvent;
@@ -34,7 +35,6 @@ import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.opentest4j.TestSkippedException;
@@ -49,6 +49,7 @@ public class ChatTest {
     private static final boolean enabled = true;
     private static String targetUser;
     private static Thread testThread;
+    private static IrcCredential ircCredential;
 
     @Inject
     private static Injector injector;
@@ -61,7 +62,7 @@ public class ChatTest {
         osuBot.getEventBus().register(new AuthenticationAPITest.Authenticator());
 
         AuthorizationCodeGrantCredentialImpl credential = new AuthorizationCodeGrantCredentialImpl();
-        IrcCredentialImpl ircCredential = new IrcCredentialImpl();
+        ircCredential = new IrcCredentialImpl();
         File tmpCredentialFile = new File("tmpCredentialFile");
         Assertions.assertTrue(tmpCredentialFile.exists(), "Credential file not found");
 
@@ -101,6 +102,23 @@ public class ChatTest {
         osuBot.execute(() -> {
             UserImpl target = new UserImpl(targetUser);
             target.sendMessage("Test message via web API. Please respond me.");
+        });
+        try {
+            Thread.sleep(2147483647);
+        } catch (InterruptedException e) {
+
+        }
+    }
+
+    @Test
+    public void testIrcPrivateMsg() {
+        checkEnabled();
+
+        osuBot.authenticateSync(ircCredential);
+
+        osuBot.execute(() -> {
+            UserImpl target = new UserImpl(targetUser);
+            target.sendMessage("Test message via IRC. Please respond me.");
         });
         try {
             Thread.sleep(2147483647);

@@ -39,6 +39,7 @@ public class InjectClassTransformer extends ClassVisitor {
     private String me;
     private String superName;
     private boolean hasClInit = false;
+    private boolean skip = false;
 
     protected InjectClassTransformer(ClassVisitor classVisitor) {
         super(Opcodes.ASM9, classVisitor);
@@ -50,18 +51,28 @@ public class InjectClassTransformer extends ClassVisitor {
         this.superName = superName;
         super.visit(version, access, name, signature, superName, interfaces);
 
-        if ((access & Opcodes.ACC_INTERFACE) != Opcodes.ACC_INTERFACE) {
-            super.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "injectorContext@" + me.hashCode(), contextType.getDescriptor(), null, null);
+        if ((access & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE) {
+            skip = true;
+            return;
         }
+        super.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "injectorContext@" + me.hashCode(), contextType.getDescriptor(), null, null);
     }
 
     @Override
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        if (skip) {
+            return super.visitField(access, name, descriptor, signature, value);
+        }
+
         return new FieldIdentifier(super.visitField(access & ~Opcodes.ACC_FINAL, name, descriptor, signature, value), access, name, descriptor);
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        if (skip) {
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
         if (name.equals("<clinit>")) {
             hasClInit = true;
         }
@@ -75,6 +86,11 @@ public class InjectClassTransformer extends ClassVisitor {
 
     @Override
     public void visitEnd() {
+        if (skip) {
+            super.visitEnd();
+            return;
+        }
+
         if (!hasClInit) {
             MethodVisitor clInit = this.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
             clInit.visitCode();
@@ -150,6 +166,7 @@ public class InjectClassTransformer extends ClassVisitor {
     private class ConstructorTransformer extends MethodVisitor {
         private final Label invalidInjectionLabel = new Label();
         private final boolean statis;
+        private boolean exceptionInserted = false;
 
         protected ConstructorTransformer(MethodVisitor methodVisitor, boolean statis) {
             super(Opcodes.ASM9, methodVisitor);
@@ -209,13 +226,16 @@ public class InjectClassTransformer extends ClassVisitor {
 
                 super.visitInsn(opcode);
 
-                super.visitLabel(invalidInjectionLabel);
-                super.visitInsn(Opcodes.POP);
-                super.visitTypeInsn(Opcodes.NEW, Type.getInternalName(IllegalStateException.class));
-                super.visitInsn(Opcodes.DUP);
-                super.visitLdcInsn("Current class isn't bootstrapped by injector");
-                super.visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(IllegalStateException.class), "<init>", "(Ljava/lang/String;)V", false);
-                super.visitInsn(Opcodes.ATHROW);
+                if (!exceptionInserted) {
+                    super.visitLabel(invalidInjectionLabel);
+                    super.visitInsn(Opcodes.POP);
+                    super.visitTypeInsn(Opcodes.NEW, Type.getInternalName(IllegalStateException.class));
+                    super.visitInsn(Opcodes.DUP);
+                    super.visitLdcInsn("Current class isn't bootstrapped by injector");
+                    super.visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(IllegalStateException.class), "<init>", "(Ljava/lang/String;)V", false);
+                    super.visitInsn(Opcodes.ATHROW);
+                    exceptionInserted = true;
+                }
                 return;
             }
 

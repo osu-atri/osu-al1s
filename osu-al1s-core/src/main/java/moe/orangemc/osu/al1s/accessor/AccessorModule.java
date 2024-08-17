@@ -14,15 +14,13 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.inject.api;
+package moe.orangemc.osu.al1s.accessor;
 
-import java.util.Collection;
+import moe.orangemc.osu.al1s.inject.api.Provides;
 
-public interface InjectionContext {
-    void registerModule(Object module);
-    void registerModule(Object module, boolean reload);
-    Object mapField(Class<?> type, String name);
-    Class<?> getMappedClass(String name);
-
-    InjectionContext getParent();
+public class AccessorModule {
+    @Provides
+    public AccessorClassLoader accessorClassLoader() {
+        return new AccessorClassLoader();
+    }
 }

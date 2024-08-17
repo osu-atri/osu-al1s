@@ -14,15 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.inject.api;
+package moe.orangemc.osu.al1s.api.chat.command;
 
-import java.util.Collection;
-
-public interface InjectionContext {
-    void registerModule(Object module);
-    void registerModule(Object module, boolean reload);
-    Object mapField(Class<?> type, String name);
-    Class<?> getMappedClass(String name);
-
-    InjectionContext getParent();
+public interface CommandBase {
+    String getName();
+    String getDescription();
+    String getUsage();
 }
