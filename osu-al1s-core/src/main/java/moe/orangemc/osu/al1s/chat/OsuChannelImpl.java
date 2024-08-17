@@ -18,16 +18,29 @@ package moe.orangemc.osu.al1s.chat;
 
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
+import moe.orangemc.osu.al1s.api.event.EventBus;
+import moe.orangemc.osu.al1s.api.event.chat.SystemMessagePoll;
 import moe.orangemc.osu.al1s.inject.api.Inject;
-import moe.orangemc.osu.al1s.inject.api.InjectTiming;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public abstract class OsuChannelImpl implements OsuChannel {
     @Inject
     private ChatManager chatManager;
 
-    private final Map<Long, List<String>> serverMessages = new HashMap<>();
+    @Inject
+    private EventBus eventBus;
+
+    @Inject
+    private Scheduler scheduler;
+
+    private final List<String> polledServerMessages = new ArrayList<>();
+
+    public OsuChannelImpl() {
+        scheduler.runTaskTimer(this::schedulePollEvent, 5, 5, TimeUnit.SECONDS);
+    }
 
     @Override
     public void sendMessage(String message) {
@@ -35,23 +48,15 @@ public abstract class OsuChannelImpl implements OsuChannel {
     }
 
     public void pushServerMessage(String message) {
-        long time = System.currentTimeMillis() / 1000;
-        serverMessages.computeIfAbsent(time, _ -> new ArrayList<>()).add(message);
+        this.polledServerMessages.addLast(message);
     }
 
-    @Override
-    public List<String> getServerMessages(long time) {
-        return Collections.unmodifiableList(serverMessages.getOrDefault(time, Collections.emptyList()));
-    }
+    public void schedulePollEvent() {
+        if (this.polledServerMessages.size() <= 0) {
+            return;
+        }
 
-    @Override
-    public List<String> getLatestServerMessages() {
-        long latestTime = serverMessages.keySet().stream().max(Long::compareTo).orElse(0L);
-        return getServerMessages(latestTime);
-    }
-
-    @Override
-    public void clearServerMessages() {
-        serverMessages.clear();
+        eventBus.fire(new SystemMessagePoll(Collections.unmodifiableList(new ArrayList<>(this.polledServerMessages)), this));
+        this.polledServerMessages.clear();
     }
 }
