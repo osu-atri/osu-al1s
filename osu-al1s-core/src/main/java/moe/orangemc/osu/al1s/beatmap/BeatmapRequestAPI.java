@@ -36,11 +36,13 @@ public class BeatmapRequestAPI {
     private Gson gson;
 
     private final URL targetURL;
+    private final URL setURL;
 
     private final HashMap<Integer, Map<String, Object>> mapCache;
 
     public BeatmapRequestAPI() {
         targetURL = URLUtil.concat(referer.getBaseUrl(), "api/v2/beatmaps/");
+        setURL = URLUtil.concat(referer.getBaseUrl(), "api/v2/beatmapsets/");
         mapCache = new HashMap<>();
     }
 
@@ -55,6 +57,10 @@ public class BeatmapRequestAPI {
         }
         String response = HttpUtil.get(URLUtil.concat(targetURL, String.valueOf(id)));
         Map<String, Object> result = gson.fromJson(response, new TypeToken<>() {}.getType());
+        String setResponse = HttpUtil.get(URLUtil.concat(targetURL, result.get("beatmapset_id").toString()));
+        Map<String, Object> setResult = gson.fromJson(setResponse, new TypeToken<>() {}.getType());
+        result.putAll(setResult);
+
         mapCache.put(id, result);
         return result;
     }

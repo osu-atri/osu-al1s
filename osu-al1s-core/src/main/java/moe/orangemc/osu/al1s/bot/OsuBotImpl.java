@@ -30,7 +30,6 @@ import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.beatmap.BeatmapRequestAPIModule;
-import moe.orangemc.osu.al1s.beatmap.BeatmapSetRequestAPIModule;
 import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.concurrent.SchedulerImpl;
 import moe.orangemc.osu.al1s.event.EventBusImpl;
@@ -69,7 +68,6 @@ public class OsuBotImpl implements OsuBot {
 
         try (var _ = injector.setContext(ctx)) {
             ctx.registerModule(new BeatmapRequestAPIModule());
-            ctx.registerModule(new BeatmapSetRequestAPIModule());
             ctx.registerModule(new UserRequestAPIModule());
             ctx.registerModule(new AuthenticationAPIModule());
             this.authenticationAPI = (AuthenticationAPI) ctx.mapField(AuthenticationAPI.class, "default");

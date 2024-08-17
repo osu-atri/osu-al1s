@@ -68,7 +68,11 @@ public class BeatmapImpl implements Beatmap {
     }
 
     // Extract from metadata.
-    BeatmapSet getMapSet() { return new BeatmapSetImpl(getSetId()); }
+    String getTitle() { return getMetadata("title"); }
+    String getTitleUnicode() { return getMetadata("title_unicode"); }
+    String getArtist() { return getMetadata("artist"); }
+    String getArtistUnicode() { return getMetadata("artist_unicode"); }
+    String getSource() { return getMetadata("source"); }
     float getStarRating() { return getMetadata("difficulty_rating"); }
     Ruleset getMode() { return Ruleset.valueOf(getMetadata("mode").toString().toUpperCase()); }
     RankStatus getRankStatus() {
@@ -99,6 +103,10 @@ public class BeatmapImpl implements Beatmap {
 
     int getPassCount() { return getMetadata("passcount"); }
     int getPlayCount() { return getMetadata("playcount"); }
+    int getFavouriteCount() { return getMetadata("favourite_count"); }
+    boolean isExplicit() { return getMetadata("nsfw"); }
+    boolean hasVideo() { return getMetadata("video"); }
+    int getOffset() { return getMetadata("offset"); }
 
     int getCircleCount() { return getMetadata("count_circles"); }
     int getSliderCount() { return getMetadata("count_sliders"); }
