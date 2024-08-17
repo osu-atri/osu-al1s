@@ -139,6 +139,12 @@ public class CommandExecutorFactory {
             }
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(node.getMethod().getDeclaringClass()), node.getMethod().getName(), Type.getMethodDescriptor(node.getMethod()), false);
             mv.visitInsn(Opcodes.RETURN);
+        } else {
+            mv.visitTypeInsn(Opcodes.NEW, "java/lang/IllegalArgumentException");
+            mv.visitInsn(Opcodes.DUP);
+            mv.visitLdcInsn("Invalid command arguments");
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(String.class)), false);
+            mv.visitInsn(Opcodes.ATHROW);
         }
 
         mv.visitLabel(catchStart);
