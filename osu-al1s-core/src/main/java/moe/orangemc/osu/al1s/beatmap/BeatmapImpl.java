@@ -69,10 +69,19 @@ public class BeatmapImpl implements Beatmap {
     }
 
     // Extract from metadata.
-    BeatmapSet getMapSet() { throw new NotImplementedException("Leave me alone..."); }
+    BeatmapSet getMapSet() { return new BeatmapSetImpl(getSetId()); }
     float getStarRating() { return getMetadata("difficulty_rating"); }
     Ruleset getMode() { return Ruleset.valueOf(getMetadata("mode").toString().toUpperCase()); }
-    RankStatus getRankStatus() { return RankStatus.valueOf(getMetadata("status").toString().toUpperCase()); }
+    RankStatus getRankStatus() {
+        String status = getMetadata("status").toString();
+        try {
+            return RankStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // When getting integers instead of strings...
+            System.err.printf("Unknown rank status \"%s\".", status);
+            return null;
+        }
+    }
     int getLength() { return getMetadata("total_length"); }
     User getMapper() { return new UserImpl(getMetadata("user_id")); }
 

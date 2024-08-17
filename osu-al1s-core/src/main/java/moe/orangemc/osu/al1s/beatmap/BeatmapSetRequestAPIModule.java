@@ -14,13 +14,11 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.beatmap;
+package moe.orangemc.osu.al1s.beatmap;
 
-import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.inject.api.Provides;
 
-public interface BeatmapSet {
-    // General map for storing attributes.
-    <T> T getMetadata(String key);
-
-    int getId();
+public class BeatmapSetRequestAPIModule {
+    @Provides
+    public BeatmapSetRequestAPI create() { return new BeatmapSetRequestAPI(); }
 }
