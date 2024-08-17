@@ -16,7 +16,6 @@
 
 package moe.orangemc.osu.al1s;
 
-import moe.orangemc.osu.al1s.api.bot.InitEntry;
 import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
 import moe.orangemc.osu.al1s.auth.CredentialProviderModule;
 import moe.orangemc.osu.al1s.bot.BotFactoryModule;
@@ -39,8 +38,9 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
         ctx.registerModule(new BotFactoryModule());
         ctx.registerModule(new CredentialProviderModule());
 
+        Class<?> initInterfaceClass = injector.bootstrap("moe.orangemc.osu.al1s.api.bot.InitEntry");
         Class<?> initClass = injector.bootstrap(init);
-        if (!InitEntry.class.isAssignableFrom(initClass)) {
+        if (!initInterfaceClass.isAssignableFrom(initClass)) {
             throw new IllegalArgumentException("Init class must implement InitEntry");
         }
 
@@ -51,7 +51,7 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
             throw new IllegalArgumentException("Init class must have a public no-args constructor", e);
         }
 
-        InitEntry entry = (InitEntry) SneakyExceptionHelper.call(entryConstructor::newInstance);
-        entry.main();
+        Object entry = SneakyExceptionHelper.call(entryConstructor::newInstance);
+        SneakyExceptionHelper.call(() -> initClass.getMethod("main").invoke(entry));
     }
 }
