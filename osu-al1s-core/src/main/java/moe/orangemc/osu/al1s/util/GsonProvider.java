@@ -19,9 +19,9 @@ package moe.orangemc.osu.al1s.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import moe.orangemc.osu.al1s.auth.token.ServerTokenResponse;
-import moe.orangemc.osu.al1s.chat.web.model.*;
-import moe.orangemc.osu.al1s.chat.web.model.websocket.WebsocketChatData;
-import moe.orangemc.osu.al1s.chat.web.model.websocket.WebsocketEvent;
+import moe.orangemc.osu.al1s.chat.driver.web.model.*;
+import moe.orangemc.osu.al1s.chat.driver.web.model.websocket.WebsocketChatData;
+import moe.orangemc.osu.al1s.chat.driver.web.model.websocket.WebsocketEvent;
 import moe.orangemc.osu.al1s.inject.api.Provides;
 
 public class GsonProvider {

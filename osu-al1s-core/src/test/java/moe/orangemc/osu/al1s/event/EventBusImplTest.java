@@ -19,7 +19,7 @@ package moe.orangemc.osu.al1s.event;
 import moe.orangemc.osu.al1s.api.event.CancellableEvent;
 import moe.orangemc.osu.al1s.api.event.Event;
 import moe.orangemc.osu.al1s.api.event.EventHandler;
-import moe.orangemc.osu.al1s.event.asm.LineNumberedMethodVisitor;
+import moe.orangemc.osu.al1s.event.accessor.LineNumberedMethodVisitor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

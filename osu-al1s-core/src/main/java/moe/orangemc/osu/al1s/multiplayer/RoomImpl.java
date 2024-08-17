@@ -24,7 +24,7 @@ import moe.orangemc.osu.al1s.api.mutltiplayer.WinCondition;
 import moe.orangemc.osu.al1s.api.ruleset.Mod;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
-import moe.orangemc.osu.al1s.chat.ChatDriver;
+import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import org.jetbrains.annotations.NotNull;
