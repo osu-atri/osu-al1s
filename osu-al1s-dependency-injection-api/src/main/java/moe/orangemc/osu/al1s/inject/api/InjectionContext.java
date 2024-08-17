@@ -24,8 +24,5 @@ public interface InjectionContext {
     Object mapField(Class<?> type, String name);
     Class<?> getMappedClass(String name);
 
-    void addExternalClass(Class<?>... classes);
-    void addExternalClass(Collection<Class<?>> classes);
-
     InjectionContext getParent();
 }

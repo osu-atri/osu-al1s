@@ -92,20 +92,6 @@ public class InjectionContextImpl implements InjectionContext {
         return providedClass.get(name);
     }
 
-    @Override
-    public void addExternalClass(Class<?>... classes) {
-        for (Class<?> clazz : classes) {
-            providedClass.put(clazz.getName(), clazz);
-        }
-    }
-
-    @Override
-    public void addExternalClass(java.util.Collection<Class<?>> classes) {
-        for (Class<?> clazz : classes) {
-            providedClass.put(clazz.getName(), clazz);
-        }
-    }
-
     private void addDirectChildren(InjectionContextImpl child) {
         this.directChildren.add(child);
         this.addChildren(child);

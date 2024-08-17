@@ -23,7 +23,7 @@ import moe.orangemc.osu.al1s.inject.asm.InjectorClassLoader;
 import moe.orangemc.osu.al1s.inject.context.ContextSessionImpl;
 import moe.orangemc.osu.al1s.inject.context.InjectionContextImpl;
 
-import java.util.Stack;
+import java.util.*;
 
 public class InjectorImpl implements Injector {
     private final InjectionContextImpl root = new InjectionContextImpl();
@@ -33,7 +33,6 @@ public class InjectorImpl implements Injector {
     private boolean selfProvided = false;
 
     private final Stack<InjectionContextImpl> contextStack = new Stack<>();
-
 
     @Override
     public Class<?> bootstrap(String rootClass) {

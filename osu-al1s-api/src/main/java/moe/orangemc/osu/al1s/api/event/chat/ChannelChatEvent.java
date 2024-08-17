@@ -19,6 +19,7 @@ package moe.orangemc.osu.al1s.api.event.chat;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
 import moe.orangemc.osu.al1s.api.user.User;
 
+// TODO: Differences between web api & irc.
 public class ChannelChatEvent extends ChatEvent {
     private final OsuChannel channel;
 

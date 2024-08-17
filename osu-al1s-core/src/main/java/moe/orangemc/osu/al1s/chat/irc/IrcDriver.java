@@ -27,9 +27,7 @@ public class IrcDriver implements ChatDriver {
 
     public IrcDriver(String host, int port, IrcCredentialImpl credential) {
         this.client = Client.builder()
-                .nick(credential.getUsername())
-                .realName(credential.getUsername())
-                .user(credential.getUsername())
+                .nick(credential.getUsername().replaceAll(" ", "_"))
                 .server()
                 .host(host)
                 .port(port, Client.Builder.Server.SecurityType.INSECURE)
@@ -41,16 +39,19 @@ public class IrcDriver implements ChatDriver {
     @Override
     public void sendMessage(String channel, String message) {
         client.sendMessage(channel, message);
+        ((Client.WithManagement) client).startSending();
     }
 
     @Override
     public void joinChannel(String channel) {
         client.addChannel(channel);
+        ((Client.WithManagement) client).startSending();
     }
 
     @Override
     public void leaveChannel(String channel) {
         client.removeChannel(channel);
+        ((Client.WithManagement) client).startSending();
     }
 
     @Override
