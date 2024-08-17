@@ -24,6 +24,7 @@ import moe.orangemc.osu.al1s.util.HttpUtil;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 public class BeatmapRequestAPI {
@@ -36,8 +37,11 @@ public class BeatmapRequestAPI {
 
     private final URL targetURL;
 
+    private final HashMap<Integer, Map<String, Object>> mapCache;
+
     public BeatmapRequestAPI() {
         targetURL = URLUtil.concat(referer.getBaseUrl(), "api/v2/beatmaps/");
+        mapCache = new HashMap<>();
     }
 
     /**
@@ -46,7 +50,12 @@ public class BeatmapRequestAPI {
      * @return A map representing <a href="https://osu.ppy.sh/docs/index.html#beatmapextended">BeatmapExtended</a> object.
      */
     public Map<String, Object> getBeatmapMetadata(int id) {
+        if (mapCache.containsKey(id)) {
+            return mapCache.get(id);
+        }
         String response = HttpUtil.get(URLUtil.concat(targetURL, String.valueOf(id)));
-        return gson.fromJson(response, new TypeToken<>() {}.getType());
+        Map<String, Object> result = gson.fromJson(response, new TypeToken<>() {}.getType());
+        mapCache.put(id, result);
+        return result;
     }
 }

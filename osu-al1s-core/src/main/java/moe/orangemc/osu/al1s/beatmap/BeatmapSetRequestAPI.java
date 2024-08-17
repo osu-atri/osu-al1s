@@ -24,20 +24,24 @@ import moe.orangemc.osu.al1s.util.HttpUtil;
 import moe.orangemc.osu.al1s.util.URLUtil;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class BeatmapSetRequestAPI {
     @Inject
     private OsuBotImpl referer;
-    // Does this support anonymous requesting? Is a referer really needed...
 
     @Inject
     private Gson gson;
 
     private final URL targetURL;
 
+    private final HashMap<Integer, Map<String, Object>> setCache;
+
     public BeatmapSetRequestAPI() {
         targetURL = URLUtil.concat(referer.getBaseUrl(), "api/v2/beatmapsets/");
+        setCache = new HashMap<>();
     }
 
     /**
@@ -46,7 +50,12 @@ public class BeatmapSetRequestAPI {
      * @return A map set representing <a href="https://osu.ppy.sh/docs/index.html#beatmapset">Beatmapset</a> object.
      */
     public Map<String, Object> getBeatmapSetMetadata(int setId) {
+        if (setCache.containsKey(setId)) {
+            return setCache.get(setId);
+        }
         String response = HttpUtil.get(URLUtil.concat(targetURL, String.valueOf(setId)));
-        return gson.fromJson(response, new TypeToken<>() {}.getType());
+        Map<String, Object> result = gson.fromJson(response, new TypeToken<>() {}.getType());
+        setCache.put(setId, result);
+        return result;
     }
 }

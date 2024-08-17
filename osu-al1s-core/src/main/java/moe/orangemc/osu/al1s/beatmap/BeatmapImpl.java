@@ -23,7 +23,6 @@ import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Map;
 
