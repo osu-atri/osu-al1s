@@ -18,7 +18,6 @@ package moe.orangemc.osu.al1s.inject.asm;
 
 import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.Injector;
-import moe.orangemc.osu.al1s.inject.util.ClassNameMatcher;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.CheckClassAdapter;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class InjectorClassLoader extends ClassLoader {
