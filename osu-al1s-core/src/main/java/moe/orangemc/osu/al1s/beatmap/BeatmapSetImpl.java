@@ -77,8 +77,8 @@ public class BeatmapSetImpl implements BeatmapSet {
     }
     int getPlayCount() { return getMetadata("play_count"); }
     int getFavouriteCount() { return getMetadata("favourite_count"); }
-    boolean getNSFW() { return getMetadata("nsfw"); }
-    boolean getHasVideo() { return getMetadata("video"); }
+    boolean isExplicit() { return getMetadata("nsfw"); }
+    boolean hasVideo() { return getMetadata("video"); }
     int getOffset() { return getMetadata("offset"); }
 
     // Optional and extended attributes aren't listed here yet.
