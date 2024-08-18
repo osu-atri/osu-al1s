@@ -29,7 +29,6 @@ import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.objectweb.asm.*;
 import org.objectweb.asm.util.CheckClassAdapter;
 
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -145,20 +144,16 @@ public class CommandExecutorFactory {
         Label catchStart = new Label();
 
         mv.visitTryCatchBlock(tryStart, tryEnd, catchStart, "java/lang/IllegalArgumentException");
+        mv.visitTryCatchBlock(tryStart, tryEnd, catchStart, "java/lang/StringIndexOutOfBoundsException");
         mv.visitLabel(tryStart);
 
         mv.visitVarInsn(Opcodes.ALOAD, 4);
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "mark", Type.getMethodDescriptor(Type.VOID_TYPE), false);
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, typeAdapterType.getInternalName(), "parse", Type.getMethodDescriptor(SneakyExceptionHelper.call(() -> ArgumentTypeAdapter.class.getMethod("parse", StringReader.class))), true);
 
         mv.visitVarInsn(Opcodes.ALOAD, 4);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "skip", Type.getMethodDescriptor(Type.VOID_TYPE), false);
-
-        mv.visitInsn(Opcodes.DUP);
-        mv.visitTypeInsn(Opcodes.INSTANCEOF, Type.getInternalName(node.getParameter()));
-
-        Label typeCheckpoint = new Label();
-        mv.visitInsn(Opcodes.ICONST_0);
-        mv.visitJumpInsn(Opcodes.IF_ICMPEQ, typeCheckpoint);
 
         mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(node.getParameter()));
         mv.visitVarInsn(Opcodes.ASTORE, 4 + depth);
@@ -190,7 +185,9 @@ public class CommandExecutorFactory {
         }
 
         mv.visitLabel(catchStart);
-        mv.visitLabel(typeCheckpoint);
+        mv.visitVarInsn(Opcodes.ALOAD, 4);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "reset", Type.getMethodDescriptor(Type.VOID_TYPE), false);
+        mv.visitInsn(Opcodes.POP);
         return maxDepth;
     }
 

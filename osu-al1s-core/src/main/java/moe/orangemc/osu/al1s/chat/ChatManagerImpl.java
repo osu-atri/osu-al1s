@@ -18,11 +18,13 @@ package moe.orangemc.osu.al1s.chat;
 
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.chat.ChannelChatEvent;
 import moe.orangemc.osu.al1s.api.event.chat.ChatEvent;
 import moe.orangemc.osu.al1s.api.event.chat.MultiplayerRoomChatEvent;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
+import moe.orangemc.osu.al1s.chat.command.CommandManagerImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.driver.irc.IrcDriver;
 import moe.orangemc.osu.al1s.chat.driver.web.WebDriver;
@@ -48,6 +50,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
         result.setMessageHandler(this);
         return result;
     });
+    private final CommandManagerImpl commandManager = new CommandManagerImpl();
 
     private String ircHost;
     private int ircPort;
@@ -78,6 +81,10 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
 
         if (user.getUsername().equals(serverBotName)) {
             osuChannel.pushServerMessage(message);
+            return;
+        }
+
+        if (message.startsWith("!") && commandManager.executeCommand(user, osuChannel, message)) {
             return;
         }
 
@@ -121,5 +128,10 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
                 reverseChannelsNameMap.put(user, channelName);
             }
         }
+    }
+
+    @Override
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 }

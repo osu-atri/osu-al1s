@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.chat;
 
+import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
+
 public interface ChatManager {
     void sendMessage(OsuChannel channel, String message);
+    CommandManager getCommandManager();
 }

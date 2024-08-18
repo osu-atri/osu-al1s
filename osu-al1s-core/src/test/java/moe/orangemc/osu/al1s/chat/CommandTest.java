@@ -94,5 +94,15 @@ public class CommandTest {
         public void test2(User user, OsuChannel channel, int a) {
             test2 = a;
         }
+
+        @Command
+        public void test3(User user, OsuChannel channel, int a, int b) {
+            test2 = a + b;
+        }
+
+        @Command
+        public void test4(User user, OsuChannel channel, boolean a) {
+            test = a;
+        }
     }
 }

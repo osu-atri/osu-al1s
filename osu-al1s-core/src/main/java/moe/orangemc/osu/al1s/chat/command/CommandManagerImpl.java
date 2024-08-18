@@ -53,18 +53,22 @@ public class CommandManagerImpl implements CommandManager {
         registerAdapter(float.class, new FloatTypeAdapter());
         registerAdapter(Float.class, new FloatTypeAdapter());
 
+        registerAdapter(boolean.class, new BooleanTypeAdapter());
+        registerAdapter(Boolean.class, new BooleanTypeAdapter());
+
         registerAdapter(String.class, new StringTypeAdapter());
     }
 
-    public void executeCommand(UserImpl sender, OsuChannelImpl where, String command) {
+    public boolean executeCommand(UserImpl sender, OsuChannelImpl where, String command) {
         StringReader reader = new StringReader(command);
         String cmdName = reader.getRootCommand();
         reader.skip();
         CommandBase cmd = commandMap.get(cmdName);
         if (cmd == null) {
-            return;
+            return false;
         }
         executorFactory.createExecutor(cmd).execute(sender, where, this, reader);
+        return true;
     }
 
     @Override

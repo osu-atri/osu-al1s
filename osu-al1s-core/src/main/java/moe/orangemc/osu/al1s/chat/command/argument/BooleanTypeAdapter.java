@@ -22,6 +22,10 @@ import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 public class BooleanTypeAdapter implements ArgumentTypeAdapter<Boolean> {
     @Override
     public Boolean parse(StringReader reader) {
-        return Boolean.parseBoolean(reader.readString());
+        String s = reader.readString();
+        if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")) {
+            return Boolean.parseBoolean(s);
+        }
+        throw new IllegalArgumentException("Invalid boolean value: " + s);
     }
 }

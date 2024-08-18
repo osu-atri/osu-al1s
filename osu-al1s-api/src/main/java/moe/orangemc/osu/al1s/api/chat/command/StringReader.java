@@ -22,6 +22,8 @@ public class StringReader {
     private int pos = 0;
     private final String rootCommand;
 
+    private int checkpoint = 0;
+
     public StringReader(String command) {
         this.command = command;
         expect('!');
@@ -102,5 +104,13 @@ public class StringReader {
 
     public String readRemaining() {
         return this.command.substring(this.pos);
+    }
+
+    public void mark() {
+        this.checkpoint = this.pos;
+    }
+
+    public void reset() {
+        this.pos = this.checkpoint;
     }
 }
