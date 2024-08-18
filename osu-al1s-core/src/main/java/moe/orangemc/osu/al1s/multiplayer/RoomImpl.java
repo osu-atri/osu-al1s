@@ -465,7 +465,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
                     this.host = user;
                 }
-                case ALL_READY -> this.eventBus.fire(new AllReadyEvent(this));
+                case ALL_READY -> {
+                    for (UserState state : this.playerStates.values()) {
+                        state.waitStatus = PlayerWaitStatus.READY;
+                    }
+                    this.eventBus.fire(new AllReadyEvent(this));
+                }
             }
         }
     }
