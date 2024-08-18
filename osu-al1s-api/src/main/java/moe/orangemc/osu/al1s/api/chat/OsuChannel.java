@@ -16,16 +16,8 @@
 
 package moe.orangemc.osu.al1s.api.chat;
 
-import java.util.List;
-
 public interface OsuChannel {
     void sendMessage(String message);
-    List<String> getServerMessages(long time);
-    List<String> getLatestServerMessages();
-    List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed);
-    List<String> getServerMessagesTillNow(long startTime, boolean reversed);
-    List<Long> getMessageTimes(String msg, boolean reversed, boolean strict);
-    void clearServerMessages();
 
     String getChannelName();
 }

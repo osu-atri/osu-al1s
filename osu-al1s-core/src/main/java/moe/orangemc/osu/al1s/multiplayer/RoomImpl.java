@@ -41,6 +41,12 @@ import java.util.regex.Pattern;
 public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+    private static final Pattern JOIN_MESSAGE_PAtTERN = Pattern.compile("(.+) joined in slot (\\d+)");
+    private static final Pattern SLOT_SWITCH_PATTERN = Pattern.compile("(.+) moved to slot (\\d+)");
+    private static final Pattern TEAM_SWITCH_PATTERN = Pattern.compile("(.+) changed to (Red|Blue)");
+    private static final Pattern LEAVE_PATTERN = Pattern.compile("(.+) left the game");
+    private static final Pattern SCORE_PATTERN = Pattern.compile("(.+) has finished playing \\(Score (\\d+), .+\\)");
+
     @Inject
     private ChatDriver chatDriver;
     @Inject
@@ -95,9 +101,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     public Map<String, String> getSettings() {
         Map<String, String> roomInfo = new java.util.HashMap<>(Collections.emptyMap());
         this.sendMessage("!mp settings");
-        try { wait(1000); } catch (Exception ignored) {}
-        long requestTime = this.getMessageTimes("!mp settings", true, false).getFirst();
-        List<String> infoStr = this.getServerMessagesTillNow(requestTime, true);
+        List<String> infoStr = this.pollServerMessages();
         for (String i : infoStr)
         {
             String[] infoPair = i.split(":");
@@ -200,10 +204,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     public Set<User> getReferees() {
         Set<User> users = new java.util.HashSet<>(Collections.emptySet());
         this.sendMessage("!mp listrefs");
-        try { wait(1000); } catch (Exception ignored) {}
-        // Wait when?
-        List<Long> times = this.getMessageTimes("BanchoBot: Match referees:", true, false);
-        List<String> msgToNow = this.getServerMessagesTillNow(times.getFirst(), true);
+        List<String> msgToNow = this.pollServerMessages();
         msgToNow.removeLast();
         for (String i : msgToNow) {
             String trimmedStr = i.split(":")[1].trim();
@@ -255,5 +256,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public @NotNull OsuBot getManagingBot() {
         return manager;
+    }
+
+    @Override
+    protected void processServerMessages(List<String> messages) {
+        for (String message : messages) {
+
+        }
     }
 }

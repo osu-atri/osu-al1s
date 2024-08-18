@@ -24,6 +24,7 @@ import moe.orangemc.osu.al1s.api.event.chat.SystemMessagePoll;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public abstract class OsuChannelImpl implements OsuChannel {
@@ -37,9 +38,10 @@ public abstract class OsuChannelImpl implements OsuChannel {
     private Scheduler scheduler;
 
     private final List<String> polledServerMessages = new ArrayList<>();
+    private CompletableFuture<List<String>> pollFuture = new CompletableFuture<>();
 
     public OsuChannelImpl() {
-        scheduler.runTaskTimer(this::schedulePollEvent, 5, 5, TimeUnit.SECONDS);
+        scheduler.runTaskTimer(this::schedulePollEvent, 1, 1, TimeUnit.SECONDS);
     }
 
     @Override
@@ -57,12 +59,18 @@ public abstract class OsuChannelImpl implements OsuChannel {
         }
 
         List<String> messages = Collections.unmodifiableList(new ArrayList<>(this.polledServerMessages));
-        this.processSystemMessage(messages);
+        pollFuture.complete(messages);
+        pollFuture = new CompletableFuture<>();
+        this.processServerMessages(messages);
         eventBus.fire(new SystemMessagePoll(messages, this));
         this.polledServerMessages.clear();
     }
 
-    public void processSystemMessage(List<String> messages) {
+    protected List<String> pollServerMessages() {
+        return pollFuture.join();
+    }
+
+    protected void processServerMessages(List<String> messages) {
 
     }
 }
