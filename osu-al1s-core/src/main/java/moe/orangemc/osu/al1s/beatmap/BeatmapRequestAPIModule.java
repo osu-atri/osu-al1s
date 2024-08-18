@@ -14,18 +14,11 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.chat;
+package moe.orangemc.osu.al1s.beatmap;
 
-import java.util.List;
+import moe.orangemc.osu.al1s.inject.api.Provides;
 
-public interface OsuChannel {
-    void sendMessage(String message);
-    List<String> getServerMessages(long time);
-    List<String> getLatestServerMessages();
-    List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed);
-    List<String> getServerMessagesTillNow(long startTime, boolean reversed);
-    List<Long> getMessageTimes(String msg, boolean reversed, boolean strict);
-    void clearServerMessages();
-
-    String getChannelName();
+public class BeatmapRequestAPIModule {
+    @Provides
+    public BeatmapRequestAPI create() { return new BeatmapRequestAPI(); }
 }

@@ -14,18 +14,23 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.chat;
+package moe.orangemc.osu.al1s.api.beatmap;
 
-import java.util.List;
+public enum RankStatus {
+    RANKED(1),
+    QUALIFIED(3),
+    LOVED(4),
+    APPROVED(2),
+    WIP(-1),
+    PENDING(0),
+    GRAVEYARD(-2),
+    // Placeholder for other statuses (etc. deleted or failure)
+    UNKNOWN(255);
 
-public interface OsuChannel {
-    void sendMessage(String message);
-    List<String> getServerMessages(long time);
-    List<String> getLatestServerMessages();
-    List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed);
-    List<String> getServerMessagesTillNow(long startTime, boolean reversed);
-    List<Long> getMessageTimes(String msg, boolean reversed, boolean strict);
-    void clearServerMessages();
+    private final int index;
 
-    String getChannelName();
+    RankStatus() { this.index = 255; }
+    RankStatus(int index) { this.index = index; }
+
+    public String getName() { return name().toLowerCase(); }
 }

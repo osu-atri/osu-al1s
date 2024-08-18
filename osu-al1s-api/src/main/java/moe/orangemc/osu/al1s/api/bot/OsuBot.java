@@ -24,6 +24,7 @@ import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 public interface OsuBot extends User {
@@ -49,5 +50,30 @@ public interface OsuBot extends User {
 
     default void sendMessage(String message) {
         throw new UnsupportedOperationException("I cannot chat to myself");
+    }
+
+    default List<String> getServerMessages(long time) {
+        throw new UnsupportedOperationException("I didn't do anything to the server");
+    }
+
+    default List<String> getServerMessagesInRange(long startTime, long endTime, boolean reversed) {
+        throw new UnsupportedOperationException("I'm not the right one to interact with.");
+    }
+
+    default List<String> getServerMessagesTillNow(long startTime, boolean reversed) {
+        throw new UnsupportedOperationException("Try asking the Channel, it knows.");
+    }
+
+    default List<Long> getMessageTimes(String msg, boolean reversed, boolean strict) {
+        throw new UnsupportedOperationException("Don't blame me.");
+    }
+
+    default List<String> getLatestServerMessages() {
+        return getServerMessages(0);
+    }
+
+    @Override
+    default void clearServerMessages() {
+        getLatestServerMessages();
     }
 }

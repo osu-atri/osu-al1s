@@ -35,6 +35,8 @@ public interface MultiplayerRoom extends OsuChannel {
     String getPassword();
     void setPassword(String password);
 
+    Map<String, String> getSettings();
+
     Map<Integer, User> getPlayers();
     void kickPlayer(User user);
     void banPlayer(User user);

@@ -27,10 +27,13 @@ import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.user.UserImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -86,6 +89,31 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public void setPassword(String password) {
         this.sendMessage("!mp password " + password);
+    }
+
+    @Override
+    public Map<String, String> getSettings() {
+        Map<String, String> roomInfo = new java.util.HashMap<>(Collections.emptyMap());
+        this.sendMessage("!mp settings");
+        try { wait(1000); } catch (Exception ignored) {}
+        long requestTime = this.getMessageTimes("!mp settings", true, false).getFirst();
+        List<String> infoStr = this.getServerMessagesTillNow(requestTime, true);
+        for (String i : infoStr)
+        {
+            String[] infoPair = i.split(":");
+            // Add more arguments here
+            switch (infoPair[0]) {
+                case "Active mods":
+                    roomInfo.computeIfAbsent("Mods", _ -> infoPair[1].trim());
+                    break;
+                // Team mode: HeadToHead, Win condition: Score
+                case "Team mode":
+                    roomInfo.computeIfAbsent("TeamMode", _ -> infoPair[1].split(",")[0].trim());
+                    roomInfo.computeIfAbsent("WinCondition", _ -> infoPair[2].trim());
+                    break;
+            }
+        }
+        return roomInfo;
     }
 
     @Override
@@ -170,7 +198,18 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public Set<User> getReferees() {
-        return Set.of();
+        Set<User> users = new java.util.HashSet<>(Collections.emptySet());
+        this.sendMessage("!mp listrefs");
+        try { wait(1000); } catch (Exception ignored) {}
+        // Wait when?
+        List<Long> times = this.getMessageTimes("BanchoBot: Match referees:", true, false);
+        List<String> msgToNow = this.getServerMessagesTillNow(times.getFirst(), true);
+        msgToNow.removeLast();
+        for (String i : msgToNow) {
+            String trimmedStr = i.split(":")[1].trim();
+            users.add(new UserImpl(trimmedStr));
+        }
+        return users;
     }
 
     @Override

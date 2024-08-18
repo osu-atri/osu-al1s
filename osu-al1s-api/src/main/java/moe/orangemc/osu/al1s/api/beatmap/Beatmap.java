@@ -17,4 +17,9 @@
 package moe.orangemc.osu.al1s.api.beatmap;
 
 public interface Beatmap {
+    // General map for storing attributes.
+    <T> T getMetadata(String key);
+
+    int getId();
+    int getSetId();
 }
