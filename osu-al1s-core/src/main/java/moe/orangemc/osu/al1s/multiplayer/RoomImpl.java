@@ -439,6 +439,8 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
                     User user = UserImpl.get(username);
                     this.eventBus.fire(new PlayerFinishPlayEvent(this, user, score, result));
+
+                    this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
                 }
                 case BEATMAP_CHANGED -> {
                     int beatmapId = Integer.parseInt(matcher.group(4));
