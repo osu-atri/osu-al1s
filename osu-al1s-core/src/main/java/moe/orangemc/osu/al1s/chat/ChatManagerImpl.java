@@ -134,4 +134,8 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
     public CommandManager getCommandManager() {
         return commandManager;
     }
+
+    public String getServerBotName() {
+        return serverBotName;
+    }
 }

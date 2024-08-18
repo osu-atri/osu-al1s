@@ -35,18 +35,19 @@ import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.opentest4j.TestSkippedException;
 
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
 
+@Disabled("This test is disabled because it requires manual interaction")
 @ExtendWith(TestLaunchNeedle.class)
 public class ChatTest {
     private static OsuBotImpl osuBot;
-    private static final boolean enabled = true;
+    private static final boolean enabled = false;
     private static String targetUser;
     private static Thread testThread;
     private static IrcCredential ircCredential;
@@ -83,10 +84,7 @@ public class ChatTest {
         osuBot.execute(() -> osuBot.getEventBus().register(new MessageListener()));
     }
 
-    private void checkEnabled() {
-        if (!enabled) {
-            throw new TestSkippedException("Test disabled");
-        }
+    private void spamStopper() {
         try {
             Thread.sleep(1500);
         } catch (InterruptedException e) {
@@ -97,7 +95,7 @@ public class ChatTest {
 
     @Test
     public void testNewPrivateMsg() {
-        checkEnabled();
+        spamStopper();
 
         osuBot.execute(() -> {
             UserImpl target = UserImpl.get(targetUser);
@@ -112,7 +110,7 @@ public class ChatTest {
 
     @Test
     public void testIrcPrivateMsg() {
-        checkEnabled();
+        spamStopper();
 
         osuBot.authenticateSync(ircCredential);
 

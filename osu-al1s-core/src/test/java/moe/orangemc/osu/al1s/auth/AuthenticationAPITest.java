@@ -25,12 +25,14 @@ import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.Injector;
 import moe.orangemc.osu.al1s.util.GsonProvider;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -40,22 +42,29 @@ import java.util.Scanner;
 
 @ExtendWith(TestLaunchNeedle.class)
 public class AuthenticationAPITest {
-    private static OsuBotImpl osuBot;
+    private OsuBotImpl osuBot;
 
     @Inject
     private static Injector injector;
+    private static InjectionContext initialContext;
 
     @BeforeAll
     public static void setUp() {
         injector.getCurrentContext().registerModule(new GsonProvider());
+        initialContext = injector.getCurrentContext();
+    }
+
+    public void initTest() {
+        injector.setContext(initialContext);
+        injector.setContext(injector.derivativeContext());
 
         osuBot = new OsuBotImpl(true, URLUtil.newURL("http://osu.ppy.sh/"), "BanchoBot", "irc.ppy.sh", 6667);
-        System.out.println(AuthenticationAPITest.class.getClassLoader());
         osuBot.getEventBus().register(new Authenticator());
     }
 
     @Test
     public void testAuthorizationCodeGrant() {
+        initTest();
         AuthorizationCodeGrantCredentialImpl credential = new AuthorizationCodeGrantCredentialImpl();
 
         File tmpCredentialFile = new File("tmpCredentialFile");
@@ -76,6 +85,7 @@ public class AuthenticationAPITest {
 
     @Test
     public void testClientCredentialsGrant() {
+        initTest();
         CredentialBase credentialBase = new CredentialBase();
 
         File tmpCredentialFile = new File("tmpCredentialFile");
@@ -93,6 +103,7 @@ public class AuthenticationAPITest {
 
     @Test
     public void testTokenRenewal() {
+        initTest();
         AuthorizationCodeGrantCredentialImpl credential = new AuthorizationCodeGrantCredentialImpl();
 
         File tmpCredentialFile = new File("tmpCredentialFile");

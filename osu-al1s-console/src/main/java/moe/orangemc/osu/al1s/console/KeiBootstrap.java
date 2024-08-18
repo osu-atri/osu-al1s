@@ -20,6 +20,6 @@ import moe.orangemc.osu.al1s.api.ArisService;
 
 public class KeiBootstrap {
     public static void main(String[] args) {
-        ArisService.boot("moe.orangemc.osu.al1s.console.ArisBot");
+        ArisService.bootstrap("moe.orangemc.osu.al1s.console.ArisBot", args);
     }
 }

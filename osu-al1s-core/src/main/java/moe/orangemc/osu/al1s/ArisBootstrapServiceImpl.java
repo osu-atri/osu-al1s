@@ -29,7 +29,7 @@ import java.lang.reflect.Constructor;
 
 public class ArisBootstrapServiceImpl implements ArisBootstrapService {
     @Override
-    public void boot(String init) {
+    public void bootstrap(String init, String[] args) {
         Injector injector = new InjectorImpl();
 
         InjectionContext ctx = injector.getCurrentContext();
@@ -38,8 +38,8 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
         ctx.registerModule(new BotFactoryModule());
         ctx.registerModule(new CredentialProviderModule());
 
-        Class<?> initInterfaceClass = injector.bootstrap("moe.orangemc.osu.al1s.api.bot.InitEntry");
-        Class<?> initClass = injector.bootstrap(init);
+        Class<?> initInterfaceClass = injector.loadWithInjection("moe.orangemc.osu.al1s.api.bot.InitEntry");
+        Class<?> initClass = injector.loadWithInjection(init);
         if (!initInterfaceClass.isAssignableFrom(initClass)) {
             throw new IllegalArgumentException("Init class must implement InitEntry");
         }
@@ -52,6 +52,6 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
         }
 
         Object entry = SneakyExceptionHelper.call(entryConstructor::newInstance);
-        SneakyExceptionHelper.call(() -> initClass.getMethod("main").invoke(entry));
+        SneakyExceptionHelper.call(() -> initClass.getMethod("main", String[].class).invoke(entry, (Object) args));
     }
 }

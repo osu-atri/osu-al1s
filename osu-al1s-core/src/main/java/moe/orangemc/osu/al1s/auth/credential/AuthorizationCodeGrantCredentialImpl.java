@@ -82,7 +82,7 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
                     "client_id=" + getClientId() + "&" +
                     "redirect_uri=" + URLUtil.encode(redirectUri) + "&" +
                     "response_type=code&" +
-                    "scope=" + URLUtil.encode(getScopes().stream().map(Scope::name).reduce((a, b) -> a + " " + b).orElseThrow(() -> new IllegalStateException("Unknown scope"))) + "&" +
+                    "scope=" + Scope.join(getScopes()) + "&" +
                     "state=" + state.toString());
         }
 

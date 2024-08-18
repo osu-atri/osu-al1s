@@ -18,6 +18,7 @@ package moe.orangemc.osu.al1s.multiplayer;
 
 import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
+import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.multiplayer.*;
 import moe.orangemc.osu.al1s.api.mutltiplayer.*;
@@ -28,6 +29,7 @@ import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.beatmap.BeatmapImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
@@ -48,6 +50,8 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private OsuBotImpl manager;
     @Inject
     private EventBus eventBus;
+    @Inject
+    private ChatManager chatManager;
 
     private final int id;
     private String name;
@@ -67,7 +71,10 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private boolean alive = true;
 
     public RoomImpl(String roomName) {
-        String response = "";
+        UserImpl banchobot = UserImpl.get(((ChatManagerImpl) chatManager).getServerBotName());
+        banchobot.sendMessage("!mp make " + roomName);
+        List<String> messages = banchobot.pollServerMessages();
+        String response = messages.getFirst();
         Pattern pattern = Pattern.compile("(\\d+)");
 
         this.id = Integer.parseInt(pattern.matcher(response).group(1));

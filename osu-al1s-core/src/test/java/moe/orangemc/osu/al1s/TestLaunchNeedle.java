@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TestLaunchNeedle implements InvocationInterceptor {
-    private static final InjectorImpl injector = new InjectorImpl();
+    private static InjectorImpl injector = new InjectorImpl();
     private final Map<Class<?>, Object> testInstances = new HashMap<>();
 
     @Override
@@ -38,6 +38,8 @@ public class TestLaunchNeedle implements InvocationInterceptor {
 
     @Override
     public void interceptBeforeAllMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
+        injector = new InjectorImpl();
+        testInstances.clear();
         intercept(invocation, invocationContext);
     }
 
@@ -80,7 +82,7 @@ public class TestLaunchNeedle implements InvocationInterceptor {
         Thread.currentThread().setContextClassLoader(injectorClassLoader);
 
         try {
-            Class<T> testClass = (Class<T>) injector.bootstrap(invocationContext.getExecutable().getDeclaringClass().getName());
+            Class<T> testClass = (Class<T>) injector.loadWithInjection(invocationContext.getExecutable().getDeclaringClass().getName());
             Constructor<T> testConstructor = testClass.getDeclaredConstructor();
             testConstructor.setAccessible(true);
             T instance = testConstructor.newInstance();
@@ -100,7 +102,7 @@ public class TestLaunchNeedle implements InvocationInterceptor {
         Thread.currentThread().setContextClassLoader(injectorClassLoader);
 
         try {
-            Class<?> testClass = injector.bootstrap(invocationContext.getExecutable().getDeclaringClass().getName());
+            Class<?> testClass = injector.loadWithInjection(invocationContext.getExecutable().getDeclaringClass().getName());
             Method testMethod = testClass.getDeclaredMethod(invocationContext.getExecutable().getName());
             testMethod.setAccessible(true);
             if ((testMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC) {

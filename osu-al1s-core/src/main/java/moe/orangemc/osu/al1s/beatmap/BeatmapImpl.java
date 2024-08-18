@@ -16,10 +16,12 @@
 
 package moe.orangemc.osu.al1s.beatmap;
 
+import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.beatmap.RankStatus;
 import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 
@@ -31,10 +33,14 @@ public class BeatmapImpl implements Beatmap {
 
     @Inject
     private BeatmapRequestAPI api;
+    @Inject
+    private OsuBotImpl bot;
 
     private final Map<String, Object> metadata;
 
     public BeatmapImpl(int id) {
+        bot.checkPermission(Scope.PUBLIC);
+
         metadata = api.getBeatmapMetadata(id);
         this.setId = (int)((double) getMetadata("beatmapset_id"));
         this.id = (int)((double) getMetadata("id"));

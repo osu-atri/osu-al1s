@@ -51,7 +51,7 @@ public class HandlerDispatcherFactory {
 
         String generatedName = "moe/orangemc/osu/al1s/event/accessor/HandlerDispatcherImpl_" + DigestUtil.sha256sum(Type.getType(m.getDeclaringClass()) + "." + m.getName() + "@" + Type.getMethodDescriptor(m) + ":" + ignoreCancelled);
 
-        cw.visit(Opcodes.V22, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, generatedName, null, "java/lang/Object", new String[]{"moe/orangemc/osu/al1s/event/accessor/HandlerDispatcher"});
+        cw.visit(Opcodes.V22, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, generatedName, null, "java/lang/Object", new String[]{"moe/orangemc/osu/al1s/event/accessor/GeneratedHandlerDispatcher"});
         cw.visitSource("HandlerDispatcherFactory.java", null);
 
         /* handler */ {
@@ -99,7 +99,7 @@ public class HandlerDispatcherFactory {
                 /* if (((CancellableEvent) event).isCancelled()) */ {
                     // return;
                     mv.visitTypeInsn(Opcodes.CHECKCAST, "moe/orangemc/osu/al1s/api/event/CancellableEvent"); // We did a `dup` before
-                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "moe/orangemc/osu/al1s/api/event/CancellableEvent", "isCancelled", "()Z", false);
+                    mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "moe/orangemc/osu/al1s/api/event/CancellableEvent", "isCancelled", "()Z", true);
                     mv.visitInsn(Opcodes.ICONST_0);
                     mv.visitJumpInsn(Opcodes.IF_ICMPEQ, end);
                     mv.visitInsn(Opcodes.RETURN);

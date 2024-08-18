@@ -18,6 +18,7 @@ package moe.orangemc.osu.al1s.chat.driver.web;
 
 import com.google.gson.Gson;
 import moe.orangemc.osu.al1s.api.auth.Scope;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
@@ -31,25 +32,28 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class WebDriver implements ChatDriver {
     @Inject
     private OsuBotImpl bot;
     @Inject
     private Gson gson;
+    @Inject
+    private Scheduler scheduler;
 
     private final Set<WebsocketMessageReceiver> receivers = new HashSet<>();
 
     private void keepAlive() {
+        bot.checkPermission(Scope.CHAT.READ);
+
         URL keepAliveUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/ack");
         HttpUtil.post(keepAliveUrl, "{}", Map.of("Content-Type", "application/json"));
     }
 
     @Override
     public void sendMessage(String channel, String message) {
-        if (!bot.getToken().getAllowedScopes().contains(Scope.CHAT.WRITE)) {
-            throw new UnsupportedOperationException("Bot does not have permission to write to chat");
-        }
+        bot.checkPermission(Scope.CHAT.WRITE);
 
         URL channelUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/channels/" + channel + "/messages");
         HttpUtil.post(channelUrl, gson.toJson(new OutboundChannelMessage(message, false)), Map.of("Content-Type", "application/json"));
@@ -57,9 +61,7 @@ public class WebDriver implements ChatDriver {
 
     @Override
     public void joinChannel(String channel) {
-        if (!bot.getToken().getAllowedScopes().contains(Scope.CHAT.WRITE_MANAGE)) {
-            throw new UnsupportedOperationException("Bot does not have permission to manage chat");
-        }
+        bot.checkPermission(Scope.CHAT.WRITE_MANAGE);
 
         String username = bot.getMetadata("username");
         URL channelUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/channels/" + channel + "/users/" + username);
@@ -68,9 +70,7 @@ public class WebDriver implements ChatDriver {
 
     @Override
     public void leaveChannel(String channel) {
-        if (!bot.getToken().getAllowedScopes().contains(Scope.CHAT.WRITE_MANAGE)) {
-            throw new UnsupportedOperationException("Bot does not have permission to manage chat");
-        }
+        bot.checkPermission(Scope.CHAT.WRITE_MANAGE);
 
         String username = bot.getMetadata("username");
         URL channelUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/channels/" + channel + "/users/" + username);
@@ -79,9 +79,7 @@ public class WebDriver implements ChatDriver {
 
     @Override
     public String initializePrivateChannel(UserImpl user, String initialMessage) {
-        if (!bot.getToken().getAllowedScopes().contains(Scope.CHAT.WRITE)) {
-            throw new UnsupportedOperationException("Bot does not have permission to write to chat");
-        }
+        bot.checkPermission(Scope.CHAT.WRITE);
 
         URL channelUrl = URLUtil.concat(bot.getBaseUrl(), "api/v2/chat/new");
         String created = HttpUtil.post(channelUrl, gson.toJson(new OutboundInitiatePrivateMessage(user, initialMessage, false)), Map.of("Content-Type", "application/json"));
@@ -90,6 +88,9 @@ public class WebDriver implements ChatDriver {
 
     @Override
     public void setMessageHandler(ChatMessageHandler handler) {
+        bot.checkPermission(Scope.CHAT.READ);
+        scheduler.runTaskTimer(this::keepAlive, 0, 30, TimeUnit.SECONDS);
+
         receivers.add(new WebsocketMessageReceiver(handler));
     }
 

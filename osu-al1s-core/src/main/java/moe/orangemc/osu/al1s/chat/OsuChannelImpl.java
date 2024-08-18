@@ -66,7 +66,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
         this.polledServerMessages.clear();
     }
 
-    protected List<String> pollServerMessages() {
+    public List<String> pollServerMessages() {
         return pollFuture.join();
     }
 

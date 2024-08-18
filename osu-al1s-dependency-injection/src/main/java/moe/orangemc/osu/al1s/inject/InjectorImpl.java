@@ -35,7 +35,7 @@ public class InjectorImpl implements Injector {
     private final Stack<InjectionContextImpl> contextStack = new Stack<>();
 
     @Override
-    public Class<?> bootstrap(String rootClass) {
+    public Class<?> loadWithInjection(String rootClass) {
         if (!selfProvided) {
             selfProvided = true;
             root.registerModule(new InjectorProvider(this));
@@ -58,7 +58,7 @@ public class InjectorImpl implements Injector {
             throw new IllegalArgumentException("Invalid context class: " + context.getClass());
         }
 
-        if (!(root.isChild(ctx))) {
+        if (!(root.isChild(ctx)) && root != ctx) {
             throw new IllegalArgumentException("Unclaimed context");
         }
 

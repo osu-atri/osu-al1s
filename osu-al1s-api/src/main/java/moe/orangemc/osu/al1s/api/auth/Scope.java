@@ -16,8 +16,10 @@
 
 package moe.orangemc.osu.al1s.api.auth;
 
+import java.util.List;
+
 public record Scope(String name) {
-    public static String join(Scope... scopes) {
+    public static String join(List<Scope> scopes) {
         StringBuilder sb = new StringBuilder();
         for (Scope scope : scopes) {
             sb.append(scope.name()).append(" ");
@@ -45,5 +47,10 @@ public record Scope(String name) {
 
     public static class FriendsScope {
         public final Scope READ = new Scope("friends.read");
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

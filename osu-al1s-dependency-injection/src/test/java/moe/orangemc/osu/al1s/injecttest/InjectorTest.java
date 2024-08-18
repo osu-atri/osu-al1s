@@ -54,7 +54,7 @@ public class InjectorTest {
 
         Assertions.assertDoesNotThrow(() -> injectionContext.registerModule(this));
 
-        Class<?> injecteeClass = injector.bootstrap("moe.orangemc.osu.al1s.injecttest.TestInjectee");
+        Class<?> injecteeClass = injector.loadWithInjection("moe.orangemc.osu.al1s.injecttest.TestInjectee");
         Object injectee = Assertions.assertDoesNotThrow(() -> injecteeClass.getConstructor().newInstance());
 
         Method m = Assertions.assertDoesNotThrow(() -> injecteeClass.getMethod("getTestProvider"));
@@ -74,7 +74,7 @@ public class InjectorTest {
             }
         }));
 
-        Class<?> injecteeClass = injector.bootstrap("moe.orangemc.osu.al1s.injecttest.TestInjectee");
+        Class<?> injecteeClass = injector.loadWithInjection("moe.orangemc.osu.al1s.injecttest.TestInjectee");
         Object injectee = Assertions.assertDoesNotThrow(() -> injecteeClass.getConstructor().newInstance());
 
         Method m = Assertions.assertDoesNotThrow(() -> injecteeClass.getMethod("getTestProvider"));
@@ -100,7 +100,7 @@ public class InjectorTest {
 
         Assertions.assertDoesNotThrow(() -> firstLayer.registerModule(this));
 
-        Class<?> injecteeClass = injector.bootstrap("moe.orangemc.osu.al1s.injecttest.TestInjectee");
+        Class<?> injecteeClass = injector.loadWithInjection("moe.orangemc.osu.al1s.injecttest.TestInjectee");
         Object injectee = Assertions.assertDoesNotThrow(() -> injecteeClass.getConstructor().newInstance());
 
         Method m = Assertions.assertDoesNotThrow(() -> injecteeClass.getMethod("getTestProvider"));

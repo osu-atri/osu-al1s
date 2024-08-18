@@ -19,6 +19,7 @@ package moe.orangemc.osu.al1s.bot;
 import moe.orangemc.osu.al1s.accessor.AccessorModule;
 import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
+import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
@@ -39,6 +40,7 @@ import moe.orangemc.osu.al1s.inject.api.*;
 import moe.orangemc.osu.al1s.multiplayer.RoomManagerImpl;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.user.UserRequestAPIModule;
+import moe.orangemc.osu.al1s.util.LazyReference;
 import org.apache.commons.lang3.Validate;
 
 import java.net.URL;
@@ -55,7 +57,13 @@ public class OsuBotImpl implements OsuBot {
     private final RoomManagerImpl roomManager;
 
     private TokenImpl token = null;
-    private User botUser;
+    private final LazyReference<User> botUser = new LazyReference<>(() -> {
+        if (!token.getAllowedScopes().contains(Scope.IDENTIFY)) {
+            throw new UnsupportedOperationException("No permission to identify self");
+        }
+        this.execute(UserImpl::me);
+        return UserImpl.me();
+    });
 
     @Inject
     private Injector injector;
@@ -113,8 +121,6 @@ public class OsuBotImpl implements OsuBot {
 
         try (var _ = injector.setContext(ctx)) {
             this.token = authenticationAPI.authorize((CredentialBase) credential);
-
-            this.botUser = UserImpl.ME;
         }
     }
 
@@ -168,12 +174,12 @@ public class OsuBotImpl implements OsuBot {
 
     @Override
     public int getId() {
-        return botUser.getId();
+        return botUser.get().getId();
     }
 
     @Override
     public <T> T getMetadata(String key) {
-        return botUser.getMetadata(key);
+        return botUser.get().getMetadata(key);
     }
 
     public URL getBaseUrl() {
@@ -182,7 +188,7 @@ public class OsuBotImpl implements OsuBot {
 
     @Override
     public String getUsername() {
-        return botUser.getUsername();
+        return botUser.get().getUsername();
     }
 
     @Override
@@ -190,6 +196,12 @@ public class OsuBotImpl implements OsuBot {
         try (var _ = injector.setContext(ctx)) {
             ctx.registerModule(this, true);
             runnable.run();
+        }
+    }
+
+    public void checkPermission(Scope scope) {
+        if (token == null || !token.getAllowedScopes().contains(scope)) {
+            throw new UnsupportedOperationException("No permission to " + scope);
         }
     }
 }

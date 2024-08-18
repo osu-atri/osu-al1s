@@ -91,7 +91,7 @@ class EventBusImplTest {
         }
 
         @EventHandler(ignoreCancelled = true)
-        public void onEventCancellable(CancellableEvent evt) {
+        public void onEventCancellable(CancellableEvt evt) {
             val |= 2;
         }
 

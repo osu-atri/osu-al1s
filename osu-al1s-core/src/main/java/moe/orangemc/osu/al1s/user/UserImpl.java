@@ -16,7 +16,9 @@
 
 package moe.orangemc.osu.al1s.user;
 
+import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
@@ -24,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserImpl extends OsuChannelImpl implements User {
-    public static UserImpl ME = new UserImpl();
+    private static UserImpl ME = null;
     private static final Map<Integer, UserImpl> byId = new HashMap<>();
     private static final Map<String, UserImpl> byUsername = new HashMap<>();
 
@@ -32,6 +34,8 @@ public class UserImpl extends OsuChannelImpl implements User {
 
     @Inject
     private UserRequestAPI api;
+    @Inject
+    private OsuBotImpl bot;
 
     private final Map<String, Object> metadata;
 
@@ -42,11 +46,15 @@ public class UserImpl extends OsuChannelImpl implements User {
     }
 
     private UserImpl(int id) {
+        bot.checkPermission(Scope.PUBLIC);
+
         metadata = api.getUserMetadata(id);
         this.id = (int)((double) getMetadata("id"));
     }
 
     private UserImpl(String username) {
+        bot.checkPermission(Scope.PUBLIC);
+
         metadata = api.getUserMetadata(username);
         this.id = (int)((double) getMetadata("id"));
     }
@@ -83,5 +91,12 @@ public class UserImpl extends OsuChannelImpl implements User {
 
     public static UserImpl get(String username) {
         return byUsername.computeIfAbsent(username, UserImpl::new);
+    }
+
+    public static UserImpl me() {
+        if (ME == null) {
+            ME = new UserImpl();
+        }
+        return ME;
     }
 }

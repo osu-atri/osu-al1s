@@ -20,7 +20,7 @@ import moe.orangemc.osu.al1s.api.bot.InitEntry;
 
 public class ArisBot implements InitEntry {
     @Override
-    public void main() {
+    public void main(String[] args) {
 
     }
 }
