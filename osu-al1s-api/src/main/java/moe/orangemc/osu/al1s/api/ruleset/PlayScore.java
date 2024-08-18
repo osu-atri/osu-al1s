@@ -14,21 +14,11 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event.multiplayer;
+package moe.orangemc.osu.al1s.api.ruleset;
 
-import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
-import moe.orangemc.osu.al1s.api.ruleset.PlayScore;
-import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 
-public class PlayerFinishPlayEvent extends UserActInRoomEvent {
-    private final PlayScore score;
+import java.util.Set;
 
-    public PlayerFinishPlayEvent(MultiplayerRoom room, User user, PlayScore score) {
-        super(room, user);
-        this.score = score;
-    }
-
-    public PlayScore getScore() {
-        return score;
-    }
+public record PlayScore(PlayResult result, Ruleset ruleset, Beatmap map, int score, Set<Mod> mods, double accuracy, int maxCombo, int count50, int count100, int count300, int countMiss, double pp) {
 }

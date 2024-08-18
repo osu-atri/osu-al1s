@@ -16,10 +16,14 @@
 
 package moe.orangemc.osu.al1s.api.beatmap;
 
+import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
+
 public interface Beatmap {
     // General map for storing attributes.
     <T> T getMetadata(String key);
 
     int getId();
     int getSetId();
+
+    Ruleset getMode();
 }

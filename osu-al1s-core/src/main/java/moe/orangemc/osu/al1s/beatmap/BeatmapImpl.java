@@ -73,7 +73,7 @@ public class BeatmapImpl implements Beatmap {
     String getArtistUnicode() { return getMetadata("artist_unicode"); }
     String getSource() { return getMetadata("source"); }
     float getStarRating() { return getMetadata("difficulty_rating"); }
-    Ruleset getMode() { return Ruleset.valueOf(getMetadata("mode").toString().toUpperCase()); }
+    public Ruleset getMode() { return Ruleset.valueOf(getMetadata("mode").toString().toUpperCase()); }
     RankStatus getRankStatus() {
         String status = getMetadata("status").toString();
         try {

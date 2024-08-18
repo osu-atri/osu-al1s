@@ -23,11 +23,11 @@ import moe.orangemc.osu.al1s.api.event.multiplayer.*;
 import moe.orangemc.osu.al1s.api.mutltiplayer.*;
 import moe.orangemc.osu.al1s.api.ruleset.Mod;
 import moe.orangemc.osu.al1s.api.ruleset.PlayResult;
+import moe.orangemc.osu.al1s.api.ruleset.PlayScore;
 import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.beatmap.BeatmapImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
-import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
@@ -42,8 +42,6 @@ import java.util.regex.Pattern;
 public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    @Inject
-    private ChatDriver chatDriver;
     @Inject
     private OsuBotImpl manager;
     @Inject
@@ -61,6 +59,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     private BeatmapImpl currentBeatmap;
     private Set<Mod> enforcedMods = new HashSet<>();
+    private Ruleset currentRuleset = Ruleset.OSU;
 
     public RoomImpl(String roomName) {
         String response = "";
@@ -286,6 +285,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     public void setCurrentBeatmap(Beatmap beatmap, Ruleset ruleset) {
         this.sendMessage("!mp map " + beatmap.getId() + " " + ruleset.getId());
         this.currentBeatmap = (BeatmapImpl) beatmap;
+        this.currentRuleset = ruleset;
     }
 
     @Override
@@ -449,7 +449,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     int score = Integer.parseInt(matcher.group(2));
                     PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
                     User user = UserImpl.get(username);
-                    this.eventBus.fire(new PlayerFinishPlayEvent(this, user, score, result));
+                    this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScore(result, this.currentBeatmap.getMode() == Ruleset.OSU ? this.currentRuleset : this.currentBeatmap.getMode(), this.currentBeatmap, score, this.playerStates.get(user).mods, 0, 0, 0, 0, 0, 0, 0)));
 
                     this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
                     this.playerStates.get(user).lastScore = score;
