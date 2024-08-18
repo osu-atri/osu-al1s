@@ -24,6 +24,7 @@ import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
+import moe.orangemc.osu.al1s.api.mutltiplayer.RoomManager;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.auth.AuthenticationAPIModule;
@@ -35,6 +36,7 @@ import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.concurrent.SchedulerImpl;
 import moe.orangemc.osu.al1s.event.EventBusImpl;
 import moe.orangemc.osu.al1s.inject.api.*;
+import moe.orangemc.osu.al1s.multiplayer.RoomManagerImpl;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.user.UserRequestAPIModule;
 import org.apache.commons.lang3.Validate;
@@ -50,6 +52,7 @@ public class OsuBotImpl implements OsuBot {
 
     private final SchedulerImpl scheduler = new SchedulerImpl();
     private final EventBus eventBus;
+    private final RoomManagerImpl roomManager;
 
     private TokenImpl token = null;
     private User botUser;
@@ -78,12 +81,24 @@ public class OsuBotImpl implements OsuBot {
             this.chatManager = new ChatManagerImpl(serverBotName);
             this.chatManager.setIrcServer(ircServer, ircPort);
             ctx.registerModule(this, true);
+            this.roomManager = new RoomManagerImpl();
+            ctx.registerModule(this, true);
         }
     }
 
     @Provides
-    public OsuBotImpl getBot() {
+    public OsuBotImpl getBotImpl() {
         return this;
+    }
+
+    @Provides
+    public OsuBot getBot() {
+        return this;
+    }
+
+    @Provides
+    public RoomManager getRoomManager() {
+        return this.roomManager;
     }
 
     @Override

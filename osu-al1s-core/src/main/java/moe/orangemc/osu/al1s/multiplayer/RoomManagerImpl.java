@@ -17,23 +17,25 @@
 package moe.orangemc.osu.al1s.multiplayer;
 
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.mutltiplayer.RoomManager;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class RoomManager {
+public class RoomManagerImpl implements RoomManager {
     @Inject
     private Scheduler scheduler;
 
     private final Set<RoomImpl> managedRooms = new HashSet<>();
 
-    public RoomManager() {
+    public RoomManagerImpl() {
         scheduler.runTaskTimer(this::cleanupRoom, 20, 20, TimeUnit.SECONDS);
     }
 
-    public RoomImpl createRoom(String roomName) {
+    public MultiplayerRoom createRoom(String roomName) {
         RoomImpl result = new RoomImpl(roomName);
         managedRooms.add(result);
         return result;
