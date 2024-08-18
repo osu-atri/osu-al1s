@@ -303,7 +303,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     public void setRoomMods(Set<Mod> mods) {
         if (mods.contains(Mod.FREE_MOD)) {
             this.enforcedMods = Set.of(Mod.FREE_MOD);
-            this.sendMessage("!mp mods FreeMod");
+            this.sendMessage("!mp mods Freemod");
             return;
         }
 
@@ -361,6 +361,16 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public void setProperties(TeamMode teamMode, WinCondition winCondition) {
         this.sendMessage("!mp set " + teamMode.getId() + " " + winCondition.getId());
+
+        if (this.teamMode.isTeammed() ^ teamMode.isTeammed()) {
+            refreshState();
+        }
+        this.teamMode = teamMode;
+        this.winCondition = winCondition;
+    }
+
+    public boolean isInGame() {
+        return this.playerStates.values().stream().anyMatch(state -> state.waitStatus == PlayerWaitStatus.IN_GAME);
     }
 
     @Override
@@ -371,6 +381,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public void abort() {
         this.sendMessage("!mp abort");
+        this.refreshState();
     }
 
     @Override
@@ -441,6 +452,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     this.eventBus.fire(new PlayerFinishPlayEvent(this, user, score, result));
 
                     this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
+                    this.playerStates.get(user).lastScore = score;
+
+                    if (this.playerStates.values().stream().noneMatch(state -> state.waitStatus == PlayerWaitStatus.IN_GAME)) {
+                        this.eventBus.fire(new MatchEndEvent(this));
+                        this.refreshState();
+                    }
                 }
                 case BEATMAP_CHANGED -> {
                     int beatmapId = Integer.parseInt(matcher.group(4));
@@ -473,6 +490,15 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     }
                     this.eventBus.fire(new AllReadyEvent(this));
                 }
+                case MATCH_STARTED -> {
+                    for (UserState state : this.playerStates.values()) {
+                        if (state.waitStatus == PlayerWaitStatus.NO_MAP) {
+                            continue;
+                        }
+                        state.waitStatus = PlayerWaitStatus.IN_GAME;
+                    }
+                    this.eventBus.fire(new MatchStartEvent(this));
+                }
             }
         }
     }
@@ -480,9 +506,10 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private class UserState {
         private int slot;
         private MultiplayerTeam team;
-        private Set<Mod> mods;
-        private PlayerWaitStatus waitStatus;
+        private final Set<Mod> mods = new HashSet<>();
+        private PlayerWaitStatus waitStatus = PlayerWaitStatus.NOT_READY;
         private final User user;
+        private int lastScore = 0;
 
         public UserState(User user) {
             this.user = user;

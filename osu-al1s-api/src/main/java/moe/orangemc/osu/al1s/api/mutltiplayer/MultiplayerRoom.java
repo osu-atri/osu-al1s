@@ -71,6 +71,8 @@ public interface MultiplayerRoom extends OsuChannel {
     WinCondition getWinCondition();
     void setProperties(TeamMode teamMode, WinCondition winCondition);
 
+    boolean isInGame();
+
     void start(int delay);
     void abort();
 

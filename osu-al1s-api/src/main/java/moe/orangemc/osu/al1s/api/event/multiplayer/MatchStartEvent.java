@@ -14,21 +14,12 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.mutltiplayer;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
-public enum PlayerWaitStatus {
-    READY,
-    NOT_READY,
-    NO_MAP,
-    // RED_PIGGED,
-    IN_GAME,
-    ;
-    public static PlayerWaitStatus fromString(String status) {
-        return switch (status) {
-            case "Ready" -> READY;
-            case "Not Ready" -> NOT_READY;
-            case "No Map" -> NO_MAP;
-            default -> throw new IllegalArgumentException("Unknown player wait status: " + status);
-        };
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+
+public class MatchStartEvent extends MultiplayerRoomEvent {
+    public MatchStartEvent(MultiplayerRoom room) {
+        super(room);
     }
 }

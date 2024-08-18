@@ -26,7 +26,8 @@ public enum BanchoMessagePattern {
     FINISHED_PLAYING("(.+) has finished playing \\(Score: (\\d+), (PASSED|FAILED)\\)\\."),
     BEATMAP_CHANGED("Beatmap changed to: (.+) - (.+) \\[(.+)] \\(https://osu.ppy.sh/b/(\\d+)\\)"),
     HOST_CHANGED("(.+) became the host\\."),
-    ALL_READY("All players are ready\\.");
+    ALL_READY("All players are ready\\."),
+    MATCH_STARTED("The match has started\\!"),;
 
     private final Pattern pattern;
 
