@@ -29,4 +29,6 @@ public interface BotFactory {
     BotFactory withIrcServer(String host);
 
     BotFactory withIrcServer(int port);
+
+    OsuBot build();
 }

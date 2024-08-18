@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.bot;
 
 import moe.orangemc.osu.al1s.api.bot.BotFactory;
+import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 
 import java.net.URI;
@@ -73,5 +74,10 @@ public class BotFactoryImpl implements BotFactory {
     public BotFactory withIrcServer(int port) {
         this.ircPort = port;
         return this;
+    }
+
+    @Override
+    public OsuBot build() {
+        return new OsuBotImpl(debug, baseUrl, serverBotName, ircHost, ircPort);
     }
 }
