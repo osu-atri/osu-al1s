@@ -19,6 +19,7 @@ package moe.orangemc.osu.al1s.api.bot;
 import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
@@ -41,6 +42,7 @@ public interface OsuBot extends User {
     void useToken(Token token);
 
     void execute(Runnable runnable);
+    Beatmap findBeatmap(int beatmapId);
 
     @Override
     default String getChannelName() {

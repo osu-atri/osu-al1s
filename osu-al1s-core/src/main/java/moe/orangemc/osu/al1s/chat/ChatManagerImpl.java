@@ -23,6 +23,7 @@ import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.chat.ChannelChatEvent;
 import moe.orangemc.osu.al1s.api.event.chat.ChatEvent;
 import moe.orangemc.osu.al1s.api.event.chat.MultiplayerRoomChatEvent;
+import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.chat.command.CommandManagerImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
@@ -128,6 +129,16 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
                 reverseChannelsNameMap.put(user, channelName);
             }
         }
+    }
+
+    @Override
+    public User getUser(String username) {
+        return UserImpl.get(username);
+    }
+
+    @Override
+    public User getUser(int userId) {
+        return UserImpl.get(userId);
     }
 
     @Override

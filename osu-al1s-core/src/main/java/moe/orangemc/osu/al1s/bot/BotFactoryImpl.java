@@ -42,6 +42,7 @@ public class BotFactoryImpl implements BotFactory {
 
     @Override
     public BotFactory withBaseURL(URL baseURL) {
+        this.baseUrl = baseURL;
         return this;
     }
 

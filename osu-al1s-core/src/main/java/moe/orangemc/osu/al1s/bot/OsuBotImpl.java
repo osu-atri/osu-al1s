@@ -21,6 +21,7 @@ import moe.orangemc.osu.al1s.api.auth.Credential;
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.auth.Token;
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
@@ -32,6 +33,7 @@ import moe.orangemc.osu.al1s.auth.AuthenticationAPIModule;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
+import moe.orangemc.osu.al1s.beatmap.BeatmapImpl;
 import moe.orangemc.osu.al1s.beatmap.BeatmapRequestAPIModule;
 import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.concurrent.SchedulerImpl;
@@ -197,6 +199,11 @@ public class OsuBotImpl implements OsuBot {
             ctx.registerModule(this, true);
             runnable.run();
         }
+    }
+
+    @Override
+    public Beatmap findBeatmap(int beatmapId) {
+        return BeatmapImpl.get(beatmapId);
     }
 
     public void checkPermission(Scope scope) {

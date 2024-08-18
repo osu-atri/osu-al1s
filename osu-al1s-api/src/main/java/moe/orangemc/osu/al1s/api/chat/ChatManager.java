@@ -17,8 +17,11 @@
 package moe.orangemc.osu.al1s.api.chat;
 
 import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
+import moe.orangemc.osu.al1s.api.user.User;
 
 public interface ChatManager {
     void sendMessage(OsuChannel channel, String message);
+    User getUser(String username);
+    User getUser(int userId);
     CommandManager getCommandManager();
 }
