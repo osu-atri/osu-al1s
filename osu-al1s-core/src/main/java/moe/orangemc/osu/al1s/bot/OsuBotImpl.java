@@ -141,6 +141,19 @@ public class OsuBotImpl implements OsuBot {
     }
 
     @Override
+    public void useToken(Token token) {
+        this.token = (TokenImpl) token;
+        if (System.currentTimeMillis() / 1000 > token.getTimeToLive()) {
+            try {
+                token.refresh();
+            } catch (UnsupportedOperationException e) {
+                this.token = null;
+                throw e;
+            }
+        }
+    }
+
+    @Override
     public int getId() {
         return botUser.getId();
     }

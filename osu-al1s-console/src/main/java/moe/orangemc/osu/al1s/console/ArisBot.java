@@ -16,10 +16,11 @@
 
 package moe.orangemc.osu.al1s.console;
 
-import moe.orangemc.osu.al1s.api.ArisService;
+import moe.orangemc.osu.al1s.api.bot.InitEntry;
 
-public class KeiBootstrap {
-    public static void main(String[] args) {
-        ArisService.boot("moe.orangemc.osu.al1s.console.ArisBot");
+public class ArisBot implements InitEntry {
+    @Override
+    public void main() {
+
     }
 }

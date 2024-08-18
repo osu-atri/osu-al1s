@@ -18,4 +18,7 @@ package moe.orangemc.osu.al1s.api.auth;
 
 public interface CredentialProvider {
     <T extends Credential> T newCredential(AuthenticateType authenticateType);
+
+    Token loadToken(byte[] serialized);
+    Token loadToken(byte[] serialized, byte[] key);
 }

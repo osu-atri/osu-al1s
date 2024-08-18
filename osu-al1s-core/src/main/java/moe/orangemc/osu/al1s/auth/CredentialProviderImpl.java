@@ -18,9 +18,11 @@ package moe.orangemc.osu.al1s.auth;
 
 import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
 import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.auth.credential.AuthorizationCodeGrantCredentialImpl;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.api.auth.CredentialProvider;
+import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 
 public class CredentialProviderImpl implements CredentialProvider {
     @SuppressWarnings("unchecked")
@@ -31,5 +33,15 @@ public class CredentialProviderImpl implements CredentialProvider {
             case AUTHORIZATION_CODE -> new AuthorizationCodeGrantCredentialImpl();
             case REFRESH_TOKEN -> throw new UnsupportedOperationException("Please use Token#refresh() to refresh a token");
         };
+    }
+
+    @Override
+    public Token loadToken(byte[] serialized) {
+        return TokenImpl.deserialize(serialized);
+    }
+
+    @Override
+    public Token loadToken(byte[] serialized, byte[] key) {
+        return TokenImpl.deserialize(serialized, key);
     }
 }

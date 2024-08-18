@@ -38,6 +38,7 @@ public interface OsuBot extends User {
     ChatManager getChatManager();
 
     Token getToken();
+    void useToken(Token token);
 
     void execute(Runnable runnable);
 
