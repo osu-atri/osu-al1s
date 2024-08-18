@@ -35,6 +35,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +63,9 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private Set<Mod> enforcedMods = new HashSet<>();
     private Ruleset currentRuleset = Ruleset.OSU;
 
+    private long lastActTimer;
+    private boolean alive = true;
+
     public RoomImpl(String roomName) {
         String response = "";
         Pattern pattern = Pattern.compile("(\\d+)");
@@ -75,6 +80,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         }
         this.password = passwordBuilder.toString();
         setPassword(password);
+        lastActTimer = System.currentTimeMillis();
     }
 
     @Override
@@ -386,7 +392,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public void close() {
+        if (!this.alive) {
+            return;
+        }
+
         this.sendMessage("!mp close");
+        this.alive = false;
     }
 
     @Override
@@ -396,6 +407,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     protected void processServerMessages(List<String> messages) {
+        this.lastActTimer = System.currentTimeMillis();
         for (String message : messages) {
             BanchoMessagePattern matching = BanchoMessagePattern.findMatchingPattern(message);
             if (matching == null) {
@@ -501,6 +513,14 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                 }
             }
         }
+    }
+
+    public boolean isActive() {
+        return this.alive && (Duration.of(System.currentTimeMillis() - lastActTimer, ChronoUnit.MILLIS).toMinutes() < 5 || !this.playerStates.isEmpty());
+    }
+
+    public boolean isAlive() {
+        return this.alive;
     }
 
     private class UserState {
