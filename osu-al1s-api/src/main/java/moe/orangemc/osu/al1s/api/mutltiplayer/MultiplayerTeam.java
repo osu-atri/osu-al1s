@@ -29,4 +29,12 @@ public enum MultiplayerTeam {
     public String getId() {
         return id;
     }
+
+    public static MultiplayerTeam fromString(String team) {
+        return switch (team) {
+            case "Red" -> RED;
+            case "Blue" -> BLUE;
+            default -> throw new IllegalArgumentException("Unknown team: " + team);
+        };
+    }
 }

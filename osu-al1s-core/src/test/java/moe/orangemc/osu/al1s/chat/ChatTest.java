@@ -100,7 +100,7 @@ public class ChatTest {
         checkEnabled();
 
         osuBot.execute(() -> {
-            UserImpl target = new UserImpl(targetUser);
+            UserImpl target = UserImpl.get(targetUser);
             target.sendMessage("Test message via web API. Please respond me.");
         });
         try {
@@ -117,7 +117,7 @@ public class ChatTest {
         osuBot.authenticateSync(ircCredential);
 
         osuBot.execute(() -> {
-            UserImpl target = new UserImpl(targetUser);
+            UserImpl target = UserImpl.get(targetUser);
             target.sendMessage("Test message via IRC. Please respond me.");
         });
         try {

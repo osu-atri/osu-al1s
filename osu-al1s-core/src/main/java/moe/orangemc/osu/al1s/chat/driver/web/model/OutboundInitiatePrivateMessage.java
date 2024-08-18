@@ -57,7 +57,7 @@ public record OutboundInitiatePrivateMessage(User target, String message, boolea
                 }
             }
             jsonReader.endObject();
-            return new OutboundInitiatePrivateMessage(new UserImpl(target), message, action);
+            return new OutboundInitiatePrivateMessage(UserImpl.get(target), message, action);
         }
     }
 }

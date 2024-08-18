@@ -88,9 +88,7 @@ public class OsuBotImpl implements OsuBot {
 
     @Override
     public Future<Void> authenticate(Credential credential) {
-        return scheduler.runTask(() -> {
-            authenticateSync(credential);
-        });
+        return scheduler.runTask(() -> authenticateSync(credential));
     }
 
     @Override
@@ -101,15 +99,13 @@ public class OsuBotImpl implements OsuBot {
         try (var _ = injector.setContext(ctx)) {
             this.token = authenticationAPI.authorize((CredentialBase) credential);
 
-            this.botUser = new UserImpl();
+            this.botUser = UserImpl.ME;
         }
     }
 
     @Override
     public Future<Void> authenticate(IrcCredential credential) {
-        return scheduler.runTask(() -> {
-            authenticateSync(credential);
-        });
+        return scheduler.runTask(() -> authenticateSync(credential));
     }
 
     @Override

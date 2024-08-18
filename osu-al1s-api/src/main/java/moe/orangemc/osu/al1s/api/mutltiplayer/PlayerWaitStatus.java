@@ -14,9 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event;
+package moe.orangemc.osu.al1s.api.mutltiplayer;
 
-public interface CancellableEvent {
-    boolean isCancelled();
-    void setCancelled(boolean cancelled);
+public enum PlayerWaitStatus {
+    READY,
+    NOT_READY,
+    NO_MAP,
+    // RED_PIGGED
+    ;
+    public static PlayerWaitStatus fromString(String status) {
+        return switch (status) {
+            case "Ready" -> READY;
+            case "Not Ready" -> NOT_READY;
+            case "No Map" -> NO_MAP;
+            default -> throw new IllegalArgumentException("Unknown player wait status: " + status);
+        };
+    }
 }

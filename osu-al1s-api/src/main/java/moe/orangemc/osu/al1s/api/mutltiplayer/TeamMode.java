@@ -31,4 +31,18 @@ public enum TeamMode {
     public int getId() {
         return id;
     }
+
+    public boolean isTeammed() {
+        return this == TEAM_VS || this == TAG_TEAM_VS;
+    }
+
+    public static TeamMode fromString(String mode) {
+        return switch (mode) {
+            case "HeadToHead" -> HEAD_TO_HEAD;
+            case "TagCoop" -> TAG_COOP;
+            case "TeamVs" -> TEAM_VS;
+            case "TagTeamVs" -> TAG_TEAM_VS;
+            default -> throw new IllegalArgumentException("Unknown team mode: " + mode);
+        };
+    }
 }

@@ -14,22 +14,27 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.chat.command.argument;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
-import moe.orangemc.osu.al1s.api.chat.command.ArgumentTypeAdapter;
-import moe.orangemc.osu.al1s.api.chat.command.StringReader;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.ruleset.PlayResult;
 import moe.orangemc.osu.al1s.api.user.User;
-import moe.orangemc.osu.al1s.user.UserImpl;
 
-public class UserTypeAdapter implements ArgumentTypeAdapter<User> {
-    @Override
-    public User parse(StringReader reader) {
-        String userArg = reader.readString();
+public class PlayerFinishPlayEvent extends UserActInRoomEvent {
+    private final int score;
+    private final PlayResult result;
 
-        try {
-            return UserImpl.get(Integer.parseInt(userArg));
-        } catch (NumberFormatException e) {
-            return UserImpl.get(userArg);
-        }
+    public PlayerFinishPlayEvent(MultiplayerRoom room, User user, int score, PlayResult result) {
+        super(room, user);
+        this.score = score;
+        this.result = result;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public PlayResult getResult() {
+        return result;
     }
 }

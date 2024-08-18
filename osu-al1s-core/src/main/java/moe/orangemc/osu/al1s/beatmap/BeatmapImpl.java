@@ -17,7 +17,6 @@
 package moe.orangemc.osu.al1s.beatmap;
 
 import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
-import moe.orangemc.osu.al1s.api.beatmap.BeatmapSet;
 import moe.orangemc.osu.al1s.api.beatmap.RankStatus;
 import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
@@ -86,7 +85,7 @@ public class BeatmapImpl implements Beatmap {
         }
     }
     int getLength() { return getMetadata("total_length"); }
-    User getMapper() { return new UserImpl(getMetadata("user_id")); }
+    User getMapper() { return UserImpl.get(getMetadata("user_id")); }
 
     // Extended attributes, should be returned.
     String getURL() { return getMetadata("url"); }

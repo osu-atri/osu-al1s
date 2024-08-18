@@ -16,9 +16,11 @@
 
 package moe.orangemc.osu.al1s.api.mutltiplayer;
 
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
 import moe.orangemc.osu.al1s.api.ruleset.Mod;
+import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +37,7 @@ public interface MultiplayerRoom extends OsuChannel {
     String getPassword();
     void setPassword(String password);
 
-    Map<String, String> getSettings();
+    void refreshState();
 
     Map<Integer, User> getPlayers();
     void kickPlayer(User user);
@@ -51,11 +53,13 @@ public interface MultiplayerRoom extends OsuChannel {
     @Nullable User getHost();
     void setHost(@Nullable User user);
 
-    int getOpenSlotCount();
-
     Set<Mod> getRoomMods();
     void setRoomMods(Set<Mod> mods);
     void setRoomMods(Mod... mods);
+
+    Beatmap getCurrentBeatmap();
+    void setCurrentBeatmap(Beatmap beatmap, Ruleset ruleset);
+    void setCurrentBeatmap(Beatmap currentBeatmap);
 
     Set<Mod> getUserMods(User user);
 

@@ -67,7 +67,7 @@ public class WebsocketMessageReceiver implements WebSocket.Listener, AutoCloseab
             }
 
             for (InboundChatMessage msg : evt.data().messages()) {
-                handler.handle(String.valueOf(msg.channelId()), new UserImpl(msg.senderUid()), msg.message());
+                handler.handle(String.valueOf(msg.channelId()), UserImpl.get(msg.senderUid()), msg.message());
             }
 
             webSocket.request(1);

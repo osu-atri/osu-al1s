@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event;
+package moe.orangemc.osu.al1s.api.ruleset;
 
-public interface CancellableEvent {
-    boolean isCancelled();
-    void setCancelled(boolean cancelled);
+public enum PlayResult {
+    PASSED,
+    FAILED
 }

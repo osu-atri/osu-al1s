@@ -92,9 +92,9 @@ public record WebsocketChatData(List<User> who, List<InboundChatMessage> message
                             }
                             jsonReader.endObject();
                             if (id != -1) {
-                                who.add(new UserImpl(id));
+                                who.add(UserImpl.get(id));
                             } else {
-                                who.add(new UserImpl(username));
+                                who.add(UserImpl.get(username));
                             }
                         }
                         jsonReader.endArray();

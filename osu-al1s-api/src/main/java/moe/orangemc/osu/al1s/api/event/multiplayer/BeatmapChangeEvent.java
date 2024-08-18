@@ -14,23 +14,23 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event.auth;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.event.CancellableEvent;
-import moe.orangemc.osu.al1s.api.event.Event;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
 
-import java.net.InetSocketAddress;
-
-public class UserActionEvent extends Event implements CancellableEvent {
-    private final InetSocketAddress userAddr;
+public class BeatmapChangeEvent extends MultiplayerRoomEvent implements CancellableEvent {
+    private final Beatmap beatmap;
     private boolean cancelled;
 
-    public UserActionEvent(InetSocketAddress userAddr) {
-        this.userAddr = userAddr;
+    public BeatmapChangeEvent(MultiplayerRoom room, Beatmap beatmap) {
+        super(room);
+        this.beatmap = beatmap;
     }
 
-    public InetSocketAddress getUserAddr() {
-        return userAddr;
+    public Beatmap getBeatmap() {
+        return beatmap;
     }
 
     @Override

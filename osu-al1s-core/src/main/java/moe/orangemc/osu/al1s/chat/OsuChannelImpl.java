@@ -50,7 +50,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
     }
 
     public final void pushServerMessage(String message) {
-        this.polledServerMessages.addLast(message);
+        this.polledServerMessages.addLast(message.replaceAll("\\s+", " ")); // remove extra spaces and tabs
     }
 
     public final void schedulePollEvent() {

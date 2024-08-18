@@ -16,13 +16,16 @@
 
 package moe.orangemc.osu.al1s.multiplayer;
 
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
-import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
-import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerTeam;
-import moe.orangemc.osu.al1s.api.mutltiplayer.TeamMode;
-import moe.orangemc.osu.al1s.api.mutltiplayer.WinCondition;
+import moe.orangemc.osu.al1s.api.event.EventBus;
+import moe.orangemc.osu.al1s.api.event.multiplayer.*;
+import moe.orangemc.osu.al1s.api.mutltiplayer.*;
 import moe.orangemc.osu.al1s.api.ruleset.Mod;
+import moe.orangemc.osu.al1s.api.ruleset.PlayResult;
+import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.beatmap.BeatmapImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
@@ -32,29 +35,32 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.SecureRandom;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    private static final Pattern JOIN_MESSAGE_PAtTERN = Pattern.compile("(.+) joined in slot (\\d+)");
-    private static final Pattern SLOT_SWITCH_PATTERN = Pattern.compile("(.+) moved to slot (\\d+)");
-    private static final Pattern TEAM_SWITCH_PATTERN = Pattern.compile("(.+) changed to (Red|Blue)");
-    private static final Pattern LEAVE_PATTERN = Pattern.compile("(.+) left the game");
-    private static final Pattern SCORE_PATTERN = Pattern.compile("(.+) has finished playing \\(Score (\\d+), .+\\)");
-
     @Inject
     private ChatDriver chatDriver;
     @Inject
     private OsuBotImpl manager;
+    @Inject
+    private EventBus eventBus;
 
     private final int id;
-    private final String name;
-    private final String password;
+    private String name;
+    private String password;
+
+    private final Map<User, UserState> playerStates = new HashMap<>();
+    private @Nullable User host;
+
+    private WinCondition winCondition;
+    private TeamMode teamMode;
+
+    private BeatmapImpl currentBeatmap;
+    private Set<Mod> enforcedMods = new HashSet<>();
 
     public RoomImpl(String roomName) {
         String response = "";
@@ -85,6 +91,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public void setName(String name) {
         this.sendMessage("!mp name " + name);
+        this.name = name;
     }
 
     @Override
@@ -95,44 +102,116 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public void setPassword(String password) {
         this.sendMessage("!mp password " + password);
+        this.password = password;
     }
 
     @Override
-    public Map<String, String> getSettings() {
-        Map<String, String> roomInfo = new java.util.HashMap<>(Collections.emptyMap());
+    public void refreshState() {
         this.sendMessage("!mp settings");
-        List<String> infoStr = this.pollServerMessages();
-        for (String i : infoStr)
-        {
-            String[] infoPair = i.split(":");
-            // Add more arguments here
-            switch (infoPair[0]) {
-                case "Active mods":
-                    roomInfo.computeIfAbsent("Mods", _ -> infoPair[1].trim());
-                    break;
-                // Team mode: HeadToHead, Win condition: Score
-                case "Team mode":
-                    roomInfo.computeIfAbsent("TeamMode", _ -> infoPair[1].split(",")[0].trim());
-                    roomInfo.computeIfAbsent("WinCondition", _ -> infoPair[2].trim());
-                    break;
+        List<String> messages = this.pollServerMessages();
+
+        this.playerStates.clear();
+        RoomSettingMessagePattern currentPattern = RoomSettingMessagePattern.ROOM_NAME_AND_LINK;
+        for (String message : messages) {
+            Matcher matcher = currentPattern.getPattern().matcher(message);
+            if (matcher.find()) {
+                switch (currentPattern) {
+                    case ROOM_NAME_AND_LINK -> {
+                        refreshRoomMetadata(matcher);
+                        currentPattern = RoomSettingMessagePattern.BEATMAP;
+                    }
+                    case BEATMAP -> {
+                        refreshBeatmapMetadata(matcher);
+                        currentPattern = RoomSettingMessagePattern.MODE;
+                    }
+                    case MODE -> {
+                        refreshModeMetadata(matcher);
+                        currentPattern = RoomSettingMessagePattern.PLAYER_COUNT;
+                    }
+                    case PLAYER_COUNT -> currentPattern = RoomSettingMessagePattern.SLOTS;
+                    case SLOTS -> refreshPlayerSlot(matcher);
+                }
+            } else {
+                currentPattern = RoomSettingMessagePattern.values()[currentPattern.ordinal() + 1];
             }
         }
-        return roomInfo;
+    }
+
+    private void refreshRoomMetadata(Matcher matcher) {
+        int id = Integer.parseInt(matcher.group(2));
+        if (id != this.id) {
+            throw new IllegalArgumentException("Room ID mismatch");
+        }
+
+        this.name = matcher.group(1);
+    }
+
+    private void refreshBeatmapMetadata(Matcher matcher) {
+        int beatmapId = Integer.parseInt(matcher.group(1));
+        this.currentBeatmap = new BeatmapImpl(beatmapId);
+    }
+
+    private void refreshModeMetadata(Matcher matcher) {
+        String teamModeStr = matcher.group(1);
+        String winConditionStr = matcher.group(2);
+
+        this.teamMode = TeamMode.fromString(teamModeStr);
+        this.winCondition = WinCondition.fromString(winConditionStr);
+    }
+
+    private void refreshPlayerSlot(Matcher matcher) {
+        int slot = Integer.parseInt(matcher.group(1));
+        String rawWaitingStatus = matcher.group(2);
+        int userId = Integer.parseInt(matcher.group(3));
+        String modsStr = matcher.group(4);
+
+        User user = UserImpl.get(userId);
+        UserState state = new UserState(user);
+        state.slot = slot;
+        state.waitStatus = PlayerWaitStatus.fromString(rawWaitingStatus);
+
+        String[] extraStrings = modsStr.split("\\s*/\\s*");
+        Pattern teamMatcher = Pattern.compile("Team (Red|Blue)");
+        for (String extra : extraStrings) {
+            if (extra.equals("Host")) {
+                this.host = user;
+                continue;
+            }
+
+            Matcher teamMatch = teamMatcher.matcher(extra);
+            if (teamMatch.find()) {
+                state.team = MultiplayerTeam.fromString(teamMatch.group(1));
+                continue;
+            }
+
+            String[] modStrings = extra.split("\\s*,\\s*");
+            for (String modStr : modStrings) {
+                state.mods.add(Mod.fromString(modStr));
+            }
+        }
+
+        this.playerStates.put(user, state);
     }
 
     @Override
     public Map<Integer, User> getPlayers() {
-        return Map.of();
+        Map<Integer, User> slotMap = new HashMap<>();
+        for (Map.Entry<User, UserState> entry : this.playerStates.entrySet()) {
+            slotMap.put(entry.getValue().slot, entry.getKey());
+        }
+        return slotMap;
     }
 
     @Override
     public void kickPlayer(User user) {
         this.sendMessage("!mp kick " + user.getUsername());
+        this.playerStates.remove(user);
     }
 
     @Override
     public void banPlayer(User user) {
         this.sendMessage("!mp ban " + user.getUsername());
+        this.playerStates.remove(user);
     }
 
     @Override
@@ -140,30 +219,52 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         this.sendMessage("!mp invite " + user.getUsername());
     }
 
+    private void ensureUserInRoom(User user) {
+        if (!this.playerStates.containsKey(user)) {
+            throw new IllegalArgumentException("User is not in the room");
+        }
+    }
+
     @Override
     public int getPlayerSlot(User user) {
-        return 0;
+        ensureUserInRoom(user);
+
+        return this.playerStates.get(user).slot;
     }
 
     @Override
     public void movePlayer(User user, int slot) {
-        this.sendMessage("!mp move " + user.getUsername() + " " + slot);
+        ensureUserInRoom(user);
+
+        this.playerStates.get(user).setSlot(slot);
     }
 
     @Override
     public @Nullable MultiplayerTeam getTeam(User user) {
-        return null;
+        ensureUserInRoom(user);
+
+        if (!teamMode.isTeammed()) {
+            return null;
+        }
+
+        return this.playerStates.get(user).team;
     }
 
     @Override
     public void setTeam(User user, MultiplayerTeam team) {
-        this.sendMessage("!mp team " + user.getUsername() + " " + team.getId());
+        ensureUserInRoom(user);
+
+        if (!teamMode.isTeammed()) {
+            throw new IllegalStateException("Room is not team-based");
+        }
+
+        this.playerStates.get(user).setTeam(team);
     }
 
     @Nullable
     @Override
     public User getHost() {
-        return null;
+        return this.host;
     }
 
     @Override
@@ -173,21 +274,45 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         } else {
             this.sendMessage("!mp host " + user.getUsername());
         }
+        this.host = user;
     }
 
     @Override
-    public int getOpenSlotCount() {
-        return 0;
+    public BeatmapImpl getCurrentBeatmap() {
+        return currentBeatmap;
+    }
+
+    @Override
+    public void setCurrentBeatmap(Beatmap beatmap, Ruleset ruleset) {
+        this.sendMessage("!mp map " + beatmap.getId() + " " + ruleset.getId());
+        this.currentBeatmap = (BeatmapImpl) beatmap;
+    }
+
+    @Override
+    public void setCurrentBeatmap(Beatmap currentBeatmap) {
+        this.sendMessage("!mp map " + currentBeatmap.getId());
+        this.currentBeatmap = (BeatmapImpl) currentBeatmap;
     }
 
     @Override
     public Set<Mod> getRoomMods() {
-        return Set.of();
+        return Collections.unmodifiableSet(enforcedMods);
     }
 
     @Override
     public void setRoomMods(Set<Mod> mods) {
-        this.sendMessage("!mp mods " + mods.stream().map(Mod::getShortName).reduce((a, b) -> a + b).orElse(""));
+        if (mods.contains(Mod.FREE_MOD)) {
+            this.enforcedMods = Set.of(Mod.FREE_MOD);
+            this.sendMessage("!mp mods FreeMod");
+            return;
+        }
+
+        this.enforcedMods = mods;
+        int modMask = 0;
+        for (Mod mod : mods) {
+            modMask |= mod.getValue();
+        }
+        this.sendMessage("!mp mods " + modMask);
     }
 
     @Override
@@ -197,18 +322,18 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public Set<Mod> getUserMods(User user) {
-        return Set.of();
+        ensureUserInRoom(user);
+        return playerStates.get(user).mods;
     }
 
     @Override
     public Set<User> getReferees() {
-        Set<User> users = new java.util.HashSet<>(Collections.emptySet());
+        Set<User> users = new HashSet<>(Collections.emptySet());
         this.sendMessage("!mp listrefs");
         List<String> msgToNow = this.pollServerMessages();
-        msgToNow.removeLast();
+        msgToNow.removeFirst();
         for (String i : msgToNow) {
-            String trimmedStr = i.split(":")[1].trim();
-            users.add(new UserImpl(trimmedStr));
+            users.add(UserImpl.get(i));
         }
         return users;
     }
@@ -225,12 +350,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public TeamMode getTeamMode() {
-        return null;
+        return teamMode;
     }
 
     @Override
     public WinCondition getWinCondition() {
-        return null;
+        return winCondition;
     }
 
     @Override
@@ -261,7 +386,109 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     protected void processServerMessages(List<String> messages) {
         for (String message : messages) {
+            BanchoMessagePattern matching = BanchoMessagePattern.findMatchingPattern(message);
+            if (matching == null) {
+                continue;
+            }
 
+            Matcher matcher = matching.getPattern().matcher(message);
+            switch (matching) {
+                case JOIN_ROOM -> {
+                    String username = matcher.group(1);
+                    int slot = Integer.parseInt(matcher.group(2));
+                    User user = UserImpl.get(username);
+                    UserMoveToSlotEvent event = new UserJoinRoomEvent(this, user, slot);
+                    this.eventBus.fire(event);
+
+                    if (event.getSlot() != slot) {
+                        this.movePlayer(user, event.getSlot());
+                    }
+                }
+                case MOVE -> {
+                    String username = matcher.group(1);
+                    int slot = Integer.parseInt(matcher.group(2));
+                    User user = UserImpl.get(username);
+                    UserMoveToSlotEvent event = new UserMoveToSlotEvent(this, user, slot);
+                    this.eventBus.fire(event);
+
+                    if (event.getSlot() != slot) {
+                        this.movePlayer(user, event.getSlot());
+                    }
+                }
+                case TEAM_SWITCH -> {
+                    String username = matcher.group(1);
+                    MultiplayerTeam team = MultiplayerTeam.fromString(matcher.group(2));
+                    User user = UserImpl.get(username);
+                    UserSwitchTeamEvent event = new UserSwitchTeamEvent(this, user, team);
+                    this.eventBus.fire(event);
+
+                    if (event.isCancelled()) {
+                        this.setTeam(user, getTeam(user));
+                        return;
+                    }
+                    this.setTeam(user, event.getTeam());
+                }
+                case LEAVE -> {
+                    String username = matcher.group(1);
+                    User user = UserImpl.get(username);
+                    this.playerStates.remove(user);
+                }
+                case FINISHED_PLAYING -> {
+                    String username = matcher.group(1);
+                    int score = Integer.parseInt(matcher.group(2));
+                    PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
+                    User user = UserImpl.get(username);
+                    this.eventBus.fire(new PlayerFinishPlayEvent(this, user, score, result));
+                }
+                case BEATMAP_CHANGED -> {
+                    int beatmapId = Integer.parseInt(matcher.group(4));
+                    BeatmapImpl newBeatmap = new BeatmapImpl(beatmapId);
+
+                    BeatmapChangeEvent event = new BeatmapChangeEvent(this, newBeatmap);
+                    this.eventBus.fire(event);
+                    if (event.isCancelled()) {
+                        this.setCurrentBeatmap(currentBeatmap);
+                        return;
+                    }
+                }
+                case HOST_CHANGED -> {
+                    String username = matcher.group(1);
+                    User user = UserImpl.get(username);
+
+                    HostChangeEvent event = new HostChangeEvent(this, this.host, user);
+                    this.eventBus.fire(event);
+
+                    if (event.isCancelled()) {
+                        this.setHost(getHost());
+                        return;
+                    }
+
+                    this.host = user;
+                }
+                case ALL_READY -> this.eventBus.fire(new AllReadyEvent(this));
+            }
+        }
+    }
+
+    private class UserState {
+        private int slot;
+        private MultiplayerTeam team;
+        private Set<Mod> mods;
+        private PlayerWaitStatus waitStatus;
+        private final User user;
+
+        public UserState(User user) {
+            this.user = user;
+        }
+
+        public void setSlot(int slot) {
+            this.slot = slot;
+            RoomImpl.this.sendMessage("!mp move " + user.getUsername() + " " + slot);
+        }
+
+        public void setTeam(MultiplayerTeam team) {
+            this.team = team;
+            RoomImpl.this.sendMessage("!mp team " + user.getUsername() + " " + team.getId());
         }
     }
 }

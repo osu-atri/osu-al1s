@@ -34,13 +34,13 @@ public class IrcListener {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
         String sender = event.getActor().getName();
-        handler.handle(channelName, new UserImpl(sender), message);
+        handler.handle(channelName, UserImpl.get(sender), message);
     }
 
     @Handler
     public void onPrivateMessage(PrivateMessageEvent event) {
         String message = event.getMessage();
         String sender = event.getActor().getName();
-        handler.handle(sender, new UserImpl(sender), message);
+        handler.handle(sender, UserImpl.get(sender), message);
     }
 }

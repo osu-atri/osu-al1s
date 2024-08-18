@@ -14,24 +14,22 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event.auth;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
 import moe.orangemc.osu.al1s.api.event.CancellableEvent;
-import moe.orangemc.osu.al1s.api.event.Event;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerTeam;
+import moe.orangemc.osu.al1s.api.user.User;
 
-import java.net.InetSocketAddress;
-
-public class UserActionEvent extends Event implements CancellableEvent {
-    private final InetSocketAddress userAddr;
+public class UserSwitchTeamEvent extends UserActInRoomEvent implements CancellableEvent {
     private boolean cancelled;
+    private MultiplayerTeam team;
 
-    public UserActionEvent(InetSocketAddress userAddr) {
-        this.userAddr = userAddr;
+    public UserSwitchTeamEvent(MultiplayerRoom room, User user, MultiplayerTeam team) {
+        super(room, user);
+        this.team = team;
     }
 
-    public InetSocketAddress getUserAddr() {
-        return userAddr;
-    }
 
     @Override
     public boolean isCancelled() {
@@ -39,7 +37,15 @@ public class UserActionEvent extends Event implements CancellableEvent {
     }
 
     @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
+    public void setCancelled(boolean cancel) {
+        this.cancelled = cancel;
+    }
+
+    public MultiplayerTeam getTeam() {
+        return team;
+    }
+
+    public void setTeam(MultiplayerTeam team) {
+        this.team = team;
     }
 }

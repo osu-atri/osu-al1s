@@ -20,9 +20,14 @@ import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class UserImpl extends OsuChannelImpl implements User {
+    public static UserImpl ME = new UserImpl();
+    private static final Map<Integer, UserImpl> byId = new HashMap<>();
+    private static final Map<String, UserImpl> byUsername = new HashMap<>();
+
     private final int id;
 
     @Inject
@@ -31,17 +36,17 @@ public class UserImpl extends OsuChannelImpl implements User {
     private final Map<String, Object> metadata;
 
 
-    public UserImpl() {
+    private UserImpl() {
         metadata = api.getSelfMetadata();
         this.id = (int)((double) getMetadata("id"));
     }
 
-    public UserImpl(int id) {
+    private UserImpl(int id) {
         metadata = api.getUserMetadata(id);
         this.id = (int)((double) getMetadata("id"));
     }
 
-    public UserImpl(String username) {
+    private UserImpl(String username) {
         metadata = api.getUserMetadata(username);
         this.id = (int)((double) getMetadata("id"));
     }
@@ -70,5 +75,13 @@ public class UserImpl extends OsuChannelImpl implements User {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    public static UserImpl get(int id) {
+        return byId.computeIfAbsent(id, UserImpl::new);
+    }
+
+    public static UserImpl get(String username) {
+        return byUsername.computeIfAbsent(username, UserImpl::new);
     }
 }

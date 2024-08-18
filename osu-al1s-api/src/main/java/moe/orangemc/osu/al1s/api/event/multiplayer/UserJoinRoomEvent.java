@@ -14,9 +14,13 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.event;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
-public interface CancellableEvent {
-    boolean isCancelled();
-    void setCancelled(boolean cancelled);
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.user.User;
+
+public class UserJoinRoomEvent extends UserMoveToSlotEvent {
+    public UserJoinRoomEvent(MultiplayerRoom room, User user, int slot) {
+        super(room, user, slot);
+    }
 }

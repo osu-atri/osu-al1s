@@ -31,4 +31,14 @@ public enum WinCondition {
     public int getId() {
         return id;
     }
+
+    public static WinCondition fromString(String condition) {
+        return switch (condition) {
+            case "Score" -> SCORE;
+            case "Accuracy" -> ACCURACY;
+            case "Combo" -> COMBO;
+            case "ScoreV2" -> SCORE_V2;
+            default -> throw new IllegalArgumentException("Unknown win condition: " + condition);
+        };
+    }
 }

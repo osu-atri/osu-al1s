@@ -84,4 +84,42 @@ public enum Mod {
     public String getShortName() {
         return shortName;
     }
+
+    public static Mod fromString(String mod) {
+        return switch (mod) {
+            case "NoMod" -> NO_MOD;
+            case "NoFail" -> NO_FAIL;
+            case "Easy" -> EASY;
+            case "TouchDevice" -> TOUCH_DEVICE;
+            case "Hidden" -> HIDDEN;
+            case "HardRock" -> HARD_ROCK;
+            case "SuddenDeath" -> SUDDEN_DEATH;
+            case "DoubleTime" -> DOUBLE_TIME;
+            case "Relax" -> RELAX;
+            case "HalfTime" -> HALF_TIME;
+            case "Nightcore" -> NIGHTCORE;
+            case "Flashlight" -> FLASHLIGHT;
+            case "Autoplay" -> AUTOPLAY;
+            case "SpunOut" -> SPUN_OUT;
+            case "Autopilot" -> AUTOPILOT;
+            case "Perfect" -> PERFECT;
+            case "4K" -> KEY4;
+            case "5K" -> KEY5;
+            case "6K" -> KEY6;
+            case "7K" -> KEY7;
+            case "8K" -> KEY8;
+            case "FadeIn" -> FADE_IN;
+            case "Random" -> RANDOM;
+            case "Cinema" -> CINEMA;
+            case "TargetPractice" -> TARGET_PRATICE;
+            case "9K" -> KEY9;
+            case "Coop" -> KEY_COOP;
+            case "1K" -> KEY1;
+            case "3K" -> KEY3;
+            case "2K" -> KEY2;
+            case "ScoreV2" -> SCOREV2;
+            case "Mirror" -> MIRROR;
+            default -> throw new IllegalArgumentException("Unknown mod: " + mod);
+        };
+    }
 }
