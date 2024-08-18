@@ -43,20 +43,26 @@ public abstract class OsuChannelImpl implements OsuChannel {
     }
 
     @Override
-    public void sendMessage(String message) {
+    public final void sendMessage(String message) {
         chatManager.sendMessage(this, message);
     }
 
-    public void pushServerMessage(String message) {
+    public final void pushServerMessage(String message) {
         this.polledServerMessages.addLast(message);
     }
 
-    public void schedulePollEvent() {
+    public final void schedulePollEvent() {
         if (this.polledServerMessages.size() <= 0) {
             return;
         }
 
-        eventBus.fire(new SystemMessagePoll(Collections.unmodifiableList(new ArrayList<>(this.polledServerMessages)), this));
+        List<String> messages = Collections.unmodifiableList(new ArrayList<>(this.polledServerMessages));
+        this.processSystemMessage(messages);
+        eventBus.fire(new SystemMessagePoll(messages, this));
         this.polledServerMessages.clear();
+    }
+
+    public void processSystemMessage(List<String> messages) {
+
     }
 }
