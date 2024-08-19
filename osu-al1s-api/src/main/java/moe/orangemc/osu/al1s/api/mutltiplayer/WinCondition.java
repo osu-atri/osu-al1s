@@ -17,20 +17,24 @@
 package moe.orangemc.osu.al1s.api.mutltiplayer;
 
 public enum WinCondition {
-    SCORE(0),
-    ACCURACY(1),
-    COMBO(2),
-    SCORE_V2(3);
+    SCORE(0, "Score"),
+    ACCURACY(1, "Accuracy"),
+    COMBO(2, "Combo"),
+    SCORE_V2(3, "ScoreV2");
 
     private final int id;
+    private final String name;
 
-    WinCondition(int id) {
+    WinCondition(int id, String name) {
         this.id = id;
+        this.name = name;
     }
 
     public int getId() {
         return id;
     }
+
+    public String getName() { return name; }
 
     public static WinCondition fromString(String condition) {
         return switch (condition) {
