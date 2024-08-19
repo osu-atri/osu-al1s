@@ -22,10 +22,7 @@ import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.multiplayer.*;
 import moe.orangemc.osu.al1s.api.mutltiplayer.*;
-import moe.orangemc.osu.al1s.api.ruleset.Mod;
-import moe.orangemc.osu.al1s.api.ruleset.PlayResult;
-import moe.orangemc.osu.al1s.api.ruleset.PlayScore;
-import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
+import moe.orangemc.osu.al1s.api.ruleset.*;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.beatmap.BeatmapImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
@@ -464,11 +461,17 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     this.playerStates.remove(user);
                 }
                 case FINISHED_PLAYING -> {
+                    // FIXME: Add replayID, accuracy, maxCombo, Perfect, count*s, PP, Grade
                     String username = matcher.group(1);
                     int score = Integer.parseInt(matcher.group(2));
                     PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
                     User user = UserImpl.get(username);
-                    this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScore(result, this.currentBeatmap.getMode() == Ruleset.OSU ? this.currentRuleset : this.currentBeatmap.getMode(), this.currentBeatmap, score, this.playerStates.get(user).mods, 0, 0, 0, 0, 0, 0, 0)));
+                    this.eventBus.fire(new PlayerFinishPlayEvent(this, user,
+                            new PlayScore(0, result, this.currentBeatmap.getMode() == Ruleset.OSU ? this.currentRuleset : this.currentBeatmap.getMode(),
+                                    this.currentBeatmap, score, this.playerStates.get(user).mods,
+                                    0, 0, 0,
+                                    0, 0, 0, 0,
+                                    0, PlayGrade.F, user.getId())));
 
                     this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
                     this.playerStates.get(user).lastScore = score;
