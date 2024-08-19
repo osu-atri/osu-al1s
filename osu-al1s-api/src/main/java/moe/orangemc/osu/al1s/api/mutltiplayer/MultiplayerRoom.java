@@ -47,6 +47,8 @@ public interface MultiplayerRoom extends OsuChannel {
     int getPlayerSlot(User user);
     void movePlayer(User user, int slot);
 
+    PlayerWaitStatus getPlayerWaitStatus(User user);
+
     @Nullable MultiplayerTeam getTeam(User user);
     void setTeam(User user, MultiplayerTeam team);
 

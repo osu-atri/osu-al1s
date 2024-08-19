@@ -252,6 +252,11 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     }
 
     @Override
+    public PlayerWaitStatus getPlayerWaitStatus(User user) {
+        return this.playerStates.get(user).waitStatus;
+    }
+
+    @Override
     public @Nullable MultiplayerTeam getTeam(User user) {
         ensureUserInRoom(user);
 
