@@ -20,16 +20,14 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import moe.orangemc.osu.al1s.api.match.MatchEvent;
 import moe.orangemc.osu.al1s.api.match.MatchEventType;
-import moe.orangemc.osu.al1s.api.match.MatchGame;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 
 import java.io.IOException;
 
-public record MatchEventData(long id, String time, User user, MatchEventType type, String description, MatchGameData game) implements MatchEvent {
+public record MatchEventData(long id, String time, User user, MatchEventType type, String description, MatchGameData game) {
     public static class Adapter extends TypeAdapter<MatchEventData> {
         @Override
         public void write(JsonWriter jsonWriter, MatchEventData matchEventData) throws IOException {
@@ -120,22 +118,4 @@ public record MatchEventData(long id, String time, User user, MatchEventType typ
             return new MatchEventData(id, time, user, type, description, game);
         }
     }
-
-    @Override
-    public long getId() { return id; }
-
-    @Override
-    public String getTimestamp() { return time; }
-
-    @Override
-    public User getUser() { return user; }
-
-    @Override
-    public MatchEventType getEventType() { return type; }
-
-    @Override
-    public String getDescription() { return description; }
-
-    @Override
-    public MatchGame getGame() { return game; }
 }

@@ -20,9 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
-import moe.orangemc.osu.al1s.api.beatmap.BeatmapSet;
-import moe.orangemc.osu.al1s.api.match.MatchGame;
 import moe.orangemc.osu.al1s.api.mutltiplayer.TeamMode;
 import moe.orangemc.osu.al1s.api.mutltiplayer.WinCondition;
 import moe.orangemc.osu.al1s.api.ruleset.Mod;
@@ -35,9 +32,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public record MatchGameData(long id, MatchBeatmapData map, Ruleset mode, String start, String end,
+public record MatchGameData(long id, int mapId, Ruleset mode, String start, String end,
                             TeamMode teamType, WinCondition scoringType,
-                            Set<Mod> mods, List<PlayScore> scores) implements MatchGame {
+                            Set<Mod> mods, List<PlayScore> scores) {
     public static class Adapter extends TypeAdapter<MatchGameData> {
         @Override
         public void write(JsonWriter jsonWriter, MatchGameData matchGameData) throws IOException {
@@ -50,7 +47,7 @@ public record MatchGameData(long id, MatchBeatmapData map, Ruleset mode, String 
             jsonWriter.beginObject();
 
             jsonWriter.name("id").value(matchGameData.id);
-            jsonWriter.name("beatmap_id").value(matchGameData.map.getId());
+            jsonWriter.name("beatmap_id").value(matchGameData.mapId);
             jsonWriter.name("start_time").value(matchGameData.start);
             jsonWriter.name("end_time").value(matchGameData.end);
             jsonWriter.name("mode").value(matchGameData.mode.getName());
@@ -68,10 +65,6 @@ public record MatchGameData(long id, MatchBeatmapData map, Ruleset mode, String 
                 }
                 jsonWriter.endArray();
             }
-
-            jsonWriter.name("beatmap").beginObject();
-            jsonWriter.jsonValue(gf.gson.toJson(matchGameData.map));
-            jsonWriter.endObject();
 
             if (!matchGameData.scores.isEmpty()) {
                 jsonWriter.name("scores").beginArray();
@@ -95,7 +88,7 @@ public record MatchGameData(long id, MatchBeatmapData map, Ruleset mode, String 
 
             jsonReader.beginObject();
             long id = -1;
-            MatchBeatmapData map = null;
+            int mapId = -1;
             Ruleset mode = null;
             String start = "";
             String end = "";
@@ -124,6 +117,9 @@ public record MatchGameData(long id, MatchBeatmapData map, Ruleset mode, String 
                     case "team_type":
                         teamType = TeamMode.valueOf(jsonReader.nextString().toUpperCase());
                         break;
+                    case "beatmap_id":
+                        mapId = jsonReader.nextInt();
+                        break;
                     case "mods":
                         jsonReader.beginArray();
                         // TODO: Add NoMod?
@@ -132,10 +128,6 @@ public record MatchGameData(long id, MatchBeatmapData map, Ruleset mode, String 
                         }
                         jsonReader.endArray();
                         break;
-                    case "beatmap":
-                        jsonReader.beginObject();
-                        map = gf.gson.fromJson(jsonReader, MatchBeatmapData.class);
-                        jsonReader.endArray();
                     case "scores":
                         jsonReader.beginArray();
                         while (jsonReader.hasNext()) {
@@ -148,44 +140,7 @@ public record MatchGameData(long id, MatchBeatmapData map, Ruleset mode, String 
                 }
             }
             jsonReader.endObject();
-            return new MatchGameData(id, map, mode, start, end, teamType, scoringType, mods, scores);
+            return new MatchGameData(id, mapId, mode, start, end, teamType, scoringType, mods, scores);
         }
-    }
-
-    @Override
-    public long getId() { return id; }
-
-    @Override
-    public String getStartTime() { return start; }
-
-    @Override
-    public String getEndTime() { return end; }
-
-    @Override
-    public Beatmap getMap() { return map; }
-
-    @Override
-    public BeatmapSet getMapSet() {
-        throw new UnsupportedOperationException("I don't know ;w;");
-    }
-
-    @Override
-    public Ruleset getMode() { return mode; }
-
-    @Override
-    public TeamMode getTeamMode() { return teamType; }
-
-    @Override
-    public WinCondition getWinCondition() { return scoringType; }
-
-    @Override
-    public Set<Mod> getMods() { return mods; }
-
-    @Override
-    public List<PlayScore> getScores() { return scores; }
-
-    @Override
-    public <T> T getMetadata(String key) {
-        throw new UnsupportedOperationException("Ask someone else please.");
     }
 }

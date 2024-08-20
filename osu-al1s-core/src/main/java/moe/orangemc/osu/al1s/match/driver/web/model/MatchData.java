@@ -20,8 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import moe.orangemc.osu.al1s.api.match.Match;
-import moe.orangemc.osu.al1s.api.match.MatchEvent;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
@@ -37,7 +35,7 @@ import java.util.List;
  * @param users a list of {@link User}, showing all users involved in this match
  * @param events a list of {@link MatchEventData}, showing events of the match
  */
-public record MatchData(int id, String name, List<User> users, List<MatchEvent> events) implements Match {
+public record MatchData(int id, String name, List<User> users, List<MatchEventData> events) {
     public static class Adapter extends TypeAdapter<MatchData> {
         @Override
         public void write(JsonWriter jsonWriter, MatchData matchData) throws IOException {
@@ -57,7 +55,7 @@ public record MatchData(int id, String name, List<User> users, List<MatchEvent> 
 
             // "events" section
             jsonWriter.name("events").beginArray();
-            for (MatchEvent event : matchData.events()) {
+            for (MatchEventData event : matchData.events()) {
                 jsonWriter.beginObject();
                 jsonWriter.jsonValue(gf.gson.toJson(event));
                 jsonWriter.endObject();
@@ -89,7 +87,7 @@ public record MatchData(int id, String name, List<User> users, List<MatchEvent> 
             int id = -1;
             String name = "";
             List<User> users = new ArrayList<>();
-            List<MatchEvent> events = new ArrayList<>();
+            List<MatchEventData> events = new ArrayList<>();
 
             while (jsonReader.hasNext()) {
                 switch (jsonReader.nextName()) {
@@ -130,20 +128,5 @@ public record MatchData(int id, String name, List<User> users, List<MatchEvent> 
             jsonReader.endObject();
             return new MatchData(id, name, users, events);
         }
-    }
-
-    @Override
-    public int getId() { return id; }
-
-    @Override
-    public List<MatchEvent> getEvents() { return events; }
-
-    @Override
-    public List<User> getUsers() { return users; }
-
-    @Override
-    public <T> T getMetadata(String key) {
-        // TODO: Extend or throw as unimplemented
-        throw new UnsupportedOperationException("MatchData knows nothing but data, not metadata!");
     }
 }
