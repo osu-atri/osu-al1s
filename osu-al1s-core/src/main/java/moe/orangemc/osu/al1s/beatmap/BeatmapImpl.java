@@ -25,9 +25,12 @@ import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class BeatmapImpl implements Beatmap {
+    private static Map<Integer, BeatmapImpl> cache = new HashMap<>();
+
     private final int setId;
     private final int id;
 
@@ -38,7 +41,7 @@ public class BeatmapImpl implements Beatmap {
 
     private final Map<String, Object> metadata;
 
-    public BeatmapImpl(int id) {
+    private BeatmapImpl(int id) {
         bot.checkPermission(Scope.PUBLIC);
 
         metadata = api.getBeatmapMetadata(id);
@@ -116,4 +119,8 @@ public class BeatmapImpl implements Beatmap {
     int getCircleCount() { return getMetadata("count_circles"); }
     int getSliderCount() { return getMetadata("count_sliders"); }
     int getSpinnerCount() { return getMetadata("count_spinners"); }
+
+    public static BeatmapImpl get(int id) {
+        return cache.computeIfAbsent(id, BeatmapImpl::new);
+    }
 }

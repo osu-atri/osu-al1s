@@ -157,7 +157,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     private void refreshBeatmapMetadata(Matcher matcher) {
         int beatmapId = Integer.parseInt(matcher.group(1));
-        this.currentBeatmap = new BeatmapImpl(beatmapId);
+        this.currentBeatmap = BeatmapImpl.get(beatmapId);
     }
 
     private void refreshModeMetadata(Matcher matcher) {
@@ -246,6 +246,11 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         ensureUserInRoom(user);
 
         this.playerStates.get(user).setSlot(slot);
+    }
+
+    @Override
+    public PlayerWaitStatus getPlayerWaitStatus(User user) {
+        return this.playerStates.get(user).waitStatus;
     }
 
     @Override
@@ -483,7 +488,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                 }
                 case BEATMAP_CHANGED -> {
                     int beatmapId = Integer.parseInt(matcher.group(4));
-                    BeatmapImpl newBeatmap = new BeatmapImpl(beatmapId);
+                    BeatmapImpl newBeatmap = BeatmapImpl.get(beatmapId);
 
                     BeatmapChangeEvent event = new BeatmapChangeEvent(this, newBeatmap);
                     this.eventBus.fire(event);

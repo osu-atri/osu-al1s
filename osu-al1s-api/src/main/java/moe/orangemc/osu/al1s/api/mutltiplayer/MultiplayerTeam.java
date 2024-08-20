@@ -37,4 +37,11 @@ public enum MultiplayerTeam {
             default -> throw new IllegalArgumentException("Unknown team: " + team);
         };
     }
+
+    public MultiplayerTeam getOpposite() {
+        return switch (this) {
+            case RED -> BLUE;
+            case BLUE -> RED;
+        };
+    }
 }

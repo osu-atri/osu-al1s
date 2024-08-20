@@ -16,12 +16,10 @@
 
 package moe.orangemc.osu.al1s.auth;
 
-import moe.orangemc.osu.al1s.api.auth.AuthenticateType;
-import moe.orangemc.osu.al1s.api.auth.Credential;
-import moe.orangemc.osu.al1s.api.auth.Token;
+import moe.orangemc.osu.al1s.api.auth.*;
 import moe.orangemc.osu.al1s.auth.credential.AuthorizationCodeGrantCredentialImpl;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
-import moe.orangemc.osu.al1s.api.auth.CredentialProvider;
+import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 
 public class CredentialProviderImpl implements CredentialProvider {
@@ -33,6 +31,11 @@ public class CredentialProviderImpl implements CredentialProvider {
             case AUTHORIZATION_CODE -> new AuthorizationCodeGrantCredentialImpl();
             case REFRESH_TOKEN -> throw new UnsupportedOperationException("Please use Token#refresh() to refresh a token");
         };
+    }
+
+    @Override
+    public IrcCredential newIrcCredential() {
+        return new IrcCredentialImpl();
     }
 
     @Override

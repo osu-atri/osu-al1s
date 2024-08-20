@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.ruleset;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Mod {
     NO_MOD(0, "No Mod", "NM"),
     NO_FAIL(1, "No Fail", "NF"),
@@ -54,6 +57,8 @@ public enum Mod {
     FREE_MOD(0, "Free Mod", "FM", NO_FAIL, EASY, FADE_IN, HARD_ROCK, SUDDEN_DEATH, RELAX, FLASHLIGHT, SPUN_OUT, AUTOPILOT, KEY_MOD),
     SCORE_INCREASE_MOD(0, "Score Increase Mod", "IM", HIDDEN, HARD_ROCK, FLASHLIGHT, DOUBLE_TIME, FADE_IN);
 
+    private static final Map<String, Mod> BY_SHORT_NAME = new HashMap<>();
+
     private final int value;
     private final String name;
     private final String shortName;
@@ -86,6 +91,10 @@ public enum Mod {
     }
 
     public static Mod fromString(String mod) {
+        if (BY_SHORT_NAME.containsKey(mod)) {
+            return BY_SHORT_NAME.get(mod);
+        }
+
         return switch (mod) {
             case "NoMod" -> NO_MOD;
             case "NoFail", "NF" -> NO_FAIL;
@@ -121,5 +130,11 @@ public enum Mod {
             case "Mirror", "MR" -> MIRROR;
             default -> throw new IllegalArgumentException("Unknown mod: " + mod);
         };
+    }
+
+    static {
+        for (Mod mod : values()) {
+            BY_SHORT_NAME.put(mod.shortName, mod);
+        }
     }
 }
