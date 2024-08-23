@@ -17,23 +17,31 @@
 package moe.orangemc.osu.al1s.chat.driver.irc;
 
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import org.kitteh.irc.client.library.Client;
 
 public class IrcDriver implements ChatDriver {
     private final Client client;
 
+    @Inject
+    private OsuBotImpl bot;
+
     public IrcDriver(String host, int port, IrcCredentialImpl credential) {
-        this.client = Client.builder()
+        var builder = Client.builder()
                 .nick(credential.getUsername().replaceAll(" ", "_"))
                 .server()
                 .host(host)
                 .port(port, Client.Builder.Server.SecurityType.INSECURE)
                 .password(credential.getPassword())
-                .then()
-                .buildAndConnect();
+                .then();
+        if (bot.debug) {
+            builder = builder.listeners().input(System.out::println).output(System.out::println).exception(Throwable::printStackTrace).then();
+        }
+        client = builder.buildAndConnect();
     }
 
     @Override
@@ -56,8 +64,9 @@ public class IrcDriver implements ChatDriver {
 
     @Override
     public String initializePrivateChannel(UserImpl user, String initialMessage) {
-        client.sendMessage(user.getUsername(), initialMessage);
-        return user.getUsername();
+        client.sendMessage(user.getUsername().replaceAll(" ", "_"), initialMessage);
+        ((Client.WithManagement) client).startSending();
+        return user.getUsername().replaceAll(" ", "_");
     }
 
     @Override

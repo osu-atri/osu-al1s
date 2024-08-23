@@ -16,11 +16,19 @@
 
 package moe.orangemc.osu.al1s.auth;
 
+import moe.orangemc.osu.al1s.api.auth.CredentialProvider;
 import moe.orangemc.osu.al1s.inject.api.Provides;
 
 public class CredentialProviderModule {
+    private final CredentialProviderImpl credentialProvider = new CredentialProviderImpl();
+
     @Provides
     public CredentialProviderImpl create() {
-        return new CredentialProviderImpl();
+        return credentialProvider;
+    }
+
+    @Provides
+    public CredentialProvider createCredentialProvider() {
+        return credentialProvider;
     }
 }

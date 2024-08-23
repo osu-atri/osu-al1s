@@ -21,6 +21,8 @@ import java.util.Collection;
 public interface InjectionContext {
     void registerModule(Object module);
     void registerModule(Object module, boolean reload);
+    void registerModule(String className);
+    void registerModule(String className, boolean reload);
     Object mapField(Class<?> type, String name);
     Class<?> getMappedClass(String name);
 

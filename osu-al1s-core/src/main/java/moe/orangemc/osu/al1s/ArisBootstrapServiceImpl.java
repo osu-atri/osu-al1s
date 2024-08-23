@@ -34,9 +34,9 @@ public class ArisBootstrapServiceImpl implements ArisBootstrapService {
 
         InjectionContext ctx = injector.getCurrentContext();
 
-        ctx.registerModule(new GsonProvider());
-        ctx.registerModule(new BotFactoryModule());
-        ctx.registerModule(new CredentialProviderModule());
+        ctx.registerModule("moe.orangemc.osu.al1s.auth.CredentialProviderModule");
+        ctx.registerModule("moe.orangemc.osu.al1s.bot.BotFactoryModule");
+        ctx.registerModule("moe.orangemc.osu.al1s.util.GsonProvider");
 
         Class<?> initInterfaceClass = injector.loadWithInjection("moe.orangemc.osu.al1s.api.bot.InitEntry");
         Class<?> initClass = injector.loadWithInjection(init);

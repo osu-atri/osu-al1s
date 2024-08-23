@@ -20,6 +20,7 @@ import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import net.engio.mbassy.listener.Handler;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
+import org.kitteh.irc.client.library.event.channel.ChannelTargetedMessageEvent;
 import org.kitteh.irc.client.library.event.user.PrivateMessageEvent;
 
 public class IrcListener {
@@ -33,14 +34,22 @@ public class IrcListener {
     public void onChannelMessage(ChannelMessageEvent event) {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
-        String sender = event.getActor().getName();
+        String sender = event.getActor().getNick();
         handler.handle(channelName, UserImpl.get(sender), message);
     }
 
     @Handler
     public void onPrivateMessage(PrivateMessageEvent event) {
         String message = event.getMessage();
-        String sender = event.getActor().getName();
+        String sender = event.getActor().getNick();
         handler.handle(sender, UserImpl.get(sender), message);
+    }
+
+    @Handler
+    public void onTargetedMessage(ChannelTargetedMessageEvent event) {
+        String channelName = event.getChannel().getName();
+        String message = event.getMessage();
+        String sender = event.getActor().getNick();
+        handler.handle(channelName, UserImpl.get(sender), message);
     }
 }

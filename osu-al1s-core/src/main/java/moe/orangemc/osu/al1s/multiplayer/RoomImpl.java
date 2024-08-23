@@ -44,6 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
+    private static final Pattern ROOM_CREATION_PATTERN = Pattern.compile("Created the tournament match https://osu.ppy.sh/mp/(\\d+).*");
     private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     @Inject
@@ -60,8 +61,8 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private final Map<User, UserState> playerStates = new HashMap<>();
     private @Nullable User host;
 
-    private WinCondition winCondition;
-    private TeamMode teamMode;
+    private WinCondition winCondition = WinCondition.SCORE;
+    private TeamMode teamMode = TeamMode.HEAD_TO_HEAD;
 
     private BeatmapImpl currentBeatmap;
     private Set<Mod> enforcedMods = new HashSet<>();
@@ -75,9 +76,13 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         banchobot.sendMessage("!mp make " + roomName);
         List<String> messages = banchobot.pollServerMessages();
         String response = messages.getFirst();
-        Pattern pattern = Pattern.compile("(\\d+)");
+        Matcher matcher = ROOM_CREATION_PATTERN.matcher(response);
+        if (!matcher.find()) {
+            throw new IllegalStateException("Bad BanchoBot");
+        }
 
-        this.id = Integer.parseInt(pattern.matcher(response).group(1));
+        String rawId = matcher.group(1);
+        this.id = Integer.parseInt(rawId);
         this.name = roomName;
 
         SecureRandom random = new SecureRandom();
@@ -143,8 +148,6 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     case PLAYER_COUNT -> currentPattern = RoomSettingMessagePattern.SLOTS;
                     case SLOTS -> refreshPlayerSlot(matcher);
                 }
-            } else {
-                currentPattern = RoomSettingMessagePattern.values()[currentPattern.ordinal() + 1];
             }
         }
     }
@@ -427,6 +430,9 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
             }
 
             Matcher matcher = matching.getPattern().matcher(message);
+            if (!matcher.find()) {
+                continue;
+            }
             switch (matching) {
                 case JOIN_ROOM -> {
                     String username = matcher.group(1);
