@@ -16,11 +16,8 @@
 
 package moe.orangemc.osu.al1s.chat.driver.irc;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
@@ -36,7 +33,6 @@ import org.kitteh.irc.client.library.defaults.feature.network.NettyConnection;
 import org.kitteh.irc.client.library.event.connection.ClientConnectionEstablishedEvent;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
 public class IrcDriver implements ChatDriver {
     private final Client client;
