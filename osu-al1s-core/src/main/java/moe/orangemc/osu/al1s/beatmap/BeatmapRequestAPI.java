@@ -56,7 +56,7 @@ public class BeatmapRequestAPI {
         }
         String response = HttpUtil.get(URLUtil.concat(targetURL, String.valueOf(id)));
         Map<String, Object> result = gson.fromJson(response, new TypeToken<>() {}.getType());
-        String setResponse = HttpUtil.get(URLUtil.concat(targetURL, result.get("beatmapset_id").toString()));
+        String setResponse = HttpUtil.get(URLUtil.concat(setURL, String.valueOf(((int)(double)result.get("beatmapset_id")))));
         Map<String, Object> setResult = gson.fromJson(setResponse, new TypeToken<>() {}.getType());
         result.putAll(setResult);
 

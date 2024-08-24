@@ -25,6 +25,7 @@ import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 public abstract class OsuChannelImpl implements OsuChannel {
@@ -37,7 +38,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
     @Inject
     private Scheduler scheduler;
 
-    private final List<String> polledServerMessages = new ArrayList<>();
+    private final List<String> polledServerMessages = new CopyOnWriteArrayList<>();
     private CompletableFuture<List<String>> pollFuture = new CompletableFuture<>();
 
     public OsuChannelImpl() {

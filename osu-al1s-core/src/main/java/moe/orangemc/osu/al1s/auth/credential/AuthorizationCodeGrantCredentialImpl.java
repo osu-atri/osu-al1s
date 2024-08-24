@@ -110,7 +110,6 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
                                 eventBus.fire(evt);
 
                                 if (!evt.isCancelled()) {
-                                    System.out.println(6);
                                     exchange.sendResponseHeaders(400, 0);
                                     exchange.close();
                                     return;

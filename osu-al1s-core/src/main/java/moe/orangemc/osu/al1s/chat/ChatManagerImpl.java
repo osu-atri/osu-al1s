@@ -106,7 +106,10 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
         if (channel instanceof UserImpl user) {
             ChatDriver driver = this.driver.get();
             if (driver instanceof IrcDriver) {
-                return user.getUsername().replaceAll(" ", "_");
+                String name = user.getUsername().replaceAll(" ", "_");
+                channelsNameMap.put(name, user);
+                reverseChannelsNameMap.put(user, name);
+                return name;
             }
             throw new IllegalStateException("Send a message to them first!");
         }

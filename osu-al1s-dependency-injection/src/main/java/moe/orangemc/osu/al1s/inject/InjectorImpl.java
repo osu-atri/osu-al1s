@@ -26,7 +26,7 @@ import moe.orangemc.osu.al1s.inject.context.InjectionContextImpl;
 import java.util.*;
 
 public class InjectorImpl implements Injector {
-    private final InjectionContextImpl root = new InjectionContextImpl();
+    private final InjectionContextImpl root = new InjectionContextImpl(this);
     private final InjectorClassLoader classLoader = new InjectorClassLoader(getClass().getClassLoader(), this);
 
     private InjectionContextImpl context = root;
@@ -49,7 +49,7 @@ public class InjectorImpl implements Injector {
 
     @Override
     public InjectionContext derivativeContext() {
-        return new InjectionContextImpl(context);
+        return new InjectionContextImpl(context, this);
     }
 
     @Override

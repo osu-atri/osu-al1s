@@ -16,24 +16,44 @@
 
 package moe.orangemc.osu.al1s.chat.driver.irc;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
+import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
+import net.engio.mbassy.listener.Handler;
 import org.kitteh.irc.client.library.Client;
+import org.kitteh.irc.client.library.defaults.DefaultClient;
+import org.kitteh.irc.client.library.defaults.feature.network.NettyConnection;
+import org.kitteh.irc.client.library.event.connection.ClientConnectionEstablishedEvent;
+
+import java.lang.reflect.Field;
 
 public class IrcDriver implements ChatDriver {
     private final Client client;
 
+    @Inject
+    private OsuBotImpl bot;
+
     public IrcDriver(String host, int port, IrcCredentialImpl credential) {
-        this.client = Client.builder()
+        var builder = Client.builder()
                 .nick(credential.getUsername().replaceAll(" ", "_"))
                 .server()
                 .host(host)
                 .port(port, Client.Builder.Server.SecurityType.INSECURE)
                 .password(credential.getPassword())
-                .then()
-                .buildAndConnect();
+                .then();
+        if (bot.debug) {
+            builder = builder.listeners().input(System.out::println).output(System.out::println).exception(Throwable::printStackTrace).then();
+        }
+        client = builder.build();
+        client.getEventManager().registerEventListener(this);
+        client.connect();
     }
 
     @Override
@@ -56,8 +76,9 @@ public class IrcDriver implements ChatDriver {
 
     @Override
     public String initializePrivateChannel(UserImpl user, String initialMessage) {
-        client.sendMessage(user.getUsername(), initialMessage);
-        return user.getUsername();
+        client.sendMessage(user.getUsername().replaceAll(" ", "_"), initialMessage);
+        ((Client.WithManagement) client).startSending();
+        return user.getUsername().replaceAll(" ", "_");
     }
 
     @Override
@@ -68,5 +89,28 @@ public class IrcDriver implements ChatDriver {
     @Override
     public void shutdown() {
         this.client.shutdown();
+    }
+
+    @Handler
+    public void onConnect(ClientConnectionEstablishedEvent event) {
+        Client client = event.getClient();
+
+        // Use bancho delimiter '\n'
+        DefaultClient dc = (DefaultClient) client;
+        Class<DefaultClient> clientClass = DefaultClient.class;
+        Field connectionField = SneakyExceptionHelper.call(() -> {
+            Field f = clientClass.getDeclaredField("connection");
+            f.setAccessible(true);
+            return f;
+        });
+        NettyConnection connection = SneakyExceptionHelper.call(() -> (NettyConnection) connectionField.get(dc));
+
+        Field channelField = SneakyExceptionHelper.call(() -> {
+            Field f = connection.getClass().getDeclaredField("channel");
+            f.setAccessible(true);
+            return f;
+        });
+        Channel channel = SneakyExceptionHelper.call(() -> (Channel) channelField.get(connection));
+        channel.pipeline().replace("[INPUT] Line splitter", "[INPUT] Line splitter", new DelimiterBasedFrameDecoder(9001, true, Unpooled.copiedBuffer(new byte[]{0x0A}), Unpooled.copiedBuffer(new byte[]{0x0D, 0x0A})));
     }
 }

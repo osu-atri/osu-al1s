@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.inject.context;
 
+import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.InvalidInjectModuleException;
 import moe.orangemc.osu.al1s.inject.api.Provides;
@@ -32,12 +33,16 @@ public class InjectionContextImpl implements InjectionContext {
     private final Map<String, Class<?>> providedClass = new HashMap<>();
     private final Map<Class<?>, Map<String, Object>> fieldMap = new HashMap<>();
 
-    public InjectionContextImpl() {
+    private final InjectorImpl owner;
+
+    public InjectionContextImpl(InjectorImpl owner) {
+        this.owner = owner;
         this.parent = null;
     }
 
-    public InjectionContextImpl(InjectionContextImpl parent) {
+    public InjectionContextImpl(InjectionContextImpl parent, InjectorImpl owner) {
         this.parent = parent;
+        this.owner = owner;
         parent.addDirectChildren(this);
     }
 
@@ -72,6 +77,21 @@ public class InjectionContextImpl implements InjectionContext {
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new InvalidInjectModuleException(module.getClass(), e);
             }
+        }
+    }
+
+    @Override
+    public void registerModule(String className) {
+        registerModule(className, false);
+    }
+
+    @Override
+    public void registerModule(String className, boolean reload) {
+        Class<?> clazz = this.owner.loadWithInjection(className);
+        try {
+            registerModule(clazz.getDeclaredConstructor().newInstance(), reload);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new InvalidInjectModuleException(clazz, e);
         }
     }
 

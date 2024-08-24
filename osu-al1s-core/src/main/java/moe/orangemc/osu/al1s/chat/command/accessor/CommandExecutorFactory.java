@@ -45,7 +45,6 @@ public class CommandExecutorFactory {
         }
 
         CommandArgumentNode tree = CommandArgumentNode.build(Arrays.stream(commandBase.getClass().getMethods()).filter(method -> method.getAnnotation(Command.class) != null).toList());
-        System.out.println(tree);
 
         ClassWriter cwo = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         CheckClassAdapter cw = new CheckClassAdapter(cwo);
