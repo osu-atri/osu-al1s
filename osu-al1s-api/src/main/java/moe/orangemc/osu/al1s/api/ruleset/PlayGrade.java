@@ -17,7 +17,9 @@
 package moe.orangemc.osu.al1s.api.ruleset;
 
 public enum PlayGrade {
-    // TODO: Add for Silver SS / S
+    // Silver SS & S
+    SSH,
+    SH,
     SS,
     S,
     A,
