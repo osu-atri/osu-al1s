@@ -62,12 +62,15 @@ public class CommandManagerImpl implements CommandManager {
     public boolean executeCommand(UserImpl sender, OsuChannelImpl where, String command) {
         StringReader reader = new StringReader(command);
         String cmdName = reader.getRootCommand();
-        reader.skip();
         CommandBase cmd = commandMap.get(cmdName);
         if (cmd == null) {
             return false;
         }
-        executorFactory.createExecutor(cmd).execute(sender, where, this, reader);
+        try {
+            executorFactory.createExecutor(cmd).execute(sender, where, this, reader);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 

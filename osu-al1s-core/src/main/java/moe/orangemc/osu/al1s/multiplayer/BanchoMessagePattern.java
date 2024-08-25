@@ -19,15 +19,16 @@ package moe.orangemc.osu.al1s.multiplayer;
 import java.util.regex.Pattern;
 
 public enum BanchoMessagePattern {
-    JOIN_ROOM("(.+) joined in slot (\\d+)") ,
+    JOIN_ROOM("(.+) joined in slot (\\d+).*"),
     MOVE("(.+) moved to slot (\\d+)"),
     TEAM_SWITCH("(.+) changed to (Red|Blue)"),
     LEAVE("(.+) left the game\\."),
-    FINISHED_PLAYING("(.+) has finished playing \\(Score: (\\d+), (PASSED|FAILED)\\)\\."),
-    BEATMAP_CHANGED("Beatmap changed to: (.+) - (.+) \\[(.+)] \\(https://osu.ppy.sh/b/(\\d+)\\)"),
+    FINISHED_PLAYING("(.+) finished playing \\(Score: (\\d+), (PASSED|FAILED)\\)\\."),
+    BEATMAP_CHANGED("Beatmap changed to: (.+) - (.+) \\[(.+)\\] \\(https://osu.ppy.sh/b/(\\d+)\\)"),
     HOST_CHANGED("(.+) became the host\\."),
-    ALL_READY("All players are ready\\."),
-    MATCH_STARTED("The match has started\\!"),;
+    ALL_READY("All players are ready"),
+    MATCH_STARTED("The match has started!"),
+    MATCH_FINISHED("The match has finished!");
 
     private final Pattern pattern;
 

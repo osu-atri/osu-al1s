@@ -19,6 +19,7 @@ package moe.orangemc.osu.al1s.multiplayer;
 import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.multiplayer.*;
 import moe.orangemc.osu.al1s.api.mutltiplayer.*;
@@ -33,6 +34,7 @@ import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
+import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +42,8 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,12 +57,14 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     private EventBus eventBus;
     @Inject
     private ChatManager chatManager;
+    @Inject
+    private Scheduler scheduler;
 
     private final int id;
     private String name;
     private String password;
 
-    private final Map<User, UserState> playerStates = new HashMap<>();
+    private final Map<User, UserState> playerStates = new ConcurrentHashMap<>();
     private @Nullable User host;
 
     private WinCondition winCondition = WinCondition.SCORE;
@@ -73,10 +79,13 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     public RoomImpl(String roomName) {
         UserImpl banchobot = UserImpl.get(((ChatManagerImpl) chatManager).getServerBotName());
+        banchobot.clearUnprocessedMessages();
         banchobot.sendMessage("!mp make " + roomName);
-        List<String> messages = banchobot.pollServerMessages();
-        String response = messages.getFirst();
-        Matcher matcher = ROOM_CREATION_PATTERN.matcher(response);
+        CompletableFuture<String> response = new CompletableFuture<>();
+        banchobot.pollServerMessages((msg) -> {
+            response.complete(SneakyExceptionHelper.call(msg::take));
+        });
+        Matcher matcher = ROOM_CREATION_PATTERN.matcher(response.join());
         if (!matcher.find()) {
             throw new IllegalStateException("Bad BanchoBot");
         }
@@ -124,32 +133,59 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public void refreshState() {
-        this.sendMessage("!mp settings");
-        List<String> messages = this.pollServerMessages();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException _) {
 
-        this.playerStates.clear();
-        RoomSettingMessagePattern currentPattern = RoomSettingMessagePattern.ROOM_NAME_AND_LINK;
-        for (String message : messages) {
-            Matcher matcher = currentPattern.getPattern().matcher(message);
-            if (matcher.find()) {
-                switch (currentPattern) {
-                    case ROOM_NAME_AND_LINK -> {
-                        refreshRoomMetadata(matcher);
-                        currentPattern = RoomSettingMessagePattern.BEATMAP;
+        }
+        this.clearUnprocessedMessages();
+        this.sendMessage("!mp settings");
+        this.pollServerMessages((messages) -> {
+            try {
+                messages.addFirst(messages.takeFirst()); // Wait for command response.
+            } catch (InterruptedException e) {
+                return;
+            }
+
+            this.playerStates.clear();
+            boolean exit = false;
+            for (Iterator<String> iterator = messages.iterator(); iterator.hasNext(); ) {
+                String message = iterator.next();
+                RoomSettingMessagePattern currentPattern = RoomSettingMessagePattern.findMatchingPattern(message);
+
+                if (currentPattern != null) {
+                    Matcher matcher = currentPattern.getPattern().matcher(message);
+                    if (!matcher.matches()) {
+                        continue;
                     }
-                    case BEATMAP -> {
-                        refreshBeatmapMetadata(matcher);
-                        currentPattern = RoomSettingMessagePattern.MODE;
+
+                    exit = true;
+                    switch (currentPattern) {
+                        case ROOM_NAME_AND_LINK -> {
+                            refreshRoomMetadata(matcher);
+                            iterator.remove();
+                        }
+                        case BEATMAP -> {
+                            refreshBeatmapMetadata(matcher);
+                            iterator.remove();
+                        }
+                        case MODE -> {
+                            refreshModeMetadata(matcher);
+                            iterator.remove();
+                        }
+                        case PLAYER_COUNT -> {
+                            iterator.remove();
+                        }
+                        case SLOTS -> {
+                            refreshPlayerSlot(matcher);
+                            iterator.remove();
+                        }
                     }
-                    case MODE -> {
-                        refreshModeMetadata(matcher);
-                        currentPattern = RoomSettingMessagePattern.PLAYER_COUNT;
-                    }
-                    case PLAYER_COUNT -> currentPattern = RoomSettingMessagePattern.SLOTS;
-                    case SLOTS -> refreshPlayerSlot(matcher);
+                } else if (exit) {
+                    break;
                 }
             }
-        }
+        });
     }
 
     private void refreshRoomMetadata(Matcher matcher) {
@@ -178,7 +214,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         int slot = Integer.parseInt(matcher.group(1));
         String rawWaitingStatus = matcher.group(2);
         int userId = Integer.parseInt(matcher.group(3));
-        String modsStr = matcher.group(4);
+        String modsStr = matcher.group(5);
 
         User user = UserImpl.get(userId);
         UserState state = new UserState(user);
@@ -349,14 +385,17 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public Set<User> getReferees() {
-        Set<User> users = new HashSet<>(Collections.emptySet());
+        this.clearUnprocessedMessages();
         this.sendMessage("!mp listrefs");
-        List<String> msgToNow = this.pollServerMessages();
-        msgToNow.removeFirst();
-        for (String i : msgToNow) {
-            users.add(UserImpl.get(i));
-        }
-        return users;
+        Set<User> referees = new HashSet<>();
+        this.pollServerMessages((msgToNow) -> {
+            SneakyExceptionHelper.call(msgToNow::take);
+            for (String msg : msgToNow) {
+                referees.add(UserImpl.get(msg));
+            }
+            msgToNow.clear();
+        });
+        return referees;
     }
 
     @Override
@@ -438,6 +477,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     String username = matcher.group(1);
                     int slot = Integer.parseInt(matcher.group(2));
                     User user = UserImpl.get(username);
+                    this.playerStates.put(user, new UserState(user));
                     UserMoveToSlotEvent event = new UserJoinRoomEvent(this, user, slot);
                     this.eventBus.fire(event);
 
@@ -483,11 +523,6 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
                     this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
                     this.playerStates.get(user).lastScore = score;
-
-                    if (this.playerStates.values().stream().noneMatch(state -> state.waitStatus == PlayerWaitStatus.IN_GAME)) {
-                        this.eventBus.fire(new MatchEndEvent(this));
-                        this.refreshState();
-                    }
                 }
                 case BEATMAP_CHANGED -> {
                     int beatmapId = Integer.parseInt(matcher.group(4));
@@ -528,6 +563,14 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                         state.waitStatus = PlayerWaitStatus.IN_GAME;
                     }
                     this.eventBus.fire(new MatchStartEvent(this));
+                }
+                case MATCH_FINISHED -> {
+                    for (UserState state : this.playerStates.values()) {
+                        state.waitStatus = PlayerWaitStatus.NOT_READY;
+                    }
+                    scheduler.runTask(this::refreshState);
+
+                    this.eventBus.fire(new MatchEndEvent(this));
                 }
             }
         }

@@ -16,7 +16,9 @@
 
 package moe.orangemc.osu.al1s.chat.driver.irc;
 
+import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import net.engio.mbassy.listener.Handler;
 import org.kitteh.irc.client.library.event.channel.ChannelMessageEvent;
@@ -24,6 +26,8 @@ import org.kitteh.irc.client.library.event.channel.ChannelTargetedMessageEvent;
 import org.kitteh.irc.client.library.event.user.PrivateMessageEvent;
 
 public class IrcListener {
+    @Inject
+    private OsuBot bot;
     private final ChatMessageHandler handler;
 
     public IrcListener(ChatMessageHandler handler) {
@@ -35,14 +39,14 @@ public class IrcListener {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        handler.handle(channelName, UserImpl.get(sender), message);
+        bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message));
     }
 
     @Handler
     public void onPrivateMessage(PrivateMessageEvent event) {
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        handler.handle(sender, UserImpl.get(sender), message);
+        bot.execute(() -> handler.handle(sender, UserImpl.get(sender), message));
     }
 
     @Handler
@@ -50,6 +54,6 @@ public class IrcListener {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        handler.handle(channelName, UserImpl.get(sender), message);
+        bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message));
     }
 }

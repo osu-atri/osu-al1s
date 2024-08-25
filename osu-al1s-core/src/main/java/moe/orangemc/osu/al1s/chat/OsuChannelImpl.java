@@ -18,15 +18,14 @@ package moe.orangemc.osu.al1s.chat;
 
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
-import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.chat.SystemMessagePoll;
+import moe.orangemc.osu.al1s.chat.driver.BanchoBotWatchdog;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 public abstract class OsuChannelImpl implements OsuChannel {
     @Inject
@@ -35,15 +34,10 @@ public abstract class OsuChannelImpl implements OsuChannel {
     @Inject
     private EventBus eventBus;
 
-    @Inject
-    private Scheduler scheduler;
+    private final BanchoBotWatchdog watchdog = new BanchoBotWatchdog(this);
 
     private final List<String> polledServerMessages = new CopyOnWriteArrayList<>();
-    private CompletableFuture<List<String>> pollFuture = new CompletableFuture<>();
-
-    public OsuChannelImpl() {
-        scheduler.runTaskTimer(this::schedulePollEvent, 1, 1, TimeUnit.SECONDS);
-    }
+    private final LinkedBlockingDeque<String> polledQueue = new LinkedBlockingDeque<>();
 
     @Override
     public final void sendMessage(String message) {
@@ -52,6 +46,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
 
     public final void pushServerMessage(String message) {
         this.polledServerMessages.addLast(message.replaceAll("\\s+", " ")); // remove extra spaces and tabs
+        watchdog.feed();
     }
 
     public final void schedulePollEvent() {
@@ -59,16 +54,21 @@ public abstract class OsuChannelImpl implements OsuChannel {
             return;
         }
 
-        List<String> messages = Collections.unmodifiableList(new ArrayList<>(this.polledServerMessages));
-        pollFuture.complete(messages);
-        pollFuture = new CompletableFuture<>();
+        List<String> messages = List.copyOf(this.polledServerMessages);
+
+        polledQueue.addAll(messages);
         this.processServerMessages(messages);
         eventBus.fire(new SystemMessagePoll(messages, this));
         this.polledServerMessages.clear();
     }
 
-    public List<String> pollServerMessages() {
-        return pollFuture.join();
+    public void pollServerMessages(Consumer<LinkedBlockingDeque<String>> consumer) {
+        consumer.accept(this.polledQueue);
+    }
+
+    public void clearUnprocessedMessages() {
+        this.polledServerMessages.clear();
+        this.polledQueue.clear();
     }
 
     protected void processServerMessages(List<String> messages) {

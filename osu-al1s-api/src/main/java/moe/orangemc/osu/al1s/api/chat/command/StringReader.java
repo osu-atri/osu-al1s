@@ -30,6 +30,7 @@ public class StringReader {
         this.pos = 1;
 
         this.rootCommand = readString();
+        skip();
     }
 
     public String getRootCommand() {
@@ -51,6 +52,10 @@ public class StringReader {
     }
 
     public String readString() {
+        if (!canRead()) {
+            return "";
+        }
+
         if (peek() == '"' || peek() == '\'') {
             return readQuotedString();
         }
