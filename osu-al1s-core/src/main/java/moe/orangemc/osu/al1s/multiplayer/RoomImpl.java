@@ -140,52 +140,6 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         }
         this.clearUnprocessedMessages();
         this.sendMessage("!mp settings");
-        this.pollServerMessages((messages) -> {
-            try {
-                messages.addFirst(messages.takeFirst()); // Wait for command response.
-            } catch (InterruptedException e) {
-                return;
-            }
-
-            this.playerStates.clear();
-            boolean exit = false;
-            for (Iterator<String> iterator = messages.iterator(); iterator.hasNext(); ) {
-                String message = iterator.next();
-                RoomSettingMessagePattern currentPattern = RoomSettingMessagePattern.findMatchingPattern(message);
-
-                if (currentPattern != null) {
-                    Matcher matcher = currentPattern.getPattern().matcher(message);
-                    if (!matcher.matches()) {
-                        continue;
-                    }
-
-                    exit = true;
-                    switch (currentPattern) {
-                        case ROOM_NAME_AND_LINK -> {
-                            refreshRoomMetadata(matcher);
-                            iterator.remove();
-                        }
-                        case BEATMAP -> {
-                            refreshBeatmapMetadata(matcher);
-                            iterator.remove();
-                        }
-                        case MODE -> {
-                            refreshModeMetadata(matcher);
-                            iterator.remove();
-                        }
-                        case PLAYER_COUNT -> {
-                            iterator.remove();
-                        }
-                        case SLOTS -> {
-                            refreshPlayerSlot(matcher);
-                            iterator.remove();
-                        }
-                    }
-                } else if (exit) {
-                    break;
-                }
-            }
-        });
     }
 
     private void refreshRoomMetadata(Matcher matcher) {
@@ -391,7 +345,11 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         this.pollServerMessages((msgToNow) -> {
             SneakyExceptionHelper.call(msgToNow::take);
             for (String msg : msgToNow) {
-                referees.add(UserImpl.get(msg));
+                try {
+                    referees.add(UserImpl.get(msg));
+                } catch (Exception _) {
+
+                }
             }
             msgToNow.clear();
         });
@@ -441,7 +399,6 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public void abort() {
         this.sendMessage("!mp abort");
-        this.refreshState();
     }
 
     @Override
@@ -459,119 +416,158 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         return manager;
     }
 
+    private boolean processRoomEvent(String message) {
+        BanchoMessagePattern matching = BanchoMessagePattern.findMatchingPattern(message);
+        if (matching == null) {
+            return false;
+        }
+
+        Matcher matcher = matching.getPattern().matcher(message);
+        if (!matcher.find()) {
+            return false;
+        }
+        switch (matching) {
+            case JOIN_ROOM -> {
+                String username = matcher.group(1);
+                int slot = Integer.parseInt(matcher.group(2));
+                User user = UserImpl.get(username);
+                this.playerStates.put(user, new UserState(user));
+                UserMoveToSlotEvent event = new UserJoinRoomEvent(this, user, slot);
+                this.eventBus.fire(event);
+
+                if (event.getSlot() != slot) {
+                    this.movePlayer(user, event.getSlot());
+                }
+            }
+            case MOVE -> {
+                String username = matcher.group(1);
+                int slot = Integer.parseInt(matcher.group(2));
+                User user = UserImpl.get(username);
+                UserMoveToSlotEvent event = new UserMoveToSlotEvent(this, user, slot);
+                this.eventBus.fire(event);
+
+                if (event.getSlot() != slot) {
+                    this.movePlayer(user, event.getSlot());
+                }
+            }
+            case TEAM_SWITCH -> {
+                String username = matcher.group(1);
+                MultiplayerTeam team = MultiplayerTeam.fromString(matcher.group(2));
+                User user = UserImpl.get(username);
+                UserSwitchTeamEvent event = new UserSwitchTeamEvent(this, user, team);
+                this.eventBus.fire(event);
+
+                if (event.isCancelled()) {
+                    this.setTeam(user, getTeam(user));
+                    return true;
+                }
+                this.setTeam(user, event.getTeam());
+            }
+            case LEAVE -> {
+                String username = matcher.group(1);
+                User user = UserImpl.get(username);
+                this.playerStates.remove(user);
+            }
+            case FINISHED_PLAYING -> {
+                String username = matcher.group(1);
+                int score = Integer.parseInt(matcher.group(2));
+                PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
+                User user = UserImpl.get(username);
+                this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScore(result, this.currentBeatmap.getMode() == Ruleset.OSU ? this.currentRuleset : this.currentBeatmap.getMode(), this.currentBeatmap, score, this.playerStates.get(user).mods, 0, 0, 0, 0, 0, 0, 0)));
+
+                this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
+                this.playerStates.get(user).lastScore = score;
+            }
+            case BEATMAP_CHANGED -> {
+                int beatmapId = Integer.parseInt(matcher.group(4));
+                BeatmapImpl newBeatmap = BeatmapImpl.get(beatmapId);
+
+                BeatmapChangeEvent event = new BeatmapChangeEvent(this, newBeatmap);
+                this.eventBus.fire(event);
+                if (event.isCancelled()) {
+                    this.setCurrentBeatmap(currentBeatmap);
+                    return true;
+                }
+            }
+            case HOST_CHANGED -> {
+                String username = matcher.group(1);
+                User user = UserImpl.get(username);
+
+                HostChangeEvent event = new HostChangeEvent(this, this.host, user);
+                this.eventBus.fire(event);
+
+                if (event.isCancelled()) {
+                    this.setHost(getHost());
+                    return true;
+                }
+
+                this.host = user;
+            }
+            case ALL_READY -> {
+                for (UserState state : this.playerStates.values()) {
+                    state.waitStatus = PlayerWaitStatus.READY;
+                }
+                this.eventBus.fire(new AllReadyEvent(this));
+            }
+            case MATCH_STARTED -> {
+                for (UserState state : this.playerStates.values()) {
+                    if (state.waitStatus == PlayerWaitStatus.NO_MAP) {
+                        continue;
+                    }
+                    state.waitStatus = PlayerWaitStatus.IN_GAME;
+                }
+                this.eventBus.fire(new MatchStartEvent(this));
+            }
+            case MATCH_FINISHED -> {
+                for (UserState state : this.playerStates.values()) {
+                    state.waitStatus = PlayerWaitStatus.NOT_READY;
+                }
+
+                this.eventBus.fire(new MatchEndEvent(this));
+            }
+        }
+        return true;
+    }
+
+    private boolean processRoomStateUpdate(String message) {
+        RoomSettingMessagePattern currentPattern = RoomSettingMessagePattern.findMatchingPattern(message);
+
+        if (currentPattern != null) {
+            Matcher matcher = currentPattern.getPattern().matcher(message);
+            if (!matcher.matches()) {
+                return false;
+            }
+
+            switch (currentPattern) {
+                case ROOM_NAME_AND_LINK -> {
+                    refreshRoomMetadata(matcher);
+                }
+                case BEATMAP -> {
+                    refreshBeatmapMetadata(matcher);
+                }
+                case MODE -> {
+                    refreshModeMetadata(matcher);
+                }
+                case PLAYER_COUNT -> {
+                }
+                case SLOTS -> {
+                    refreshPlayerSlot(matcher);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     @Override
     protected void processServerMessages(List<String> messages) {
         this.lastActTimer = System.currentTimeMillis();
         for (String message : messages) {
-            BanchoMessagePattern matching = BanchoMessagePattern.findMatchingPattern(message);
-            if (matching == null) {
+            if (processRoomEvent(message)) {
                 continue;
             }
-
-            Matcher matcher = matching.getPattern().matcher(message);
-            if (!matcher.find()) {
+            if (processRoomStateUpdate(message)) {
                 continue;
-            }
-            switch (matching) {
-                case JOIN_ROOM -> {
-                    String username = matcher.group(1);
-                    int slot = Integer.parseInt(matcher.group(2));
-                    User user = UserImpl.get(username);
-                    this.playerStates.put(user, new UserState(user));
-                    UserMoveToSlotEvent event = new UserJoinRoomEvent(this, user, slot);
-                    this.eventBus.fire(event);
-
-                    if (event.getSlot() != slot) {
-                        this.movePlayer(user, event.getSlot());
-                    }
-                }
-                case MOVE -> {
-                    String username = matcher.group(1);
-                    int slot = Integer.parseInt(matcher.group(2));
-                    User user = UserImpl.get(username);
-                    UserMoveToSlotEvent event = new UserMoveToSlotEvent(this, user, slot);
-                    this.eventBus.fire(event);
-
-                    if (event.getSlot() != slot) {
-                        this.movePlayer(user, event.getSlot());
-                    }
-                }
-                case TEAM_SWITCH -> {
-                    String username = matcher.group(1);
-                    MultiplayerTeam team = MultiplayerTeam.fromString(matcher.group(2));
-                    User user = UserImpl.get(username);
-                    UserSwitchTeamEvent event = new UserSwitchTeamEvent(this, user, team);
-                    this.eventBus.fire(event);
-
-                    if (event.isCancelled()) {
-                        this.setTeam(user, getTeam(user));
-                        return;
-                    }
-                    this.setTeam(user, event.getTeam());
-                }
-                case LEAVE -> {
-                    String username = matcher.group(1);
-                    User user = UserImpl.get(username);
-                    this.playerStates.remove(user);
-                }
-                case FINISHED_PLAYING -> {
-                    String username = matcher.group(1);
-                    int score = Integer.parseInt(matcher.group(2));
-                    PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
-                    User user = UserImpl.get(username);
-                    this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScore(result, this.currentBeatmap.getMode() == Ruleset.OSU ? this.currentRuleset : this.currentBeatmap.getMode(), this.currentBeatmap, score, this.playerStates.get(user).mods, 0, 0, 0, 0, 0, 0, 0)));
-
-                    this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
-                    this.playerStates.get(user).lastScore = score;
-                }
-                case BEATMAP_CHANGED -> {
-                    int beatmapId = Integer.parseInt(matcher.group(4));
-                    BeatmapImpl newBeatmap = BeatmapImpl.get(beatmapId);
-
-                    BeatmapChangeEvent event = new BeatmapChangeEvent(this, newBeatmap);
-                    this.eventBus.fire(event);
-                    if (event.isCancelled()) {
-                        this.setCurrentBeatmap(currentBeatmap);
-                        return;
-                    }
-                }
-                case HOST_CHANGED -> {
-                    String username = matcher.group(1);
-                    User user = UserImpl.get(username);
-
-                    HostChangeEvent event = new HostChangeEvent(this, this.host, user);
-                    this.eventBus.fire(event);
-
-                    if (event.isCancelled()) {
-                        this.setHost(getHost());
-                        return;
-                    }
-
-                    this.host = user;
-                }
-                case ALL_READY -> {
-                    for (UserState state : this.playerStates.values()) {
-                        state.waitStatus = PlayerWaitStatus.READY;
-                    }
-                    this.eventBus.fire(new AllReadyEvent(this));
-                }
-                case MATCH_STARTED -> {
-                    for (UserState state : this.playerStates.values()) {
-                        if (state.waitStatus == PlayerWaitStatus.NO_MAP) {
-                            continue;
-                        }
-                        state.waitStatus = PlayerWaitStatus.IN_GAME;
-                    }
-                    this.eventBus.fire(new MatchStartEvent(this));
-                }
-                case MATCH_FINISHED -> {
-                    for (UserState state : this.playerStates.values()) {
-                        state.waitStatus = PlayerWaitStatus.NOT_READY;
-                    }
-                    scheduler.runTask(this::refreshState);
-
-                    this.eventBus.fire(new MatchEndEvent(this));
-                }
             }
         }
     }

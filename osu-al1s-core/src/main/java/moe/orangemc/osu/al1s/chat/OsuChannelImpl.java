@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.chat;
 
+import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
 import moe.orangemc.osu.al1s.api.event.EventBus;
@@ -30,9 +31,10 @@ import java.util.function.Consumer;
 public abstract class OsuChannelImpl implements OsuChannel {
     @Inject
     private ChatManager chatManager;
-
     @Inject
     private EventBus eventBus;
+    @Inject
+    private OsuBot bot;
 
     private final BanchoBotWatchdog watchdog = new BanchoBotWatchdog(this);
 
@@ -56,10 +58,12 @@ public abstract class OsuChannelImpl implements OsuChannel {
 
         List<String> messages = List.copyOf(this.polledServerMessages);
 
-        polledQueue.addAll(messages);
-        this.processServerMessages(messages);
-        eventBus.fire(new SystemMessagePoll(messages, this));
-        this.polledServerMessages.clear();
+        bot.execute(() -> {
+            polledQueue.addAll(messages);
+            this.processServerMessages(messages);
+            eventBus.fire(new SystemMessagePoll(messages, this));
+            this.polledServerMessages.clear();
+        });
     }
 
     public void pollServerMessages(Consumer<LinkedBlockingDeque<String>> consumer) {
