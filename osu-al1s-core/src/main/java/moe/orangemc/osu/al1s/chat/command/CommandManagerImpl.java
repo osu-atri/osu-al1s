@@ -61,7 +61,7 @@ public class CommandManagerImpl implements CommandManager {
 
     public boolean executeCommand(UserImpl sender, OsuChannelImpl where, String command) {
         StringReader reader = new StringReader(command);
-        String cmdName = reader.getRootCommand();
+        String cmdName = reader.getRootCommand().toLowerCase();
         CommandBase cmd = commandMap.get(cmdName);
         if (cmd == null) {
             return false;
@@ -86,6 +86,6 @@ public class CommandManagerImpl implements CommandManager {
 
     @Override
     public void registerCommand(CommandBase cmd) {
-        this.commandMap.put(cmd.getName(), cmd);
+        this.commandMap.put(cmd.getName().toLowerCase(), cmd);
     }
 }

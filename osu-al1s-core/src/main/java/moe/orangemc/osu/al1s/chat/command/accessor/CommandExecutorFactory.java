@@ -141,12 +141,17 @@ public class CommandExecutorFactory {
         Label tryStart = new Label();
         Label tryEnd = new Label();
         Label catchStart = new Label();
+        Label beforeCatch = new Label();
 
         mv.visitTryCatchBlock(tryStart, tryEnd, catchStart, "java/lang/IllegalArgumentException");
         mv.visitTryCatchBlock(tryStart, tryEnd, catchStart, "java/lang/StringIndexOutOfBoundsException");
         mv.visitLabel(tryStart);
 
         mv.visitVarInsn(Opcodes.ALOAD, 4);
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "canRead", Type.getMethodDescriptor(Type.BOOLEAN_TYPE), false);
+        mv.visitInsn(Opcodes.ICONST_0);
+        mv.visitJumpInsn(Opcodes.IF_ICMPEQ, beforeCatch);
         mv.visitInsn(Opcodes.DUP);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "mark", Type.getMethodDescriptor(Type.VOID_TYPE), false);
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, typeAdapterType.getInternalName(), "parse", Type.getMethodDescriptor(SneakyExceptionHelper.call(() -> ArgumentTypeAdapter.class.getMethod("parse", StringReader.class))), true);
@@ -182,6 +187,8 @@ public class CommandExecutorFactory {
             mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/IllegalArgumentException", "<init>", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(String.class)), false);
             mv.visitInsn(Opcodes.ATHROW);
         }
+        mv.visitLabel(beforeCatch);
+        mv.visitInsn(Opcodes.POP);
 
         mv.visitLabel(catchStart);
         mv.visitVarInsn(Opcodes.ALOAD, 4);
