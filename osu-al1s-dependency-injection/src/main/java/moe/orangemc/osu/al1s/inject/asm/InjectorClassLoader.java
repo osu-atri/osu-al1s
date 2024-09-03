@@ -31,6 +31,8 @@ import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 public class InjectorClassLoader extends ClassLoader {
+    private static final boolean DEBUG = false;
+
     private static final List<File> classPath = Stream.of(System.getProperty("java.class.path").split(File.pathSeparator)).map(File::new).toList();
     private final Map<String, Class<?>> cache = new HashMap<>();
     private final InjectorImpl injector;
@@ -54,37 +56,41 @@ public class InjectorClassLoader extends ClassLoader {
             return cache.get(name);
         }
 
-        Class<?> found = null;
-        for (File file : classPath) {
-            if (file.isDirectory()) {
-                File classFile = new File(file, name.replace('.', File.separatorChar) + ".class");
+        try {
+            Class<?> found = null;
+            for (File file : classPath) {
+                if (file.isDirectory()) {
+                    File classFile = new File(file, name.replace('.', File.separatorChar) + ".class");
 
-                if (classFile.exists()) {
-                    byte[] bytes = readClassFromFile(classFile);
+                    if (classFile.exists()) {
+                        byte[] bytes = readClassFromFile(classFile);
+                        if (bytes == null) {
+                            continue;
+                        }
+
+                        byte[] finalData = transform(bytes);
+                        found = defineClass(name, finalData, 0, finalData.length);
+                    }
+                }
+                if (file.getName().endsWith(".jar") || file.getName().endsWith(".war")) {
+                    byte[] bytes = readClassFromJar(file, name);
                     if (bytes == null) {
                         continue;
                     }
-
                     byte[] finalData = transform(bytes);
                     found = defineClass(name, finalData, 0, finalData.length);
                 }
             }
-            if (file.getName().endsWith(".jar") || file.getName().endsWith(".war")) {
-                byte[] bytes = readClassFromJar(file, name);
-                if (bytes == null) {
-                    continue;
-                }
-                byte[] finalData = transform(bytes);
-                found = defineClass(name, finalData, 0, finalData.length);
+
+            if (found == null) {
+                found = getParent().loadClass(name);
             }
-        }
 
-        if (found == null) {
-            found = getParent().loadClass(name);
+            cache.put(name, found);
+            return found;
+        } catch (Exception e) {
+            throw new ClassNotFoundException(name, e);
         }
-
-        cache.put(name, found);
-        return found;
     }
 
     private byte[] transform(byte[] from) {
@@ -93,7 +99,9 @@ public class InjectorClassLoader extends ClassLoader {
 
         cr.accept(new InjectClassTransformer(new CheckClassAdapter(cw)), 0);
 
-        return cw.toByteArray();
+        byte[] clsBytes = cw.toByteArray();
+        dumpClass(clsBytes);
+        return clsBytes;
     }
 
     private byte[] readClassFromFile(File classFile) {
@@ -122,5 +130,22 @@ public class InjectorClassLoader extends ClassLoader {
 
     public Injector getInjector() {
         return injector;
+    }
+
+    private void dumpClass(byte[] data) {
+        if (!DEBUG) {
+            return;
+        }
+
+        try {
+            File tmp = File.createTempFile("dump", ".class");
+            System.out.println("Dumping class to " + tmp.getAbsolutePath());
+
+            try (FileOutputStream fos = new FileOutputStream(tmp)) {
+                fos.write(data);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

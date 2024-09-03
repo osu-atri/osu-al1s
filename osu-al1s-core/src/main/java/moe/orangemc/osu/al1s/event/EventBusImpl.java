@@ -20,16 +20,20 @@ import moe.orangemc.osu.al1s.api.event.Event;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.EventHandler;
 import moe.orangemc.osu.al1s.api.event.HandlerOrder;
-import moe.orangemc.osu.al1s.event.asm.HandlerDispatcher;
-import moe.orangemc.osu.al1s.event.asm.HandlerDispatcherFactory;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.event.accessor.GeneratedHandlerDispatcher;
+import moe.orangemc.osu.al1s.event.accessor.HandlerDispatcherFactory;
+import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.lang.reflect.AccessFlag;
 import java.lang.reflect.Method;
 import java.util.*;
 
 public class EventBusImpl implements EventBus {
+    @Inject
+    private OsuBotImpl bot;
     private final HandlerDispatcherFactory factory = new HandlerDispatcherFactory();
-    private final Map<Class<?>, Set<HandlerDispatcher<?>>> handlers = new HashMap<>();
+    private final Map<Class<?>, Set<GeneratedHandlerDispatcher<?>>> handlers = new HashMap<>();
 
     @Override
     public void register(Object listener) {
@@ -67,19 +71,19 @@ public class EventBusImpl implements EventBus {
     public void fire(Event event) {
         Class<?> evtClass = event.getClass();
 
-        List<Set<HandlerDispatcher<Event>>> layeredHandlers = new ArrayList<>();
+        List<Set<GeneratedHandlerDispatcher<Event>>> layeredHandlers = new ArrayList<>();
 
         for (int i = 0; i < HandlerOrder.values().length; i++) {
             layeredHandlers.add(new HashSet<>());
         }
 
         while (Event.class.isAssignableFrom(evtClass)) {
-            handlers.getOrDefault(evtClass, Collections.emptySet()).forEach(handler -> layeredHandlers.get(handler.getOrderIndex()).add((HandlerDispatcher<Event>) handler));
+            handlers.getOrDefault(evtClass, Collections.emptySet()).forEach(handler -> layeredHandlers.get(handler.getOrderIndex()).add((GeneratedHandlerDispatcher<Event>) handler));
             evtClass = evtClass.getSuperclass();
         }
 
-        for (Set<HandlerDispatcher<Event>> handlers : layeredHandlers) {
-            handlers.forEach(handler -> handler.dispatchEvent(event));
+        for (Set<GeneratedHandlerDispatcher<Event>> handlers : layeredHandlers) {
+            bot.execute(() -> handlers.forEach(handler -> handler.dispatchEvent(event)));
         }
     }
 }

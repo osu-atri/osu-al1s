@@ -14,12 +14,13 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.event.asm;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
-import moe.orangemc.osu.al1s.api.event.Event;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.user.User;
 
-public interface HandlerDispatcher<T extends Event> {
-    void dispatchEvent(T event);
-    Object getOwner();
-    int getOrderIndex();
+public class UserJoinRoomEvent extends UserMoveToSlotEvent {
+    public UserJoinRoomEvent(MultiplayerRoom room, User user, int slot) {
+        super(room, user, slot);
+    }
 }

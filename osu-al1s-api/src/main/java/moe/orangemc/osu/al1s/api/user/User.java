@@ -16,6 +16,16 @@
 
 package moe.orangemc.osu.al1s.api.user;
 
-public interface User {
+import moe.orangemc.osu.al1s.api.chat.OsuChannel;
+
+public interface User extends OsuChannel {
+    int getId();
+    String getUsername();
+
     <T> T getMetadata(String key);
+
+    @Override
+    default String getChannelName() {
+        throw new UnsupportedOperationException();
+    }
 }

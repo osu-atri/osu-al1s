@@ -17,11 +17,13 @@
 package moe.orangemc.osu.al1s.api.event.auth;
 
 import moe.orangemc.osu.al1s.api.event.CancellableEvent;
+import moe.orangemc.osu.al1s.api.event.Event;
 
 import java.net.InetSocketAddress;
 
-public class UserActionEvent extends CancellableEvent {
+public class UserActionEvent extends Event implements CancellableEvent {
     private final InetSocketAddress userAddr;
+    private boolean cancelled;
 
     public UserActionEvent(InetSocketAddress userAddr) {
         this.userAddr = userAddr;
@@ -29,5 +31,15 @@ public class UserActionEvent extends CancellableEvent {
 
     public InetSocketAddress getUserAddr() {
         return userAddr;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }

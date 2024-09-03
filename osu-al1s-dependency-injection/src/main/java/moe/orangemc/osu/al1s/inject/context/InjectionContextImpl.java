@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.inject.context;
 
+import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.InvalidInjectModuleException;
 import moe.orangemc.osu.al1s.inject.api.Provides;
@@ -32,17 +33,26 @@ public class InjectionContextImpl implements InjectionContext {
     private final Map<String, Class<?>> providedClass = new HashMap<>();
     private final Map<Class<?>, Map<String, Object>> fieldMap = new HashMap<>();
 
-    public InjectionContextImpl() {
+    private final InjectorImpl owner;
+
+    public InjectionContextImpl(InjectorImpl owner) {
+        this.owner = owner;
         this.parent = null;
     }
 
-    public InjectionContextImpl(InjectionContextImpl parent) {
+    public InjectionContextImpl(InjectionContextImpl parent, InjectorImpl owner) {
         this.parent = parent;
+        this.owner = owner;
         parent.addDirectChildren(this);
     }
 
     @Override
     public void registerModule(Object module) {
+        registerModule(module, false);
+    }
+
+    @Override
+    public void registerModule(Object module, boolean reload) {
         for (Method method : module.getClass().getMethods()) {
             Provides providesAnnotation = method.getAnnotation(Provides.class);
             if (providesAnnotation == null) {
@@ -59,7 +69,7 @@ public class InjectionContextImpl implements InjectionContext {
                 method.setAccessible(true);
                 Object value = method.invoke(module);
                 Map<String, Object> map = fieldMap.computeIfAbsent(clazz, _ -> new HashMap<>());
-                if (map.containsKey(name)) {
+                if (map.containsKey(name) && !reload) {
                     throw new InvalidInjectModuleException(module.getClass(), "Duplicate @Provides name: " + clazz.getName() + ":" + name);
                 }
 
@@ -71,12 +81,27 @@ public class InjectionContextImpl implements InjectionContext {
     }
 
     @Override
+    public void registerModule(String className) {
+        registerModule(className, false);
+    }
+
+    @Override
+    public void registerModule(String className, boolean reload) {
+        Class<?> clazz = this.owner.loadWithInjection(className);
+        try {
+            registerModule(clazz.getDeclaredConstructor().newInstance(), reload);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new InvalidInjectModuleException(clazz, e);
+        }
+    }
+
+    @Override
     public Object mapField(Class<?> clazz, String name) {
         if (!fieldMap.containsKey(clazz) || !fieldMap.get(clazz).containsKey(name)) {
             if (parent != null) {
                 return parent.mapField(clazz, name);
             }
-            throw new NoSuchElementException("No such value in: " + clazz.getName() + ":" + name);
+            throw new NoSuchElementException("No such value in: " + clazz.getName() + ":" + name + ", loaded by " + clazz.getClassLoader());
         }
 
         return fieldMap.get(clazz).get(name);
@@ -85,20 +110,6 @@ public class InjectionContextImpl implements InjectionContext {
     @Override
     public Class<?> getMappedClass(String name) {
         return providedClass.get(name);
-    }
-
-    @Override
-    public void addExternalClass(Class<?>... classes) {
-        for (Class<?> clazz : classes) {
-            providedClass.put(clazz.getName(), clazz);
-        }
-    }
-
-    @Override
-    public void addExternalClass(java.util.Collection<Class<?>> classes) {
-        for (Class<?> clazz : classes) {
-            providedClass.put(clazz.getName(), clazz);
-        }
     }
 
     private void addDirectChildren(InjectionContextImpl child) {

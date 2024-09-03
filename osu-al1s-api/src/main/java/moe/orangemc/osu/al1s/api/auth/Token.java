@@ -24,4 +24,7 @@ public interface Token {
     long getTimeToLive();
 
     void refresh();
+
+    byte[] serialize();
+    byte[] serialize(byte[] key);
 }

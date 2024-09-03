@@ -62,7 +62,7 @@ public class CredentialBase implements Credential {
     public String toUrlEncodedForm() {
         return "client_id=" + clientId + "&" +
                 "client_secret=" + URLUtil.encode(clientSecret) + "&" +
-                "scope=" + URLUtil.encode(scopes.stream().map(Scope::name).reduce((a, b) -> a + " " + b).orElseThrow(() -> new IllegalStateException("Unknown scope"))) + "&" +
+                "scope=" + Scope.join(this.scopes) + "&" +
                 "grant_type=" + URLUtil.encode(getGrantType().toString());
     }
 

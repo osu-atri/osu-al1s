@@ -23,16 +23,23 @@ import moe.orangemc.osu.al1s.inject.asm.InjectorClassLoader;
 import moe.orangemc.osu.al1s.inject.context.ContextSessionImpl;
 import moe.orangemc.osu.al1s.inject.context.InjectionContextImpl;
 
+import java.util.*;
+
 public class InjectorImpl implements Injector {
-    private final InjectionContextImpl root = new InjectionContextImpl();
+    private final InjectionContextImpl root = new InjectionContextImpl(this);
     private final InjectorClassLoader classLoader = new InjectorClassLoader(getClass().getClassLoader(), this);
 
     private InjectionContextImpl context = root;
+    private boolean selfProvided = false;
 
+    private final Stack<InjectionContextImpl> contextStack = new Stack<>();
 
     @Override
-    public Class<?> bootstrap(String rootClass) {
-        root.registerModule(new InjectorProvider(this));
+    public Class<?> loadWithInjection(String rootClass) {
+        if (!selfProvided) {
+            selfProvided = true;
+            root.registerModule(new InjectorProvider(this));
+        }
         try {
             return classLoader.loadClass(rootClass);
         } catch (ClassNotFoundException e) {
@@ -42,7 +49,7 @@ public class InjectorImpl implements Injector {
 
     @Override
     public InjectionContext derivativeContext() {
-        return new InjectionContextImpl(context);
+        return new InjectionContextImpl(context, this);
     }
 
     @Override
@@ -51,22 +58,30 @@ public class InjectorImpl implements Injector {
             throw new IllegalArgumentException("Invalid context class: " + context.getClass());
         }
 
-        if (!(root.isChild(ctx))) {
+        if (!(root.isChild(ctx)) && root != ctx) {
             throw new IllegalArgumentException("Unclaimed context");
         }
 
-        InjectionContext last = this.context;
-        this.unsafeSetContext(ctx);
+        this.pushContext(ctx);
 
-        return new ContextSessionImpl(this, last);
+        return new ContextSessionImpl(this);
     }
 
-    public void unsafeSetContext(InjectionContext context) {
-        this.context = (InjectionContextImpl) context;
+    private void pushContext(InjectionContextImpl ctx) {
+        contextStack.push(this.context);
+        this.context = ctx;
+    }
+
+    public void popContext() {
+        this.context = contextStack.pop();
     }
 
     @Override
     public InjectionContext getCurrentContext() {
         return context;
+    }
+
+    public InjectorClassLoader getClassLoader() {
+        return classLoader;
     }
 }

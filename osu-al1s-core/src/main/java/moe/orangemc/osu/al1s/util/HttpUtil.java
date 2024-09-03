@@ -41,30 +41,7 @@ public class HttpUtil {
             //Create connection
             connection = (HttpURLConnection) targetURL.openConnection();
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type",
-                    "application/x-www-form-urlencoded");
-
-            connection.setRequestProperty("Content-Length",
-                    Integer.toString(urlParameters.getBytes().length));
-            connection.setRequestProperty("Content-Language", "en-US");
-
-            if (referer != null && referer.getToken() != null) {
-                connection.setRequestProperty("Authorization", ((TokenImpl) referer.getToken()).toHttpToken());
-            }
-
-            headers.forEach(connection::setRequestProperty);
-
-            connection.setUseCaches(false);
-            connection.setDoOutput(true);
-
-            //Send request
-            DataOutputStream wr = new DataOutputStream(
-                    connection.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.close();
-
-            //Get Response
-            return readResponse(connection);
+            return performRequest(connection, urlParameters, headers);
         } catch (Exception e) {
             return SneakyExceptionHelper.raise(e);
         } finally {
@@ -107,14 +84,93 @@ public class HttpUtil {
         }
     }
 
+    public static String put(URL targetURL, String urlParameters) {
+        return put(targetURL, urlParameters, Collections.emptyMap());
+    }
+
+    public static String put(URL targetURL, String urlParameters, Map<String, String> headers) {
+        HttpURLConnection connection = null;
+
+        try {
+            //Create connection
+            connection = (HttpURLConnection) targetURL.openConnection();
+            connection.setRequestMethod("PUT");
+            return performRequest(connection, urlParameters, headers);
+        } catch (Exception e) {
+            return SneakyExceptionHelper.raise(e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    public static String delete(URL targetURL) {
+        return delete(targetURL, "");
+    }
+
+    public static String delete(URL targetURL, String urlParameters) {
+        return delete(targetURL, urlParameters, Collections.emptyMap());
+    }
+
+    public static String delete(URL targetURL, String urlParameters, Map<String, String> headers) {
+        HttpURLConnection connection = null;
+
+        try {
+            //Create connection
+            connection = (HttpURLConnection) targetURL.openConnection();
+            connection.setRequestMethod("DELETE");
+            return performRequest(connection, urlParameters, headers);
+        } catch (Exception e) {
+            return SneakyExceptionHelper.raise(e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private static String performRequest(HttpURLConnection connection, String urlParameters, Map<String, String> headers) throws Exception {
+        connection.setRequestProperty("Content-Type",
+                "application/x-www-form-urlencoded");
+
+        connection.setRequestProperty("Content-Length",
+                Integer.toString(urlParameters.getBytes().length));
+        connection.setRequestProperty("Content-Language", "en-US");
+
+        if (referer != null && referer.getToken() != null) {
+            connection.setRequestProperty("Authorization", ((TokenImpl) referer.getToken()).toHttpToken());
+        }
+
+        headers.forEach(connection::setRequestProperty);
+
+        connection.setUseCaches(false);
+        connection.setDoOutput(true);
+
+        //Send request
+        DataOutputStream wr = new DataOutputStream(
+                connection.getOutputStream());
+        wr.writeBytes(urlParameters);
+        wr.close();
+
+        //Get Response
+        return readResponse(connection);
+    }
+
     private static String readResponse(HttpURLConnection connection) throws IOException {
+        try {
+            connection.setDoInput(true);
+        } catch (IllegalStateException _) {
+
+        }
+
         InputStream is = connection.getInputStream();
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));
         StringBuilder response = new StringBuilder();
         String line;
         while ((line = rd.readLine()) != null) {
             response.append(line);
-            response.append('\r');
+            response.append('\n');
         }
         rd.close();
         return response.toString();

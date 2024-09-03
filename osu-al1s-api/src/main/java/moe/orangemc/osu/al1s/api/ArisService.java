@@ -20,7 +20,7 @@ import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
 import moe.orangemc.osu.al1s.api.spi.ArisServiceProviderRegistry;
 
 public class ArisService {
-    public static void boot(String init) {
-        ArisServiceProviderRegistry.get(ArisBootstrapService.class).defaultProvider().boot(init);
+    public static void bootstrap(String init, String[] args) {
+        ArisServiceProviderRegistry.get(ArisBootstrapService.class).defaultProvider().bootstrap(init, args);
     }
 }

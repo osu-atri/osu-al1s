@@ -16,38 +16,64 @@
 
 package moe.orangemc.osu.al1s.user;
 
+import moe.orangemc.osu.al1s.api.auth.Scope;
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
+import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class UserImpl implements User {
+public class UserImpl extends OsuChannelImpl implements User {
+    private static UserImpl ME = null;
+    private static final Map<Integer, UserImpl> byId = new ConcurrentHashMap<>();
+    private static final Map<String, UserImpl> byUsername = new ConcurrentHashMap<>();
+
     private final int id;
 
     @Inject
     private UserRequestAPI api;
+    @Inject
+    private OsuBotImpl bot;
+
     private final Map<String, Object> metadata;
 
 
-    public UserImpl() {
+    private UserImpl() {
         metadata = api.getSelfMetadata();
-        this.id = getMetadata("id");
+        this.id = (int)((double) getMetadata("id"));
     }
 
-    public UserImpl(int id) {
+    private UserImpl(int id) {
+        bot.checkPermission(Scope.PUBLIC);
+
         metadata = api.getUserMetadata(id);
-        this.id = getMetadata("id");
+        this.id = (int)((double) getMetadata("id"));
     }
 
-    public UserImpl(String username) {
+    private UserImpl(String username) {
+        bot.checkPermission(Scope.PUBLIC);
+
         metadata = api.getUserMetadata(username);
-        this.id = getMetadata("id");
+        this.id = (int)((double) getMetadata("id"));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getMetadata(String key) {
         return (T) metadata.get(key);
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public String getUsername() {
+        return getMetadata("username");
     }
 
     @Override
@@ -58,5 +84,20 @@ public class UserImpl implements User {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    public static UserImpl get(int id) {
+        return byId.computeIfAbsent(id, UserImpl::new);
+    }
+
+    public static UserImpl get(String username) {
+        return byUsername.computeIfAbsent(username, UserImpl::new);
+    }
+
+    public static UserImpl me() {
+        if (ME == null) {
+            ME = new UserImpl();
+        }
+        return ME;
     }
 }

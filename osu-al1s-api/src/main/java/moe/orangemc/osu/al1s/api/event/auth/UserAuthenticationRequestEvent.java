@@ -21,7 +21,7 @@ import moe.orangemc.osu.al1s.api.event.Event;
 import java.net.URL;
 
 public class UserAuthenticationRequestEvent extends Event {
-    private URL requestURL;
+    private final URL requestURL;
 
     public UserAuthenticationRequestEvent(URL requestURL) {
         this.requestURL = requestURL;

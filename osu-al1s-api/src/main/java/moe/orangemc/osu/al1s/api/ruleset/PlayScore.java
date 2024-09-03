@@ -14,21 +14,11 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.event.asm;
+package moe.orangemc.osu.al1s.api.ruleset;
 
-import java.util.HashMap;
-import java.util.Map;
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 
-class HandlerDispatcherClassLoader extends ClassLoader {
-    private final Map<String, Class<?>> madeClassCache = new HashMap<>();
+import java.util.Set;
 
-    public Class<?> makeClass(String name, byte[] classBytes) {
-        if (madeClassCache.containsKey(name)) {
-            return madeClassCache.get(name);
-        }
-
-        Class<?> cls = this.defineClass(name, classBytes, 0, classBytes.length);
-        madeClassCache.put(name, cls);
-        return cls;
-    }
+public record PlayScore(PlayResult result, Ruleset ruleset, Beatmap map, int score, Set<Mod> mods, double accuracy, int maxCombo, int count50, int count100, int count300, int countMiss, double pp) {
 }

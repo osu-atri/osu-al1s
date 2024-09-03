@@ -17,7 +17,11 @@
 package moe.orangemc.osu.al1s.api.bot;
 
 import moe.orangemc.osu.al1s.api.auth.Credential;
+import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
+import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
+import moe.orangemc.osu.al1s.api.chat.ChatManager;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.user.User;
 
@@ -27,7 +31,25 @@ public interface OsuBot extends User {
     Future<Void> authenticate(Credential credential);
     void authenticateSync(Credential credential);
 
+    Future<Void> authenticate(IrcCredential credential);
+    void authenticateSync(IrcCredential credential);
+
     EventBus getEventBus();
+    Scheduler getScheduler();
+    ChatManager getChatManager();
 
     Token getToken();
+    void useToken(Token token);
+
+    void execute(Runnable runnable);
+    Beatmap findBeatmap(int beatmapId);
+
+    @Override
+    default String getChannelName() {
+        throw new UnsupportedOperationException("I'm a osu!bot");
+    }
+
+    default void sendMessage(String message) {
+        throw new UnsupportedOperationException("I cannot chat to myself");
+    }
 }

@@ -22,21 +22,36 @@ import moe.orangemc.osu.al1s.bot.BotFactoryModule;
 import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.Injector;
-import moe.orangemc.osu.al1s.user.UserRequestAPIModule;
 import moe.orangemc.osu.al1s.util.GsonProvider;
+import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
+
+import java.lang.reflect.Constructor;
 
 public class ArisBootstrapServiceImpl implements ArisBootstrapService {
     @Override
-    public void boot(String init) {
+    public void bootstrap(String init, String[] args) {
         Injector injector = new InjectorImpl();
 
         InjectionContext ctx = injector.getCurrentContext();
 
-        ctx.registerModule(new GsonProvider());
-        ctx.registerModule(new BotFactoryModule());
-        ctx.registerModule(new CredentialProviderModule());
-        ctx.registerModule(new UserRequestAPIModule());
+        ctx.registerModule("moe.orangemc.osu.al1s.auth.CredentialProviderModule");
+        ctx.registerModule("moe.orangemc.osu.al1s.bot.BotFactoryModule");
+        ctx.registerModule("moe.orangemc.osu.al1s.util.GsonProvider");
 
-        injector.bootstrap(init);
+        Class<?> initInterfaceClass = injector.loadWithInjection("moe.orangemc.osu.al1s.api.bot.InitEntry");
+        Class<?> initClass = injector.loadWithInjection(init);
+        if (!initInterfaceClass.isAssignableFrom(initClass)) {
+            throw new IllegalArgumentException("Init class must implement InitEntry");
+        }
+
+        Constructor<?> entryConstructor;
+        try {
+            entryConstructor = initClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("Init class must have a public no-args constructor", e);
+        }
+
+        Object entry = SneakyExceptionHelper.call(entryConstructor::newInstance);
+        SneakyExceptionHelper.call(() -> initClass.getMethod("main", String[].class).invoke(entry, (Object) args));
     }
 }

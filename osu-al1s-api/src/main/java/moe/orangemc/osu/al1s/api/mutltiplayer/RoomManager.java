@@ -14,21 +14,8 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api;
+package moe.orangemc.osu.al1s.api.mutltiplayer;
 
-public enum Ruleset {
-    OSU("osu!standard"),
-    TAIKO("osu!taiko"),
-    CATCH("osu!catch"),
-    MANIA("osu!mania");
-
-    private final String name;
-
-    Ruleset(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
+public interface RoomManager {
+    MultiplayerRoom createRoom(String roomName);
 }

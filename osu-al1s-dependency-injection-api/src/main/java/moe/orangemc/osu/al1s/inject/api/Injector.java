@@ -17,7 +17,7 @@
 package moe.orangemc.osu.al1s.inject.api;
 
 public interface Injector {
-    Class<?> bootstrap(String rootClass);
+    Class<?> loadWithInjection(String rootClass);
 
     InjectionContext derivativeContext();
     ContextSession setContext(InjectionContext context);

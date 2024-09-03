@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.event.asm;
+package moe.orangemc.osu.al1s.event.accessor;
 
 import org.objectweb.asm.*;
 

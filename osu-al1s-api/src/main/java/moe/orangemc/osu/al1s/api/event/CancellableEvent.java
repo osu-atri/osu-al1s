@@ -16,14 +16,7 @@
 
 package moe.orangemc.osu.al1s.api.event;
 
-public class CancellableEvent extends Event {
-    private boolean cancelled;
-
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
+public interface CancellableEvent {
+    boolean isCancelled();
+    void setCancelled(boolean cancelled);
 }

@@ -1,0 +1,35 @@
+/*
+ * Copyright 2024 Astro angelfish
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+package moe.orangemc.osu.al1s.chat.command.argument;
+
+import moe.orangemc.osu.al1s.api.chat.command.ArgumentTypeAdapter;
+import moe.orangemc.osu.al1s.api.chat.command.StringReader;
+import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.user.UserImpl;
+
+public class UserTypeAdapter implements ArgumentTypeAdapter<User> {
+    @Override
+    public User parse(StringReader reader) {
+        String userArg = reader.readString();
+
+        try {
+            return UserImpl.get(Integer.parseInt(userArg));
+        } catch (NumberFormatException e) {
+            return UserImpl.get(userArg);
+        }
+    }
+}

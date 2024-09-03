@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.bot;
 
 import moe.orangemc.osu.al1s.api.bot.BotFactory;
+import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 
 import java.net.URI;
@@ -26,13 +27,22 @@ public class BotFactoryImpl implements BotFactory {
     private URL baseUrl;
     private boolean debug;
 
+    private String serverBotName;
+
+    private String ircHost;
+    private int ircPort;
+
     public BotFactoryImpl() {
         SneakyExceptionHelper.voidCall(() -> withBaseURL(new URI("https://osu.ppy.sh/").toURL())
-                .withDebug(false));
+                .withDebug(false)
+                .withServerBotName("BanchoBot")
+                .withIrcServer("irc.ppy.sh", 6667)
+        );
     }
 
     @Override
     public BotFactory withBaseURL(URL baseURL) {
+        this.baseUrl = baseURL;
         return this;
     }
 
@@ -40,5 +50,35 @@ public class BotFactoryImpl implements BotFactory {
     public BotFactory withDebug(boolean debug) {
         this.debug = debug;
         return this;
+    }
+
+    @Override
+    public BotFactory withServerBotName(String serverBotName) {
+        this.serverBotName = serverBotName;
+        return this;
+    }
+
+    @Override
+    public BotFactory withIrcServer(String host, int port) {
+        this.ircHost = host;
+        this.ircPort = port;
+        return this;
+    }
+
+    @Override
+    public BotFactory withIrcServer(String host) {
+        this.ircHost = host;
+        return this;
+    }
+
+    @Override
+    public BotFactory withIrcServer(int port) {
+        this.ircPort = port;
+        return this;
+    }
+
+    @Override
+    public OsuBot build() {
+        return new OsuBotImpl(debug, baseUrl, serverBotName, ircHost, ircPort);
     }
 }
