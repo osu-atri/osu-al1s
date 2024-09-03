@@ -23,9 +23,13 @@ import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.chat.SystemMessagePoll;
 import moe.orangemc.osu.al1s.chat.driver.BanchoBotWatchdog;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public abstract class OsuChannelImpl implements OsuChannel {
@@ -39,7 +43,11 @@ public abstract class OsuChannelImpl implements OsuChannel {
     private final BanchoBotWatchdog watchdog = new BanchoBotWatchdog(this);
 
     private final List<String> polledServerMessages = new CopyOnWriteArrayList<>();
-    private final LinkedBlockingDeque<String> polledQueue = new LinkedBlockingDeque<>();
+    private final List<String> polledQueue = Collections.synchronizedList(new LinkedList<>());
+
+    private final Lock pollLock = new ReentrantLock();
+    private final Condition notEmpty = pollLock.newCondition();
+    private final Condition newArrival = pollLock.newCondition();
 
     @Override
     public final void sendMessage(String message) {
@@ -60,14 +68,45 @@ public abstract class OsuChannelImpl implements OsuChannel {
 
         bot.execute(() -> {
             polledQueue.addAll(messages);
+            try {
+                pollLock.lock();
+                notEmpty.signalAll();
+                newArrival.signalAll();
+            } finally {
+                pollLock.unlock();
+            }
             this.processServerMessages(messages);
             eventBus.fire(new SystemMessagePoll(messages, this));
             this.polledServerMessages.clear();
         });
     }
 
-    public void pollServerMessages(Consumer<LinkedBlockingDeque<String>> consumer) {
-        consumer.accept(this.polledQueue);
+    public void pollServerMessages(Consumer<List<String>> consumer) {
+        pollLock.lock();
+
+        try {
+            while (this.polledQueue.isEmpty()) {
+                SneakyExceptionHelper.voidCall(notEmpty::await);
+            }
+
+            consumer.accept(this.polledQueue);
+        } finally {
+            pollLock.unlock();
+        }
+    }
+
+    public List<String> waitForNewServerMessages() {
+        pollLock.lock();
+
+        try {
+            while (this.polledQueue.isEmpty()) {
+                SneakyExceptionHelper.voidCall(newArrival::await);
+            }
+        } finally {
+            pollLock.unlock();
+        }
+
+        return this.polledQueue;
     }
 
     public void clearUnprocessedMessages() {

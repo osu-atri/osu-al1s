@@ -83,7 +83,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         banchobot.sendMessage("!mp make " + roomName);
         CompletableFuture<String> response = new CompletableFuture<>();
         banchobot.pollServerMessages((msg) -> {
-            response.complete(SneakyExceptionHelper.call(msg::take));
+            response.complete(SneakyExceptionHelper.call(msg::removeFirst));
         });
         Matcher matcher = ROOM_CREATION_PATTERN.matcher(response.join());
         if (!matcher.find()) {
@@ -343,15 +343,25 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         this.sendMessage("!mp listrefs");
         Set<User> referees = new HashSet<>();
         this.pollServerMessages((msgToNow) -> {
-            SneakyExceptionHelper.call(msgToNow::take);
-            for (String msg : msgToNow) {
+            while (!msgToNow.contains("Match referees:")) {
+                msgToNow = this.waitForNewServerMessages();
+            }
+
+            int idx = msgToNow.indexOf("Match referees:");
+
+            for (Iterator<String> iterator = msgToNow.iterator(); iterator.hasNext(); ) {
+                String msg = iterator.next();
+                if (!(msg.matches("[0-9a-zA-Z \\[\\]\\-_]+"))) {
+                    break;
+                }
+
                 try {
                     referees.add(UserImpl.get(msg));
+                    iterator.remove();
                 } catch (Exception _) {
 
                 }
             }
-            msgToNow.clear();
         });
         return referees;
     }
