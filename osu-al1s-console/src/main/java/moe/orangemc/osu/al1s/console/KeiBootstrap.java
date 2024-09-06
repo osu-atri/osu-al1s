@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.console;
 
 import moe.orangemc.osu.al1s.api.ArisService;
 
+/**
+ * The main class to get AL1S up and running.
+ */
 public class KeiBootstrap {
     public static void main(String[] args) {
         ArisService.bootstrap("moe.orangemc.osu.al1s.console.ArisBot", args);

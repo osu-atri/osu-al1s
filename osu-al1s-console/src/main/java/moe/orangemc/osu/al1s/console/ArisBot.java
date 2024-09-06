@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.console;
 
 import moe.orangemc.osu.al1s.api.bot.InitEntry;
 
+/**
+ * Stub class (launcher base) used by {@link KeiBootstrap}.
+ */
 public class ArisBot implements InitEntry {
     @Override
     public void main(String[] args) {
