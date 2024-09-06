@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.mutltiplayer;
 
+/**
+ * Simple room manager interface stub.
+ */
 public interface RoomManager {
     MultiplayerRoom createRoom(String roomName);
 }

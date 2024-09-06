@@ -18,6 +18,10 @@ package moe.orangemc.osu.al1s.api.auth;
 
 import java.util.List;
 
+/**
+ * Available scope for a bot to use.
+ * @param name the true name of the scope
+ */
 public record Scope(String name) {
     public static String join(List<Scope> scopes) {
         StringBuilder sb = new StringBuilder();

@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.bot;
 
+/**
+ * Initialization entry of the bot, literally.
+ */
 public interface InitEntry {
     void main(String[] args);
 }

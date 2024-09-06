@@ -19,6 +19,9 @@ package moe.orangemc.osu.al1s.api.ruleset;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * All mods used in a multiplayer match game.
+ */
 public enum Mod {
     NO_MOD(0, "No Mod", "NM"),
     NO_FAIL(1, "No Fail", "NF"),
@@ -63,6 +66,14 @@ public enum Mod {
     private final String name;
     private final String shortName;
 
+    /**
+     * Constructor for creating a custom mod.
+     * @param id ID of the mod, usually listed in the <a href="https://osu.ppy.sh/wiki/Client/File_formats/osr_(file_format)">
+     *           osu!wiki page</a>
+     * @param name the full (display) name of the mod
+     * @param shortName a short name for recording, a.k.a. acronym
+     * @param overlay a list of {@link Mod} that this Mod consists of (child)
+     */
     Mod(int id, String name, String shortName, Mod... overlay) {
         int value;
         if (id > 0) {

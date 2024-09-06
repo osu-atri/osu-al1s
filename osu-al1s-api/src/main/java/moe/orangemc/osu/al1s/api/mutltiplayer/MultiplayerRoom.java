@@ -28,6 +28,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Represents a multiplayer room based on an MP channel.
+ */
 public interface MultiplayerRoom extends OsuChannel {
     int getId();
 

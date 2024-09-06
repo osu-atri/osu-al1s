@@ -19,6 +19,9 @@ package moe.orangemc.osu.al1s.api.user.meta;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * All available punishment types one player would receive.
+ */
 public enum PunishmentType {
     WARN("note"),
     MUTE("silence"),

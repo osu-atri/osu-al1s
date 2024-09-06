@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.api.beatmap;
 
 import moe.orangemc.osu.al1s.api.user.User;
 
+/**
+ * Represents a beatmap set with minimum fields.
+ */
 public interface BeatmapSet {
     // General map for storing attributes.
     <T> T getMetadata(String key);

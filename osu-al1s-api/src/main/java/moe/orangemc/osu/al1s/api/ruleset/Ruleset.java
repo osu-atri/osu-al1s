@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.ruleset;
 
+/**
+ * Known official osu! game modes (a.k.a. Rulesets).
+ */
 public enum Ruleset {
     // Naming based on API ruleset names.
     OSU("osu!standard", 0),

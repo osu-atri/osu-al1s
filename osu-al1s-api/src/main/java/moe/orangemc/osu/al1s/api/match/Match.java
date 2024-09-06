@@ -20,6 +20,9 @@ import moe.orangemc.osu.al1s.api.user.User;
 
 import java.util.List;
 
+/**
+ * Represents a multiplayer match.
+ */
 public interface Match {
     // General map for storing attributes.
     <T> T getMetadata(String key);

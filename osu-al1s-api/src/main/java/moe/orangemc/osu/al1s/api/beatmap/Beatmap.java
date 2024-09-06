@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.api.beatmap;
 
 import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 
+/**
+ * Represents a beatmap with minimum fields.
+ */
 public interface Beatmap {
     // General map for storing attributes.
     <T> T getMetadata(String key);

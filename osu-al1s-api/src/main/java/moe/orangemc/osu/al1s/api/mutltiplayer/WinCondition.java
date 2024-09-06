@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.mutltiplayer;
 
+/**
+ * All possible win conditions in a multiplayer match.
+ */
 public enum WinCondition {
     SCORE(0, "Score"),
     ACCURACY(1, "Accuracy"),
@@ -36,6 +39,12 @@ public enum WinCondition {
 
     public String getName() { return name; }
 
+    /**
+     * Translate a string into a {@link WinCondition} if possible.
+     * @param condition the source string to be translated
+     * @return a {@link WinCondition} from the given string
+     * @throws IllegalArgumentException when the given string cannot be translated into a valid condition
+     */
     public static WinCondition fromString(String condition) {
         return switch (condition) {
             case "Score" -> SCORE;

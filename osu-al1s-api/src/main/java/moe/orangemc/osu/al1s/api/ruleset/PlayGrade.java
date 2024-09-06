@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.ruleset;
 
+/**
+ * All grades that can be obtained in a play.
+ */
 public enum PlayGrade {
     // Silver SS & S
     SSH,

@@ -27,6 +27,25 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
+/**
+ * Represents a score entry associated with one single play.
+ * @param id the ID of this score
+ * @param result the ({@link PlayResult}) of this score
+ * @param ruleset the game mode ({@link Ruleset}) of this score
+ * @param map the {@link Beatmap} played in this score
+ * @param score the score value
+ * @param mods a {@link Set} of all {@link Mod} used in this score
+ * @param accuracy the accuracy of this score
+ * @param maxCombo the maximum combo that can be obtained on this beatmap
+ * @param isPerfect whether this score is a perfect play (a.k.a. Full Combo)
+ * @param count50 count of 50s
+ * @param count100 count of 100s (including Katu)
+ * @param count300 count of 300s (including Geki and Katu)
+ * @param countMiss count of misses (literally)
+ * @param pp performance point
+ * @param grade {@link PlayGrade} obtained in this score
+ * @param userId the ID of user played this
+ */
 public record PlayScore(long id, PlayResult result, Ruleset ruleset, Beatmap map, int score, Set<Mod> mods,
                         double accuracy, int maxCombo, int isPerfect,
                         int count50, int count100, int count300, int countMiss,

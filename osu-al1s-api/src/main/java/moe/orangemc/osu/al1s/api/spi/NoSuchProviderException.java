@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.spi;
 
+/**
+ * Exception thrown when no injected provider for a given class can be found.
+ */
 public class NoSuchProviderException extends RuntimeException {
     public NoSuchProviderException(Class<?> providerClass) {
         super("No provider found for " + providerClass.getName());

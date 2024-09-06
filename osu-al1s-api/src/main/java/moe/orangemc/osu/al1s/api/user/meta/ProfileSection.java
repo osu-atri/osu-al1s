@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.user.meta;
 
+/**
+ * Different sections of one's profile page.
+ */
 public enum ProfileSection {
     ME("me"),
     RECENT_ACTIVITY("recent_activity"),

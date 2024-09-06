@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.api.match;
 
 import moe.orangemc.osu.al1s.api.user.User;
 
+/**
+ * Represents an event during a multiplayer match.
+ */
 public interface MatchEvent {
     long getId();
     User getUser();
