@@ -24,31 +24,71 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class SchedulerImpl implements Scheduler {
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() / 4);
+    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() / 2);
 
-    @Override
-    public <T> Future<T> runTask(Supplier<T> task) {
-        return executor.submit(task::get);
+    public SchedulerImpl() {
+        executor.setKeepAliveTime(5, TimeUnit.SECONDS);
+        executor.allowCoreThreadTimeOut(true);
     }
 
     @Override
+    public <T> Future<T> runTask(Supplier<T> task) {
+        return executor.schedule(() -> {
+            try {
+                return task.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }, 1, TimeUnit.MILLISECONDS);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public Future<Void> runTask(Runnable task) {
-        return executor.submit(task, null);
+        return (Future<Void>) executor.schedule(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }, 1, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public <T> Future<T> runTaskLater(Supplier<T> task, long delay, TimeUnit unit) {
-        return executor.schedule(task::get, delay, unit);
+        return executor.schedule(() -> {
+            try {
+                return task.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }, delay, unit);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Future<Void> runTaskLater(Runnable task, long delay, TimeUnit unit) {
-        return (Future<Void>) executor.schedule(task, delay, unit);
+        return (Future<Void>) executor.schedule(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }, delay, unit);
     }
 
     @Override
     public void runTaskTimer(Runnable task, long delay, long period, TimeUnit unit) {
-        executor.scheduleAtFixedRate(task, delay, period, unit);
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, delay, period, unit);
     }
 }

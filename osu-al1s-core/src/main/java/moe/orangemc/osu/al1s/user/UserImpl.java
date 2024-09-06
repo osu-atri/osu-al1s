@@ -24,11 +24,12 @@ import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UserImpl extends OsuChannelImpl implements User {
     private static UserImpl ME = null;
-    private static final Map<Integer, UserImpl> byId = new HashMap<>();
-    private static final Map<String, UserImpl> byUsername = new HashMap<>();
+    private static final Map<Integer, UserImpl> byId = new ConcurrentHashMap<>();
+    private static final Map<String, UserImpl> byUsername = new ConcurrentHashMap<>();
 
     private final int id;
 

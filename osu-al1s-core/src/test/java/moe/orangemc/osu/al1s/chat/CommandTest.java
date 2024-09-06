@@ -64,6 +64,13 @@ public class CommandTest {
         commandManager.executeCommand(null, null, "!test 5");
         Assertions.assertEquals(5, myCommand.test2);
         Assertions.assertFalse(myCommand.test);
+
+        commandManager.executeCommand(null, null, "!test 8 9");
+        Assertions.assertEquals(17, myCommand.test2);
+        Assertions.assertFalse(myCommand.test);
+
+        commandManager.executeCommand(null, null, "!test true");
+        Assertions.assertTrue(myCommand.test);
     }
 
     public static class MyCommand implements CommandBase {

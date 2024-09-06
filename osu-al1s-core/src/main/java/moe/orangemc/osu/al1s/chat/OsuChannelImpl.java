@@ -16,34 +16,38 @@
 
 package moe.orangemc.osu.al1s.chat;
 
+import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.ChatManager;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
-import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.api.event.EventBus;
 import moe.orangemc.osu.al1s.api.event.chat.SystemMessagePoll;
+import moe.orangemc.osu.al1s.chat.driver.BanchoBotWatchdog;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 public abstract class OsuChannelImpl implements OsuChannel {
     @Inject
     private ChatManager chatManager;
-
     @Inject
     private EventBus eventBus;
-
     @Inject
-    private Scheduler scheduler;
+    private OsuBot bot;
+
+    private final BanchoBotWatchdog watchdog = new BanchoBotWatchdog(this);
 
     private final List<String> polledServerMessages = new CopyOnWriteArrayList<>();
-    private CompletableFuture<List<String>> pollFuture = new CompletableFuture<>();
+    private final List<String> polledQueue = Collections.synchronizedList(new LinkedList<>());
 
-    public OsuChannelImpl() {
-        scheduler.runTaskTimer(this::schedulePollEvent, 1, 1, TimeUnit.SECONDS);
-    }
+    private final Lock pollLock = new ReentrantLock();
+    private final Condition notEmpty = pollLock.newCondition();
+    private final Condition newArrival = pollLock.newCondition();
 
     @Override
     public final void sendMessage(String message) {
@@ -52,6 +56,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
 
     public final void pushServerMessage(String message) {
         this.polledServerMessages.addLast(message.replaceAll("\\s+", " ")); // remove extra spaces and tabs
+        watchdog.feed();
     }
 
     public final void schedulePollEvent() {
@@ -59,16 +64,54 @@ public abstract class OsuChannelImpl implements OsuChannel {
             return;
         }
 
-        List<String> messages = Collections.unmodifiableList(new ArrayList<>(this.polledServerMessages));
-        pollFuture.complete(messages);
-        pollFuture = new CompletableFuture<>();
-        this.processServerMessages(messages);
-        eventBus.fire(new SystemMessagePoll(messages, this));
-        this.polledServerMessages.clear();
+        List<String> messages = List.copyOf(this.polledServerMessages);
+
+        bot.execute(() -> {
+            polledQueue.addAll(messages);
+            try {
+                pollLock.lock();
+                notEmpty.signalAll();
+                newArrival.signalAll();
+            } finally {
+                pollLock.unlock();
+            }
+            this.processServerMessages(messages);
+            eventBus.fire(new SystemMessagePoll(messages, this));
+            this.polledServerMessages.clear();
+        });
     }
 
-    public List<String> pollServerMessages() {
-        return pollFuture.join();
+    public void pollServerMessages(Consumer<List<String>> consumer) {
+        pollLock.lock();
+
+        try {
+            while (this.polledQueue.isEmpty()) {
+                SneakyExceptionHelper.voidCall(notEmpty::await);
+            }
+
+            consumer.accept(this.polledQueue);
+        } finally {
+            pollLock.unlock();
+        }
+    }
+
+    public List<String> waitForNewServerMessages() {
+        pollLock.lock();
+
+        try {
+            while (this.polledQueue.isEmpty()) {
+                SneakyExceptionHelper.voidCall(newArrival::await);
+            }
+        } finally {
+            pollLock.unlock();
+        }
+
+        return this.polledQueue;
+    }
+
+    public void clearUnprocessedMessages() {
+        this.polledServerMessages.clear();
+        this.polledQueue.clear();
     }
 
     protected void processServerMessages(List<String> messages) {

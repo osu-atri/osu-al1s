@@ -19,11 +19,12 @@ package moe.orangemc.osu.al1s.multiplayer;
 import java.util.regex.Pattern;
 
 public enum RoomSettingMessagePattern {
-    ROOM_NAME_AND_LINK("Room name: (.+), History: https://osu.ppy.sh/mp/(\\d+)"),
-    BEATMAP("Beatmap: https://osu.ppy.sh/b/(\\d+) (.+) - (.+) \\[(.+)]"),
+    ROOM_NAME_AND_LINK("Room name: (.+), History: https://osu\\.ppy\\.sh/mp/(\\d+)"),
+    BEATMAP("Beatmap: https://osu\\.ppy\\.sh/b/(\\d+) (.+) - (.+).*"),
     MODE("Team mode: (.+), Win condition: (.+)"),
     PLAYER_COUNT("Players: (\\d+)"),
-    SLOTS("Slot (\\d+)  (.+) https://osu.ppy.sh/u/(\\d+) (.+) \\[(.+)\\]"),;
+    SLOTS("Slot (\\d+) (.+) https://osu\\.ppy\\.sh/u/(\\d+) (.+) \\[(.+)\\]"),
+    MODS("Active mods: (.+)"),;
     private final Pattern pattern;
 
     RoomSettingMessagePattern(String pattern) {
@@ -32,5 +33,14 @@ public enum RoomSettingMessagePattern {
 
     public Pattern getPattern() {
         return pattern;
+    }
+
+    public static RoomSettingMessagePattern findMatchingPattern(String msg) {
+        for (RoomSettingMessagePattern pattern : values()) {
+            if (pattern.getPattern().matcher(msg).matches()) {
+                return pattern;
+            }
+        }
+        return null;
     }
 }

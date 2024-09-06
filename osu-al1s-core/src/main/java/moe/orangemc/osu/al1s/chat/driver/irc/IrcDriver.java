@@ -16,9 +16,8 @@
 
 package moe.orangemc.osu.al1s.chat.driver.irc;
 
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
@@ -54,24 +53,23 @@ public class IrcDriver implements ChatDriver {
         client = builder.build();
         client.getEventManager().registerEventListener(this);
         client.connect();
+
+        ((Client.WithManagement) client).startSending();
     }
 
     @Override
     public void sendMessage(String channel, String message) {
         client.sendMessage(channel, message);
-        ((Client.WithManagement) client).startSending();
     }
 
     @Override
     public void joinChannel(String channel) {
         client.addChannel(channel);
-        ((Client.WithManagement) client).startSending();
     }
 
     @Override
     public void leaveChannel(String channel) {
         client.removeChannel(channel);
-        ((Client.WithManagement) client).startSending();
     }
 
     @Override
@@ -111,6 +109,6 @@ public class IrcDriver implements ChatDriver {
             return f;
         });
         Channel channel = SneakyExceptionHelper.call(() -> (Channel) channelField.get(connection));
-        channel.pipeline().replace("[INPUT] Line splitter", "[INPUT] Line splitter", new DelimiterBasedFrameDecoder(9001, true, Unpooled.copiedBuffer(new byte[]{0x0A}), Unpooled.copiedBuffer(new byte[]{0x0D, 0x0A})));
+        channel.pipeline().replace("[INPUT] Line splitter", "[INPUT] Line splitter", new LineBasedFrameDecoder(9001));
     }
 }
