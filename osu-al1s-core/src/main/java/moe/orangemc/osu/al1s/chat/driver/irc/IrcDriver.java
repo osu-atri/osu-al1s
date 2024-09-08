@@ -18,6 +18,7 @@ package moe.orangemc.osu.al1s.chat.driver.irc;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
@@ -38,6 +39,8 @@ public class IrcDriver implements ChatDriver {
 
     @Inject
     private OsuBotImpl bot;
+    @Inject
+    private Scheduler scheduler;
 
     public IrcDriver(String host, int port, IrcCredentialImpl credential) {
         var builder = Client.builder()
@@ -52,41 +55,43 @@ public class IrcDriver implements ChatDriver {
         }
         client = builder.build();
         client.getEventManager().registerEventListener(this);
-        client.connect();
 
-        ((Client.WithManagement) client).startSending();
+        scheduler.runTask(() -> {
+            client.connect();
+
+            ((Client.WithManagement) client).startSending();
+        });
     }
 
     @Override
     public void sendMessage(String channel, String message) {
-        client.sendMessage(channel, message);
+        scheduler.runTask(() -> client.sendMessage(channel, message));
     }
 
     @Override
     public void joinChannel(String channel) {
-        client.addChannel(channel);
+        scheduler.runTask(() -> client.addChannel(channel));
     }
 
     @Override
     public void leaveChannel(String channel) {
-        client.removeChannel(channel);
+        scheduler.runTask(() -> client.removeChannel(channel));
     }
 
     @Override
     public String initializePrivateChannel(UserImpl user, String initialMessage) {
-        client.sendMessage(user.getUsername().replaceAll(" ", "_"), initialMessage);
-        ((Client.WithManagement) client).startSending();
+        scheduler.runTask(() -> client.sendMessage(user.getUsername().replaceAll(" ", "_"), initialMessage));
         return user.getUsername().replaceAll(" ", "_");
     }
 
     @Override
     public void setMessageHandler(ChatMessageHandler handler) {
-        this.client.getEventManager().registerEventListener(new IrcListener(handler));
+        scheduler.runTask(() -> client.getEventManager().registerEventListener(new IrcListener(handler)));
     }
 
     @Override
     public void shutdown() {
-        this.client.shutdown();
+        scheduler.runTask(() -> client.shutdown());
     }
 
     @Handler

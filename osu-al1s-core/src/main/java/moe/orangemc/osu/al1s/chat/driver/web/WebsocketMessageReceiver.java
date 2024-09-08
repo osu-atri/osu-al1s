@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.chat.driver.web;
 
 import com.google.gson.Gson;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.auth.token.TokenImpl;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
@@ -38,6 +39,8 @@ public class WebsocketMessageReceiver implements WebSocket.Listener, AutoCloseab
     private OsuBotImpl bot;
     @Inject
     private Gson gson;
+    @Inject
+    private Scheduler scheduler;
 
     private final HttpClient hc = HttpClient.newHttpClient();
     private final WebSocket ws;
@@ -66,7 +69,7 @@ public class WebsocketMessageReceiver implements WebSocket.Listener, AutoCloseab
             }
 
             for (InboundChatMessage msg : evt.data().messages()) {
-                handler.handle(String.valueOf(msg.channelId()), UserImpl.get(msg.senderUid()), msg.message());
+                scheduler.runTask(() -> handler.handle(String.valueOf(msg.channelId()), UserImpl.get(msg.senderUid()), msg.message()));
             }
 
             webSocket.request(1);

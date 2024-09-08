@@ -25,11 +25,11 @@ import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BeatmapImpl implements Beatmap {
-    private static Map<Integer, BeatmapImpl> cache = new HashMap<>();
+    private static Map<Integer, BeatmapImpl> cache = new ConcurrentHashMap<>();
 
     private final int setId;
     private final int id;

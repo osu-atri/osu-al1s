@@ -17,6 +17,7 @@
 package moe.orangemc.osu.al1s.chat.driver.irc;
 
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
+import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
 import moe.orangemc.osu.al1s.chat.ChatMessageHandler;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;
@@ -29,6 +30,8 @@ public class IrcListener {
     @Inject
     private OsuBot bot;
     private final ChatMessageHandler handler;
+    @Inject
+    private Scheduler scheduler;
 
     public IrcListener(ChatMessageHandler handler) {
         this.handler = handler;
@@ -39,14 +42,14 @@ public class IrcListener {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message));
+        scheduler.runTask(() -> bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message)));
     }
 
     @Handler
     public void onPrivateMessage(PrivateMessageEvent event) {
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        bot.execute(() -> handler.handle(sender, UserImpl.get(sender), message));
+        scheduler.runTask(() -> bot.execute(() -> handler.handle(sender, UserImpl.get(sender), message)));
     }
 
     @Handler
@@ -54,6 +57,6 @@ public class IrcListener {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message));
+        scheduler.runTask(() -> bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message)));
     }
 }

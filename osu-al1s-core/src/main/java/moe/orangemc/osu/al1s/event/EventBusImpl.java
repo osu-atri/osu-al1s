@@ -83,7 +83,11 @@ public class EventBusImpl implements EventBus {
         }
 
         for (Set<GeneratedHandlerDispatcher<Event>> handlers : layeredHandlers) {
-            bot.execute(() -> handlers.forEach(handler -> handler.dispatchEvent(event)));
+            bot.execute(() -> {
+                for (GeneratedHandlerDispatcher<Event> handler : handlers) {
+                    handler.dispatchEvent(event);
+                }
+            });
         }
     }
 }

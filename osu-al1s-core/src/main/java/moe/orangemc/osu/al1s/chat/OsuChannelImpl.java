@@ -82,6 +82,7 @@ public abstract class OsuChannelImpl implements OsuChannel {
     }
 
     public void pollServerMessages(Consumer<List<String>> consumer) {
+        SneakyExceptionHelper.voidCall(() -> Thread.sleep(500)); // Sleep on purpose to prevent race condition
         pollLock.lock();
 
         try {
