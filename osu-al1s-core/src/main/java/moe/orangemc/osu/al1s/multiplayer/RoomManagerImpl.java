@@ -41,6 +41,10 @@ public class RoomManagerImpl implements RoomManager {
         return result;
     }
 
+    public MultiplayerRoom findRoom(int id) {
+        return managedRooms.stream().filter(room -> room.getId() == id).findFirst().orElse(null);
+    }
+
     public void cleanupRoom() {
         for (RoomImpl room : managedRooms) {
             if (!room.isActive()) {

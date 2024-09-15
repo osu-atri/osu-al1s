@@ -18,4 +18,6 @@ package moe.orangemc.osu.al1s.api.mutltiplayer;
 
 public interface RoomManager {
     MultiplayerRoom createRoom(String roomName);
+    MultiplayerRoom findRoom(int roomId);
+
 }

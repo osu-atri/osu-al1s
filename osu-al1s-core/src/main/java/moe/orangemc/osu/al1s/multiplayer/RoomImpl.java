@@ -518,6 +518,10 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                     int score = Integer.parseInt(matcher.group(2));
                     PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
                     User user = UserImpl.get(username);
+                    if (!this.playerStates.containsKey(user)) {
+                        System.out.println("User " + user.getUsername() + " not in room");
+                        continue;
+                    }
                     this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScore(result, this.currentBeatmap.getMode() == Ruleset.OSU ? this.currentRuleset : this.currentBeatmap.getMode(), this.currentBeatmap, score, this.playerStates.get(user).mods, 0, 0, 0, 0, 0, 0, 0)));
 
                     this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
