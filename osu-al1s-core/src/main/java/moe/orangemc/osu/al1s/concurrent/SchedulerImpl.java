@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class SchedulerImpl implements Scheduler {
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() / 2);
+    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Math.max(Runtime.getRuntime().availableProcessors() / 2, 4));
 
     public SchedulerImpl() {
         executor.setKeepAliveTime(5, TimeUnit.SECONDS);

@@ -207,6 +207,11 @@ public class OsuBotImpl implements OsuBot {
     }
 
     public void checkPermission(Scope scope) {
+        if (token.getTimeToLive() < 0) {
+            // try refresh
+            token.refresh();
+        }
+
         if (token == null || !token.getAllowedScopes().contains(scope)) {
             throw new UnsupportedOperationException("No permission to " + scope);
         }

@@ -70,15 +70,17 @@ public class TokenImpl implements Token {
     @Override
     public void refresh() {
         if (serverAuthData.refreshToken() == null) {
-            throw new UnsupportedOperationException("Only tokens created with " + AuthenticateType.AUTHORIZATION_CODE + " or " + AuthenticateType.REFRESH_TOKEN + " can be refreshed.");
+            // seems to be client credentials grant
+            TokenImpl newer = requester.authorize(referer);
+            this.serverAuthData = newer.serverAuthData;
+        } else {
+            RefreshingCredentialImpl refreshingCredential = new RefreshingCredentialImpl(this);
+            refreshingCredential.setClientId(referer.getClientId());
+            refreshingCredential.setClientSecret(referer.getClientSecret());
+            refreshingCredential.setScopes(referer.getScopes());
+
+            requester.refreshToken(refreshingCredential, (str) -> this.serverAuthData = str);
         }
-
-        RefreshingCredentialImpl refreshingCredential = new RefreshingCredentialImpl(this);
-        refreshingCredential.setClientId(referer.getClientId());
-        refreshingCredential.setClientSecret(referer.getClientSecret());
-        refreshingCredential.setScopes(referer.getScopes());
-
-        requester.refreshToken(refreshingCredential, (str) -> this.serverAuthData = str);
     }
 
     public CredentialBase getReferer() {
