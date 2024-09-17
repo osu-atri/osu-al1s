@@ -319,10 +319,9 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public void setRoomMods(Set<Mod> mods) {
-        if (mods.contains(Mod.FREE_MOD)) {
-            this.enforcedMods = Set.of(Mod.FREE_MOD);
-            this.sendMessage("!mp mods Freemod");
-            return;
+        boolean freeMod = mods.contains(Mod.FREE_MOD);
+        if (freeMod) {
+            mods.remove(Mod.FREE_MOD);
         }
 
         this.enforcedMods = mods;
@@ -330,7 +329,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
         for (Mod mod : mods) {
             modMask |= mod.getValue();
         }
-        this.sendMessage("!mp mods " + modMask);
+        this.sendMessage("!mp mods " + modMask + (freeMod ? " Freemod" : ""));
     }
 
     @Override
@@ -358,7 +357,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
             for (Iterator<String> iterator = msgToNow.iterator(); iterator.hasNext(); ) {
                 String msg = iterator.next();
-                if (!(msg.matches("[0-9a-zA-Z \\[\\]\\-_]+"))) {
+                if (!(msg.matches("^[0-9a-zA-Z \\[\\]\\-_]{1,15}$"))) {
                     break;
                 }
 
