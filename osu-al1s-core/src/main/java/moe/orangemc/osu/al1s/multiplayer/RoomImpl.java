@@ -320,11 +320,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public void setRoomMods(Set<Mod> mods) {
         boolean freeMod = mods.contains(Mod.FREE_MOD);
+
+        this.enforcedMods = mods;
         if (freeMod) {
             mods.remove(Mod.FREE_MOD);
         }
 
-        this.enforcedMods = mods;
         int modMask = 0;
         for (Mod mod : mods) {
             modMask |= mod.getValue();
@@ -340,7 +341,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
     @Override
     public Set<Mod> getUserMods(User user) {
         ensureUserInRoom(user);
-        return playerStates.get(user).mods;
+        Set<Mod> modSet = new HashSet<>(this.enforcedMods);
+        if (modSet.contains(Mod.FREE_MOD)) {
+            modSet.remove(Mod.FREE_MOD);
+            modSet.addAll(this.playerStates.get(user).mods);
+        }
+        return modSet;
     }
 
     @Override
@@ -353,10 +359,12 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                 msgToNow = this.waitForNewServerMessages();
             }
 
-            int idx = msgToNow.indexOf("Match referees:");
-
             for (Iterator<String> iterator = msgToNow.iterator(); iterator.hasNext(); ) {
                 String msg = iterator.next();
+                if (!(msg.equals("Match referees:"))) {
+                    continue;
+                }
+
                 if (!(msg.matches("^[0-9a-zA-Z \\[\\]\\-_]{1,15}$"))) {
                     break;
                 }
