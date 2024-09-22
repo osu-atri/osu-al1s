@@ -14,13 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.api.ruleset;
 
 /**
- * Exception thrown when no injected provider for a given class can be found.
+ * All grades that can be obtained in a play.
  */
-public class NoSuchProviderException extends RuntimeException {
-    public NoSuchProviderException(Class<?> providerClass) {
-        super("No provider found for " + providerClass.getName());
-    }
+public enum PlayGrade {
+    // Silver SS & S
+    SSH,
+    SH,
+    SS,
+    S,
+    A,
+    B,
+    C,
+    D,
+    F,
 }

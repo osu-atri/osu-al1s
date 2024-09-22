@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.ruleset;
 
+/**
+ * The status of the player, either passed or failed.
+ */
 public enum PlayResult {
     PASSED,
     FAILED

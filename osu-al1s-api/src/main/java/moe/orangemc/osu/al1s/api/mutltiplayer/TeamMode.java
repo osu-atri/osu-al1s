@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.mutltiplayer;
 
+/**
+ * Available team modes in a multiplayer room.
+ */
 public enum TeamMode {
     HEAD_TO_HEAD(0),
     TAG_COOP(1),
@@ -36,6 +39,12 @@ public enum TeamMode {
         return this == TEAM_VS || this == TAG_TEAM_VS;
     }
 
+    /**
+     * Translate a string into a {@link TeamMode} if possible.
+     * @param mode the source string to be translated
+     * @return a {@link TeamMode} from the given string
+     * @throws IllegalArgumentException when the given string cannot be translated into a valid team mode
+     */
     public static TeamMode fromString(String mode) {
         return switch (mode) {
             case "HeadToHead" -> HEAD_TO_HEAD;

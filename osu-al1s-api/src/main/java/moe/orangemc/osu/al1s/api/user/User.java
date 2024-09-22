@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.api.user;
 
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
 
+/**
+ * A simple interface for osu! users (assuming they are in a channel).
+ */
 public interface User extends OsuChannel {
     int getId();
     String getUsername();

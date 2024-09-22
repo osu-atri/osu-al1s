@@ -14,13 +14,20 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.api.match;
+
+import moe.orangemc.osu.al1s.api.user.User;
 
 /**
- * Exception thrown when no injected provider for a given class can be found.
+ * Represents an event during a multiplayer match.
  */
-public class NoSuchProviderException extends RuntimeException {
-    public NoSuchProviderException(Class<?> providerClass) {
-        super("No provider found for " + providerClass.getName());
-    }
+public interface MatchEvent {
+    long getId();
+    User getUser();
+    String getTimestamp();
+
+    String getDescription();
+
+    MatchEventType getEventType();
+    MatchGame getGame();
 }

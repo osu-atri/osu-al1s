@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.mutltiplayer;
 
+/**
+ * Possible player statuses in a multiplayer room.
+ */
 public enum PlayerWaitStatus {
     READY,
     NOT_READY,
@@ -23,6 +26,13 @@ public enum PlayerWaitStatus {
     // RED_PIGGED,
     IN_GAME,
     ;
+
+    /**
+     * Translate a string into a {@link PlayerWaitStatus} if possible.
+     * @param status the source string to be translated
+     * @return a {@link PlayerWaitStatus} from the given string
+     * @throws IllegalArgumentException when the given string cannot be translated into a valid status
+     */
     public static PlayerWaitStatus fromString(String status) {
         return switch (status) {
             case "Ready" -> READY;

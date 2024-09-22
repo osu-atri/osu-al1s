@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.mutltiplayer;
 
+/**
+ * Represents two multiplayer teams for Team VS mode.
+ */
 public enum MultiplayerTeam {
     RED("red"),
     BLUE("blue");
@@ -30,6 +33,12 @@ public enum MultiplayerTeam {
         return id;
     }
 
+    /**
+     * Translate a string into a {@link MultiplayerTeam} if possible.
+     * @param team the source string to be translated
+     * @return a {@link MultiplayerTeam} from the given string
+     * @throws IllegalArgumentException when the given string cannot be translated into a valid team name
+     */
     public static MultiplayerTeam fromString(String team) {
         return switch (team) {
             case "Red" -> RED;
@@ -38,6 +47,10 @@ public enum MultiplayerTeam {
         };
     }
 
+    /**
+     * Get the opposite team of the given team.
+     * @return a {@link MultiplayerTeam} opposite of this team
+     */
     public MultiplayerTeam getOpposite() {
         return switch (this) {
             case RED -> BLUE;

@@ -30,7 +30,6 @@ import java.util.Map;
 public class BeatmapRequestAPI {
     @Inject
     private OsuBotImpl referer;
-    // Does this support anonymous requesting? Is a referer really needed...
 
     @Inject
     private Gson gson;

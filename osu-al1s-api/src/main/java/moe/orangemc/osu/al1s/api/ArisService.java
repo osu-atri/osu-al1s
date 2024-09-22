@@ -20,6 +20,11 @@ import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
 import moe.orangemc.osu.al1s.api.spi.ArisServiceProviderRegistry;
 
 public class ArisService {
+    /**
+     * Boots the main service up. External projects should refer to this class.
+     * @param init the target class to be injected
+     * @param args other arguments (optional)
+     */
     public static void bootstrap(String init, String[] args) {
         ArisServiceProviderRegistry.get(ArisBootstrapService.class).defaultProvider().bootstrap(init, args);
     }

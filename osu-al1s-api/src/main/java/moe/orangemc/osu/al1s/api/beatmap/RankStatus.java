@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.beatmap;
 
+/**
+ * All available statuses for a beatmap set.
+ */
 public enum RankStatus {
     RANKED(1),
     QUALIFIED(3),

@@ -19,6 +19,9 @@ package moe.orangemc.osu.al1s.api.ruleset;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * All mods used in a multiplayer match game.
+ */
 public enum Mod {
     NO_MOD(0, "No Mod", "NM"),
     NO_FAIL(1, "No Fail", "NF"),
@@ -63,6 +66,14 @@ public enum Mod {
     private final String name;
     private final String shortName;
 
+    /**
+     * Constructor for creating a custom mod.
+     * @param id ID of the mod, usually listed in the <a href="https://osu.ppy.sh/wiki/Client/File_formats/osr_(file_format)">
+     *           osu!wiki page</a>
+     * @param name the full (display) name of the mod
+     * @param shortName a short name for recording, a.k.a. acronym
+     * @param overlay a list of {@link Mod} that this Mod consists of (child)
+     */
     Mod(int id, String name, String shortName, Mod... overlay) {
         int value;
         if (id > 0) {
@@ -97,37 +108,37 @@ public enum Mod {
 
         return switch (mod) {
             case "NoMod" -> NO_MOD;
-            case "NoFail" -> NO_FAIL;
-            case "Easy" -> EASY;
-            case "TouchDevice" -> TOUCH_DEVICE;
-            case "Hidden" -> HIDDEN;
-            case "HardRock" -> HARD_ROCK;
-            case "SuddenDeath" -> SUDDEN_DEATH;
-            case "DoubleTime" -> DOUBLE_TIME;
-            case "Relax" -> RELAX;
-            case "HalfTime" -> HALF_TIME;
-            case "Nightcore" -> NIGHTCORE;
-            case "Flashlight" -> FLASHLIGHT;
-            case "Autoplay" -> AUTOPLAY;
-            case "SpunOut" -> SPUN_OUT;
-            case "Autopilot" -> AUTOPILOT;
-            case "Perfect" -> PERFECT;
+            case "NoFail", "NF" -> NO_FAIL;
+            case "Easy", "EZ" -> EASY;
+            case "TouchDevice", "TD" -> TOUCH_DEVICE;
+            case "Hidden", "HD" -> HIDDEN;
+            case "HardRock", "HR" -> HARD_ROCK;
+            case "SuddenDeath", "SD" -> SUDDEN_DEATH;
+            case "DoubleTime", "DT" -> DOUBLE_TIME;
+            case "Relax", "RL" -> RELAX;
+            case "HalfTime", "HT" -> HALF_TIME;
+            case "Nightcore", "NC" -> NIGHTCORE;
+            case "Flashlight", "FL" -> FLASHLIGHT;
+            case "Autoplay", "AT" -> AUTOPLAY;
+            case "SpunOut", "SO" -> SPUN_OUT;
+            case "Autopilot", "AP" -> AUTOPILOT;
+            case "Perfect", "PF" -> PERFECT;
             case "4K" -> KEY4;
             case "5K" -> KEY5;
             case "6K" -> KEY6;
             case "7K" -> KEY7;
             case "8K" -> KEY8;
-            case "FadeIn" -> FADE_IN;
-            case "Random" -> RANDOM;
-            case "Cinema" -> CINEMA;
-            case "TargetPractice" -> TARGET_PRATICE;
+            case "FadeIn", "FI" -> FADE_IN;
+            case "Random", "RD" -> RANDOM;
+            case "Cinema", "CM" -> CINEMA;
+            case "TargetPractice", "TP" -> TARGET_PRATICE;
             case "9K" -> KEY9;
-            case "Coop" -> KEY_COOP;
+            case "Coop", "CP" -> KEY_COOP;
             case "1K" -> KEY1;
             case "3K" -> KEY3;
             case "2K" -> KEY2;
-            case "ScoreV2" -> SCOREV2;
-            case "Mirror" -> MIRROR;
+            case "ScoreV2", "SV2" -> SCOREV2;
+            case "Mirror", "MR" -> MIRROR;
             default -> throw new IllegalArgumentException("Unknown mod: " + mod);
         };
     }

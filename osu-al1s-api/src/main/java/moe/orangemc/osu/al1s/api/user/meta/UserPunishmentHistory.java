@@ -18,5 +18,15 @@ package moe.orangemc.osu.al1s.api.user.meta;
 
 import moe.orangemc.osu.al1s.api.user.User;
 
+/**
+ * Records one punishment entry of a user.
+ * @param receiver the {@link User} being punished
+ * @param description the reason for punishing
+ * @param id punishment ID
+ * @param length time duration during which the punishment keeps valid
+ * @param permanent whether the punishment is permanent with this user
+ * @param awardTime the time when the user got this record
+ * @param type the {@link PunishmentType} of this record
+ */
 public record UserPunishmentHistory(User receiver, String description, int id, int length, boolean permanent, long awardTime, PunishmentType type) {
 }

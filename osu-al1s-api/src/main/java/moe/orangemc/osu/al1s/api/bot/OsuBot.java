@@ -27,6 +27,9 @@ import moe.orangemc.osu.al1s.api.user.User;
 
 import java.util.concurrent.Future;
 
+/**
+ * An extended {@link User} interface for bots usage.
+ */
 public interface OsuBot extends User {
     Future<Void> authenticate(Credential credential);
     void authenticateSync(Credential credential);

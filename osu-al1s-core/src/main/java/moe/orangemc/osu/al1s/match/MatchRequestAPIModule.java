@@ -14,13 +14,11 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.match;
 
-/**
- * Exception thrown when no injected provider for a given class can be found.
- */
-public class NoSuchProviderException extends RuntimeException {
-    public NoSuchProviderException(Class<?> providerClass) {
-        super("No provider found for " + providerClass.getName());
-    }
+import moe.orangemc.osu.al1s.inject.api.Provides;
+
+public class MatchRequestAPIModule {
+    @Provides
+    public MatchRequestAPI create() { return new MatchRequestAPI(); }
 }

@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.api.auth;
 
 import java.util.List;
 
+/**
+ * Represents an authentication token.
+ */
 public interface Token {
     AuthenticateType getAuthenticateType();
     List<Scope> getAllowedScopes();

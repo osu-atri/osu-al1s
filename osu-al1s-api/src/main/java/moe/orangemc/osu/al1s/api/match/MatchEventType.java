@@ -14,13 +14,23 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.spi;
+package moe.orangemc.osu.al1s.api.match;
 
 /**
- * Exception thrown when no injected provider for a given class can be found.
+ * An enum representing all match event types.
  */
-public class NoSuchProviderException extends RuntimeException {
-    public NoSuchProviderException(Class<?> providerClass) {
-        super("No provider found for " + providerClass.getName());
-    }
+public enum MatchEventType {
+    HOST_CHANGED("host-changed"),
+    MATCH_CREATED("match-created"),
+    MATCH_DISBANDED("match-disbanded"),
+    OTHER("other"),
+    PLAYER_JOINED("player-joined"),
+    PLAYER_KICKED("player-kicked"),
+    PLAYER_LEFT("player-left");
+
+    private final String name;
+
+    MatchEventType(String name) { this.name = name; }
+
+    public String getName() { return name; }
 }

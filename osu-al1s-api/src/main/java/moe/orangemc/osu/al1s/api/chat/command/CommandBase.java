@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.chat.command;
 
+/**
+ *
+ */
 public interface CommandBase {
     String getName();
     String getDescription();

@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.chat;
 
+/**
+ * Represents a channel with a valid name.
+ */
 public interface OsuChannel {
     void sendMessage(String message);
 

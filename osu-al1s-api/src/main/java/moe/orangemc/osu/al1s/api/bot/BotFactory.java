@@ -18,6 +18,9 @@ package moe.orangemc.osu.al1s.api.bot;
 
 import java.net.URL;
 
+/**
+ * A simple interface to implement a bot.
+ */
 public interface BotFactory {
     BotFactory withBaseURL(URL baseURL);
     BotFactory withDebug(boolean debug);

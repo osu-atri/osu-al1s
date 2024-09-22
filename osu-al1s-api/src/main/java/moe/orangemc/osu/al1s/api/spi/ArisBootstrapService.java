@@ -16,6 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.spi;
 
+/**
+ * General interface for Aris bootstrapping.
+ */
 public interface ArisBootstrapService {
     void bootstrap(String init, String[] args);
 }
