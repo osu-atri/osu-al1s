@@ -228,7 +228,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public void invitePlayer(User user) {
-        this.sendMessage("!mp invite " + user.getUsername());
+        this.sendMessage("!mp invite #" + user.getId());
     }
 
     private void ensureUserInRoom(User user) {
