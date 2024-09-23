@@ -30,7 +30,7 @@ import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.driver.irc.IrcDriver;
 import moe.orangemc.osu.al1s.chat.driver.web.WebDriver;
 import moe.orangemc.osu.al1s.inject.api.Inject;
-import moe.orangemc.osu.al1s.multiplayer.RoomImpl;
+import moe.orangemc.osu.al1s.multiplayer.MatchRoomImpl;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.util.LazyReference;
 
@@ -89,7 +89,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
             return;
         }
 
-        if (osuChannel instanceof RoomImpl room) {
+        if (osuChannel instanceof MatchRoomImpl room) {
             eventBus.fire(new MultiplayerRoomChatEvent(user, message, room));
         } else if (osuChannel instanceof UserImpl) {
             eventBus.fire(new ChatEvent(user, message));

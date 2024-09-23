@@ -21,6 +21,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
+import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.io.IOException;
@@ -44,11 +45,11 @@ import java.util.Set;
  * @param countMiss count of misses (literally)
  * @param pp performance point
  * @param grade {@link PlayGrade} obtained in this score
- * @param userId the ID of user played this
+ * @param player the ID of user played this
  */
 public record PlayScore(long id, PlayResult result, Ruleset ruleset, Beatmap map, int score, Set<Mod> mods,
                         double accuracy, int maxCombo, int isPerfect,
                         int count50, int count100, int count300, int countMiss,
-                        double pp, PlayGrade grade, int userId) {
+                        double pp, PlayGrade grade, User player) {
     // TODO: Use User / UserImpl when possible for better integration
 }

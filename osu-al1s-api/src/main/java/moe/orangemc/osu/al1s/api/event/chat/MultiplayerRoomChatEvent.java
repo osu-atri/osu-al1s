@@ -16,18 +16,18 @@
 
 package moe.orangemc.osu.al1s.api.event.chat;
 
-import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MatchRoom;
 import moe.orangemc.osu.al1s.api.user.User;
 
 public class MultiplayerRoomChatEvent extends ChannelChatEvent {
-    private final MultiplayerRoom room;
+    private final MatchRoom room;
 
-    public MultiplayerRoomChatEvent(User sender, String message, MultiplayerRoom room) {
+    public MultiplayerRoomChatEvent(User sender, String message, MatchRoom room) {
         super(sender, message, room);
         this.room = room;
     }
 
-    public MultiplayerRoom getRoom() {
+    public MatchRoom getRoom() {
         return room;
     }
 }

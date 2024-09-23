@@ -14,13 +14,19 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.mutltiplayer;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
-/**
- * Simple room manager interface stub.
- */
-public interface RoomManager {
-    MatchRoom createRoom(String roomName);
-    MatchRoom findRoom(int roomId);
+import moe.orangemc.osu.al1s.api.event.Event;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MatchRoom;
 
+public class MatchRoomEvent extends Event {
+    private final MatchRoom room;
+
+    public MatchRoomEvent(MatchRoom room) {
+        this.room = room;
+    }
+
+    public final MatchRoom getRoom() {
+        return room;
+    }
 }

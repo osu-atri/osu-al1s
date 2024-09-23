@@ -17,9 +17,12 @@
 package moe.orangemc.osu.al1s.multiplayer;
 
 import moe.orangemc.osu.al1s.api.concurrent.Scheduler;
-import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MatchRoom;
 import moe.orangemc.osu.al1s.api.mutltiplayer.RoomManager;
+import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.inject.api.Injector;
+import moe.orangemc.osu.al1s.multiplayer.web.MatchRequestAPIModule;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,30 +31,29 @@ import java.util.concurrent.TimeUnit;
 public class RoomManagerImpl implements RoomManager {
     @Inject
     private Scheduler scheduler;
+    @Inject
+    private OsuBotImpl referee;
+    @Inject
+    private Injector injector;
 
-    private final Set<RoomImpl> managedRooms = new HashSet<>();
+    private final Set<MatchRoomImpl> managedRooms = new HashSet<>();
 
     public RoomManagerImpl() {
+        referee.execute(() -> injector.getCurrentContext().registerModule(new MatchRequestAPIModule()));
         scheduler.runTaskTimer(this::cleanupRoom, 20, 20, TimeUnit.SECONDS);
     }
 
-    public MultiplayerRoom createRoom(String roomName) {
-        RoomImpl result = new RoomImpl(roomName);
+    public MatchRoom createRoom(String roomName) {
+        MatchRoomImpl result = new MatchRoomImpl(roomName);
         managedRooms.add(result);
         return result;
     }
 
-    public MultiplayerRoom findRoom(int id) {
+    public MatchRoom findRoom(int id) {
         return managedRooms.stream().filter(room -> room.getId() == id).findFirst().orElse(null);
     }
 
     public void cleanupRoom() {
-        for (RoomImpl room : managedRooms) {
-            if (!room.isActive()) {
-                room.close();
-            }
-        }
-
         managedRooms.removeIf(room -> !room.isAlive());
     }
 }
