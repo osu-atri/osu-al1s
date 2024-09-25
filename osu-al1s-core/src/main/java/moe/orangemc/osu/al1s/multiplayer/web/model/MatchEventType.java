@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.multiplayer;
+package moe.orangemc.osu.al1s.multiplayer.web.model;
 
 /**
  * An enum representing all match event types.

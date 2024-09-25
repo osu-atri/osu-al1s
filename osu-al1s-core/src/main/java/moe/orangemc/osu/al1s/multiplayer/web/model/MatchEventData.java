@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import moe.orangemc.osu.al1s.multiplayer.MatchEventType;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.user.UserImpl;

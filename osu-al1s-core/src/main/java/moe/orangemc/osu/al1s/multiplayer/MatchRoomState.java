@@ -210,12 +210,20 @@ public class MatchRoomState {
     }
 
     public void updatePlayerRemoval(User user) {
+        if (!playerStates.containsKey(user)) {
+            return;
+        }
+
         playerStates.remove(user);
         UserLeaveRoomEvent event = new UserLeaveRoomEvent(owner, user);
         eventBus.fire(event);
     }
 
     public void updatePlayerJoin(User user, int slot) {
+        if (playerStates.containsKey(user)) {
+            return;
+        }
+
         playerStates.put(user, new MatchUserState(owner, user));
         UserJoinRoomEvent event = new UserJoinRoomEvent(owner, user, slot);
         eventBus.fire(event);
@@ -286,5 +294,15 @@ public class MatchRoomState {
         }
 
         this.playing = playing;
+    }
+
+    public int findMinAvailableSlot() {
+        for (int i = 0; i < 16; i++) {
+            int finalI = i;
+            if (playerStates.values().stream().noneMatch(matchUserState -> matchUserState.getSlot() == finalI)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

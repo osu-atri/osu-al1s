@@ -18,11 +18,13 @@ package moe.orangemc.osu.al1s.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import moe.orangemc.osu.al1s.api.ruleset.PlayScore;
 import moe.orangemc.osu.al1s.auth.token.ServerTokenResponse;
 import moe.orangemc.osu.al1s.chat.driver.web.model.*;
 import moe.orangemc.osu.al1s.chat.driver.web.model.websocket.WebsocketChatData;
 import moe.orangemc.osu.al1s.chat.driver.web.model.websocket.WebsocketEvent;
 import moe.orangemc.osu.al1s.inject.api.Provides;
+import moe.orangemc.osu.al1s.multiplayer.web.model.*;
 
 public class GsonProvider {
     @Provides
@@ -37,6 +39,11 @@ public class GsonProvider {
                 .registerTypeAdapter(InboundPrivateMessageCreation.class, new InboundPrivateMessageCreation.Adapter())
                 .registerTypeAdapter(WebsocketChatData.class, new WebsocketChatData.Adapter())
                 .registerTypeAdapter(WebsocketEvent.class, new WebsocketEvent.Adapter())
+                .registerTypeAdapter(MatchData.class, new MatchData.Adapter())
+                .registerTypeAdapter(MatchEventData.class, new MatchEventData.Adapter())
+                .registerTypeAdapter(MatchGameData.class, new MatchGameData.Adapter())
+                .registerTypeAdapter(MatchUserData.class, new MatchUserData.Adapter())
+                .registerTypeAdapter(PlayScore.class, new PlayScoreAdapter())
                 .create();
     }
 }

@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.user.UserImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -117,7 +118,7 @@ public record MatchData(int id, String name, List<User> users, List<MatchEventDa
                     case "users":
                         jsonReader.beginArray();
                         while (jsonReader.hasNext()) {
-                            users.add(gf.gson.fromJson(jsonReader, MatchUserData.class));
+                            users.add(UserImpl.get(((MatchUserData)gf.gson.fromJson(jsonReader, MatchUserData.class)).id()));
                         }
                         jsonReader.endArray();
                         break;

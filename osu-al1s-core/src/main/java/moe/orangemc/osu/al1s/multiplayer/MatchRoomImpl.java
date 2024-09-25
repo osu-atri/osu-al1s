@@ -33,6 +33,9 @@ import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.multiplayer.chat.BanchoMessagePattern;
 import moe.orangemc.osu.al1s.multiplayer.chat.RoomSettingMessagePattern;
 import moe.orangemc.osu.al1s.multiplayer.web.MatchRequestAPI;
+import moe.orangemc.osu.al1s.multiplayer.web.model.MatchData;
+import moe.orangemc.osu.al1s.multiplayer.web.model.MatchEventData;
+import moe.orangemc.osu.al1s.multiplayer.web.model.MatchGameData;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.jetbrains.annotations.NotNull;
@@ -505,8 +508,7 @@ public class MatchRoomImpl extends OsuChannelImpl implements MatchRoom {
                 }
                 case MATCH_STARTED -> this.roomState.setPlaying(true);
                 case MATCH_FINISHED -> {
-                    // TODO: Score fetch.
-
+                    this.refreshHistory();
                     this.roomState.setPlaying(false);
                 }
             }
@@ -517,4 +519,32 @@ public class MatchRoomImpl extends OsuChannelImpl implements MatchRoom {
         return this.roomState.isAlive();
     }
 
+    private void processHistory(MatchData data) {
+        this.roomState.setLastEventId(this.roomState.getLastEventId());
+
+        for (MatchEventData event : data.events()) {
+            switch (event.type()) {
+                case PLAYER_LEFT, PLAYER_KICKED -> this.roomState.updatePlayerRemoval(event.user());
+                case HOST_CHANGED -> this.roomState.setHost(event.user());
+                case MATCH_CREATED -> {
+                    this.roomState.setName(data.name());
+                    this.roomState.setPlaying(false);
+                }
+                case PLAYER_JOINED -> this.roomState.updatePlayerJoin(event.user(), this.roomState.findMinAvailableSlot());
+                case MATCH_DISBANDED -> this.roomState.setAlive(false);
+                case OTHER -> {
+                    if (event.game() != null) {
+                        MatchGameData mgd = event.game();
+                        if (mgd.mapId() != this.getCurrentBeatmap().getId()) {
+                            continue;
+                        }
+
+                        for (PlayScore score : mgd.scores()) {
+                            eventBus.fire(new PlayerFinishPlayEvent(this, score.player(), score));
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

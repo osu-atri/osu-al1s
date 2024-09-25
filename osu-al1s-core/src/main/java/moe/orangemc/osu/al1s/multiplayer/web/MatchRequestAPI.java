@@ -44,24 +44,24 @@ public class MatchRequestAPI {
         return gson.fromJson(response, MatchData.class);
     }
 
-    public MatchData getMatchHistory(String id, int after) {
+    public MatchData getMatchHistory(int id, int after) {
         Map<String, Integer> payload = Map.of("after", after);
 
-        String response = HttpUtil.post(URLUtil.concat(targetURL, id), gson.toJson(payload));
+        String response = HttpUtil.post(URLUtil.concat(targetURL, String.valueOf(id)), gson.toJson(payload));
         return gson.fromJson(response, MatchData.class);
     }
 
-    public MatchData getMatchHistory(String id, int after, int before) {
+    public MatchData getMatchHistory(int id, int after, int before) {
         Map<String, Integer> payload = Map.of("after", after, "before", before);
 
-        String response = HttpUtil.post(URLUtil.concat(targetURL, id), gson.toJson(payload));
+        String response = HttpUtil.post(URLUtil.concat(targetURL, String.valueOf(id)), gson.toJson(payload));
         return gson.fromJson(response, MatchData.class);
     }
 
-    public MatchData getMatchHistory(String id, int after, int before, int limit) {
+    public MatchData getMatchHistory(int id, int after, int before, int limit) {
         Map<String, Integer> payload = Map.of("after", after, "before", before, "limit", limit);
 
-        String response = HttpUtil.post(URLUtil.concat(targetURL, id), gson.toJson(payload));
+        String response = HttpUtil.post(URLUtil.concat(targetURL, String.valueOf(id)), gson.toJson(payload));
         return gson.fromJson(response, MatchData.class);
     }
 }
