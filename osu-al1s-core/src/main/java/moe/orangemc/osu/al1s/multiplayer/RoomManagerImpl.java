@@ -54,6 +54,12 @@ public class RoomManagerImpl implements RoomManager {
     }
 
     public void cleanupRoom() {
+        for (MatchRoomImpl room : managedRooms) {
+            if (!room.isAlive()) {
+                room.close();
+            }
+        }
+
         managedRooms.removeIf(room -> !room.isAlive());
     }
 }

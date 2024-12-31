@@ -14,10 +14,19 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.chat.command;
+package moe.orangemc.osu.al1s.api.event.multiplayer;
 
-public interface CommandBase {
-    String getName();
-    String getDescription();
-    String getUsage();
+import moe.orangemc.osu.al1s.api.event.Event;
+import moe.orangemc.osu.al1s.api.mutltiplayer.MultiplayerRoom;
+
+public class MultiplayerRoomEvent extends Event {
+    private final MultiplayerRoom room;
+
+    public MultiplayerRoomEvent(MultiplayerRoom room) {
+        this.room = room;
+    }
+
+    public final MultiplayerRoom getRoom() {
+        return room;
+    }
 }
