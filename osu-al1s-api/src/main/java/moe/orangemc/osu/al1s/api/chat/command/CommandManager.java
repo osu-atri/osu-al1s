@@ -16,7 +16,10 @@
 
 package moe.orangemc.osu.al1s.api.chat.command;
 
+import moe.orangemc.osu.al1s.api.chat.command.argument.ArgumentTypeAdapter;
+
 public interface CommandManager {
     <T> void registerAdapter(Class<T> clazz, ArgumentTypeAdapter<T> adapter);
     void registerCommand(CommandBase cmd);
+    <T> ArgumentTypeAdapter<T> getAdapter(Class<T> clazz);
 }

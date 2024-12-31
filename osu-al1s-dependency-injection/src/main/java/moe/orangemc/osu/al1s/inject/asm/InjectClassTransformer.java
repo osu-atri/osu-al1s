@@ -179,6 +179,33 @@ public class InjectClassTransformer extends ClassVisitor {
                 return;
             }
 
+            putInjectionContextFetchInstruction();
+
+            for (FieldToInject field : fieldSet) {
+                Integer putFieldOpcode = fetchPutOpcode(field);
+                if (putFieldOpcode == null) {
+                    continue;
+                }
+
+                Type fieldType = Type.getType(field.descriptor());
+
+                putFieldMappingInstruction(field, fieldType, putFieldOpcode);
+            }
+        }
+
+        private Integer fetchPutOpcode(FieldToInject field) {
+            int putFieldOpcode = Opcodes.PUTFIELD;
+            if ((field.access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC) {
+                putFieldOpcode = Opcodes.PUTSTATIC;
+            } else if (!statis) {
+                super.visitVarInsn(Opcodes.ALOAD, 0);
+            } else {
+                return null;
+            }
+            return putFieldOpcode;
+        }
+
+        private void putInjectionContextFetchInstruction() {
             super.visitLdcInsn(Type.getObjectType(me).getClassName());
             super.visitMethodInsn(Opcodes.INVOKESTATIC, reflectionClassType.getInternalName(), "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
 
@@ -193,30 +220,19 @@ public class InjectClassTransformer extends ClassVisitor {
             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, loaderType.getInternalName(), "getInjector", Type.getMethodDescriptor(injectorType), false);
             super.visitMethodInsn(Opcodes.INVOKEINTERFACE, injectorType.getInternalName(), "getCurrentContext", Type.getMethodDescriptor(contextType), true);
             super.visitFieldInsn(Opcodes.PUTSTATIC, me, "injectorContext@" + me.hashCode(), contextType.getDescriptor());
+        }
 
-            for (FieldToInject field : fieldSet) {
-                int putFieldOpcode = Opcodes.PUTFIELD;
-                if ((field.access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC) {
-                    putFieldOpcode = Opcodes.PUTSTATIC;
-                } else if (!statis) {
-                    super.visitVarInsn(Opcodes.ALOAD, 0);
-                } else {
-                    continue;
-                }
+        private void putFieldMappingInstruction(FieldToInject field, Type fieldType, int putFieldOpcode) {
+            super.visitFieldInsn(Opcodes.GETSTATIC, me, "injectorContext@" + me.hashCode(), contextType.getDescriptor());
+            super.visitLdcInsn(fieldType.getClassName());
+            super.visitMethodInsn(Opcodes.INVOKESTATIC, reflectionClassType.getInternalName(), "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
 
-                Type fieldType = Type.getType(field.descriptor());
+            super.visitLdcInsn(field.injectName());
 
-                super.visitFieldInsn(Opcodes.GETSTATIC, me, "injectorContext@" + me.hashCode(), contextType.getDescriptor());
-                super.visitLdcInsn(fieldType.getClassName());
-                super.visitMethodInsn(Opcodes.INVOKESTATIC, reflectionClassType.getInternalName(), "forName", "(Ljava/lang/String;)Ljava/lang/Class;", false);
+            super.visitMethodInsn(Opcodes.INVOKEINTERFACE, contextType.getInternalName(), "mapField", Type.getMethodDescriptor(Type.getType(Object.class), reflectionClassType, Type.getType(String.class)), true);
 
-                super.visitLdcInsn(field.injectName());
-
-                super.visitMethodInsn(Opcodes.INVOKEINTERFACE, contextType.getInternalName(), "mapField", Type.getMethodDescriptor(Type.getType(Object.class), reflectionClassType, Type.getType(String.class)), true);
-
-                super.visitTypeInsn(Opcodes.CHECKCAST, fieldType.getInternalName());
-                super.visitFieldInsn(putFieldOpcode, me, field.name(), field.descriptor());
-            }
+            super.visitTypeInsn(Opcodes.CHECKCAST, fieldType.getInternalName());
+            super.visitFieldInsn(putFieldOpcode, me, field.name(), field.descriptor());
         }
 
         @Override
@@ -227,19 +243,23 @@ public class InjectClassTransformer extends ClassVisitor {
                 super.visitInsn(opcode);
 
                 if (!exceptionInserted) {
-                    super.visitLabel(invalidInjectionLabel);
-                    super.visitInsn(Opcodes.POP);
-                    super.visitTypeInsn(Opcodes.NEW, Type.getInternalName(IllegalStateException.class));
-                    super.visitInsn(Opcodes.DUP);
-                    super.visitLdcInsn("Current class isn't bootstrapped by injector");
-                    super.visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(IllegalStateException.class), "<init>", "(Ljava/lang/String;)V", false);
-                    super.visitInsn(Opcodes.ATHROW);
+                    putExceptionInstruction();
                     exceptionInserted = true;
                 }
                 return;
             }
 
             super.visitInsn(opcode);
+        }
+
+        private void putExceptionInstruction() {
+            super.visitLabel(invalidInjectionLabel);
+            super.visitInsn(Opcodes.POP);
+            super.visitTypeInsn(Opcodes.NEW, Type.getInternalName(IllegalStateException.class));
+            super.visitInsn(Opcodes.DUP);
+            super.visitLdcInsn("Current class isn't bootstrapped by injector");
+            super.visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(IllegalStateException.class), "<init>", "(Ljava/lang/String;)V", false);
+            super.visitInsn(Opcodes.ATHROW);
         }
 
         @Override

@@ -18,7 +18,7 @@ package moe.orangemc.osu.al1s.chat.command.accessor;
 
 import moe.orangemc.osu.al1s.accessor.AccessorClassLoader;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
-import moe.orangemc.osu.al1s.api.chat.command.ArgumentTypeAdapter;
+import moe.orangemc.osu.al1s.api.chat.command.argument.ArgumentTypeAdapter;
 import moe.orangemc.osu.al1s.api.chat.command.Command;
 import moe.orangemc.osu.al1s.api.chat.command.CommandBase;
 import moe.orangemc.osu.al1s.api.chat.command.StringReader;

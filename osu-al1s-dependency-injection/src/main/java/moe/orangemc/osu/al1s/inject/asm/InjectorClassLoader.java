@@ -59,26 +59,17 @@ public class InjectorClassLoader extends ClassLoader {
         try {
             Class<?> found = null;
             for (File file : classPath) {
+                byte[] classByte = null;
                 if (file.isDirectory()) {
-                    File classFile = new File(file, name.replace('.', File.separatorChar) + ".class");
-
-                    if (classFile.exists()) {
-                        byte[] bytes = readClassFromFile(classFile);
-                        if (bytes == null) {
-                            continue;
-                        }
-
-                        byte[] finalData = transform(bytes);
-                        found = defineClass(name, finalData, 0, finalData.length);
-                    }
+                    classByte = findFromDirectory(file, name);
                 }
                 if (file.getName().endsWith(".jar") || file.getName().endsWith(".war")) {
-                    byte[] bytes = readClassFromJar(file, name);
-                    if (bytes == null) {
-                        continue;
-                    }
-                    byte[] finalData = transform(bytes);
-                    found = defineClass(name, finalData, 0, finalData.length);
+                    classByte = readClassFromJar(file, name);
+                }
+
+                if (classByte != null) {
+                    found = defineClass(name, transform(classByte), 0, classByte.length);
+                    break;
                 }
             }
 
@@ -93,7 +84,21 @@ public class InjectorClassLoader extends ClassLoader {
         }
     }
 
-    private byte[] transform(byte[] from) {
+    private byte[] findFromDirectory(File file, String name) {
+        File classFile = new File(file, name.replace('.', File.separatorChar) + ".class");
+
+        if (classFile.exists()) {
+            byte[] bytes = readClassFromFile(classFile);
+            if (bytes == null) {
+                return null;
+            }
+
+            return transform(bytes);
+        }
+        return null;
+    }
+
+    public byte[] transform(byte[] from) {
         ClassReader cr = new ClassReader(from);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 

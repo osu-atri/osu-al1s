@@ -14,8 +14,9 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.api.chat.command;
+package moe.orangemc.osu.al1s.console.api.plugin;
 
-public interface ArgumentTypeAdapter<T> {
-    T parse(StringReader reader);
+public interface PluginConfig {
+    <T> T get(String key);
+    void set(String key, Object value);
 }

@@ -14,6 +14,7 @@
         <module>osu-al1s-console</module>
         <module>osu-al1s-dependency-injection</module>
         <module>osu-al1s-dependency-injection-api</module>
+        <module>osu-alis-console-api</module>
     </modules>
 
     <properties>

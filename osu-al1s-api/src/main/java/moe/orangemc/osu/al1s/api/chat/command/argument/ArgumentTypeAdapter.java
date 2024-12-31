@@ -14,22 +14,10 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.inject.util;
+package moe.orangemc.osu.al1s.api.chat.command.argument;
 
-import java.util.function.Supplier;
+import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 
-public class LazyReference<T> {
-    private T value;
-    private final Supplier<T> supplier;
-
-    public LazyReference(Supplier<T> supplier) {
-        this.supplier = supplier;
-    }
-
-    public T get() {
-        if (value == null) {
-            value = supplier.get();
-        }
-        return value;
-    }
+public interface ArgumentTypeAdapter<T> {
+    T parse(StringReader reader);
 }

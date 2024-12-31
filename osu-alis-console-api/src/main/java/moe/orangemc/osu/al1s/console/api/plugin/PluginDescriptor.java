@@ -14,14 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.chat.command.argument;
+package moe.orangemc.osu.al1s.console.api.plugin;
 
-import moe.orangemc.osu.al1s.api.chat.command.argument.ArgumentTypeAdapter;
-import moe.orangemc.osu.al1s.api.chat.command.StringReader;
-
-public class LongTypeAdapter implements ArgumentTypeAdapter<Long> {
-    @Override
-    public Long parse(StringReader reader) {
-        return Long.parseLong(reader.readString());
-    }
+public record PluginDescriptor(String name, String version, String main, String[] dependencies, String[] optionalDependencies) {
 }

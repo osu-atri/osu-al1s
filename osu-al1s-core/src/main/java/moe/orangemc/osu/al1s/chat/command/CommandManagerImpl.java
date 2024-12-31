@@ -16,7 +16,7 @@
 
 package moe.orangemc.osu.al1s.chat.command;
 
-import moe.orangemc.osu.al1s.api.chat.command.ArgumentTypeAdapter;
+import moe.orangemc.osu.al1s.api.chat.command.argument.ArgumentTypeAdapter;
 import moe.orangemc.osu.al1s.api.chat.command.CommandBase;
 import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
 import moe.orangemc.osu.al1s.api.chat.command.StringReader;
@@ -80,6 +80,7 @@ public class CommandManagerImpl implements CommandManager {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public <T> ArgumentTypeAdapter<T> getAdapter(Class<T> clazz) {
         return (ArgumentTypeAdapter<T>) adapterMap.get(clazz);
     }
