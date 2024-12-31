@@ -16,16 +16,9 @@
 
 package moe.orangemc.osu.al1s.api.ruleset;
 
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import moe.orangemc.osu.al1s.api.beatmap.Beatmap;
 import moe.orangemc.osu.al1s.api.user.User;
-import moe.orangemc.osu.al1s.inject.api.Inject;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.Set;
 
 /**

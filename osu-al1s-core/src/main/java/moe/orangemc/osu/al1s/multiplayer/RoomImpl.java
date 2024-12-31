@@ -25,7 +25,6 @@ import moe.orangemc.osu.al1s.api.event.multiplayer.*;
 import moe.orangemc.osu.al1s.api.mutltiplayer.*;
 import moe.orangemc.osu.al1s.api.ruleset.Mod;
 import moe.orangemc.osu.al1s.api.ruleset.PlayResult;
-import moe.orangemc.osu.al1s.api.ruleset.PlayScore;
 import moe.orangemc.osu.al1s.api.ruleset.Ruleset;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.beatmap.BeatmapImpl;
@@ -33,6 +32,7 @@ import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import moe.orangemc.osu.al1s.ruleset.PlayScoreMaker;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.jetbrains.annotations.NotNull;
@@ -483,7 +483,14 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                 int score = Integer.parseInt(matcher.group(2));
                 PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
                 User user = UserImpl.get(username);
-                this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScore(-1, result, this.currentBeatmap.getMode() == Ruleset.OSU ? this.currentRuleset : this.currentBeatmap.getMode(), this.currentBeatmap, score, this.playerStates.get(user).mods, 0, 0, 0, 0, 0, 0, 0, Double.NaN, null, getManagingBot().getChatManager().getUser(username))));
+                this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScoreMaker()
+                        .player(user)
+                        .score(score)
+                        .result(result)
+                        .map(currentBeatmap)
+                        .ruleset(currentRuleset)
+                        .mods(playerStates.get(user).mods)
+                        .build()));
 
                 this.playerStates.get(user).waitStatus = PlayerWaitStatus.NOT_READY;
                 this.playerStates.get(user).lastScore = score;
