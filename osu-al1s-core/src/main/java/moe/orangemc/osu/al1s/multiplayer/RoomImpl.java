@@ -32,7 +32,7 @@ import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.ChatManagerImpl;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
-import moe.orangemc.osu.al1s.ruleset.PlayScoreMaker;
+import moe.orangemc.osu.al1s.ruleset.PlayScoreBuilder;
 import moe.orangemc.osu.al1s.user.UserImpl;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.jetbrains.annotations.NotNull;
@@ -483,7 +483,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                 int score = Integer.parseInt(matcher.group(2));
                 PlayResult result = matcher.group(3).equals("PASSED") ? PlayResult.PASSED : PlayResult.FAILED;
                 User user = UserImpl.get(username);
-                this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScoreMaker()
+                this.eventBus.fire(new PlayerFinishPlayEvent(this, user, new PlayScoreBuilder()
                         .player(user)
                         .score(score)
                         .result(result)

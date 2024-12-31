@@ -22,7 +22,7 @@ import moe.orangemc.osu.al1s.api.user.User;
 
 import java.util.Set;
 
-public class PlayScoreMaker {
+public class PlayScoreBuilder {
     private long id;
     private PlayResult result;
     private Ruleset ruleset;
@@ -40,82 +40,82 @@ public class PlayScoreMaker {
     private PlayGrade grade;
     private User player;
 
-    public PlayScoreMaker id(long id) {
+    public PlayScoreBuilder id(long id) {
         this.id = id;
         return this;
     }
 
-    public PlayScoreMaker result(PlayResult result) {
+    public PlayScoreBuilder result(PlayResult result) {
         this.result = result;
         return this;
     }
 
-    public PlayScoreMaker ruleset(Ruleset ruleset) {
+    public PlayScoreBuilder ruleset(Ruleset ruleset) {
         this.ruleset = ruleset;
         return this;
     }
 
-    public PlayScoreMaker map(Beatmap map) {
+    public PlayScoreBuilder map(Beatmap map) {
         this.map = map;
         return this;
     }
 
-    public PlayScoreMaker score(int score) {
+    public PlayScoreBuilder score(int score) {
         this.score = score;
         return this;
     }
 
-    public PlayScoreMaker mods(Set<Mod> mods) {
+    public PlayScoreBuilder mods(Set<Mod> mods) {
         this.mods = mods;
         return this;
     }
 
-    public PlayScoreMaker accuracy(double accuracy) {
+    public PlayScoreBuilder accuracy(double accuracy) {
         this.accuracy = accuracy;
         return this;
     }
 
-    public PlayScoreMaker maxCombo(int maxCombo) {
+    public PlayScoreBuilder maxCombo(int maxCombo) {
         this.maxCombo = maxCombo;
         return this;
     }
 
-    public PlayScoreMaker isPerfectCombo(int isPerfectCombo) {
+    public PlayScoreBuilder isPerfectCombo(int isPerfectCombo) {
         this.isPerfectCombo = isPerfectCombo;
         return this;
     }
 
-    public PlayScoreMaker count50(int count50) {
+    public PlayScoreBuilder count50(int count50) {
         this.count50 = count50;
         return this;
     }
 
-    public PlayScoreMaker count100(int count100) {
+    public PlayScoreBuilder count100(int count100) {
         this.count100 = count100;
         return this;
     }
 
-    public PlayScoreMaker count300(int count300) {
+    public PlayScoreBuilder count300(int count300) {
         this.count300 = count300;
         return this;
     }
 
-    public PlayScoreMaker countMiss(int countMiss) {
+    public PlayScoreBuilder countMiss(int countMiss) {
         this.countMiss = countMiss;
         return this;
     }
 
-    public PlayScoreMaker pp(double pp) {
+    public PlayScoreBuilder pp(double pp) {
         this.pp = pp;
         return this;
     }
 
-    public PlayScoreMaker grade(PlayGrade grade) {
+    public PlayScoreBuilder grade(PlayGrade grade) {
         this.grade = grade;
         return this;
     }
 
-    public PlayScoreMaker player(User player) {
+    public PlayScoreBuilder player(User player) {
         this.player = player;
         return this;
     }
