@@ -23,7 +23,7 @@ import moe.orangemc.osu.al1s.api.chat.command.Command;
 import moe.orangemc.osu.al1s.api.chat.command.CommandBase;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.bot.OsuBotImpl;
-import moe.orangemc.osu.al1s.chat.command.CommandManagerImpl;
+import moe.orangemc.osu.al1s.chat.command.UserspaceCommandManager;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.inject.api.Injector;
 import moe.orangemc.osu.al1s.util.GsonProvider;
@@ -35,7 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TestLaunchNeedle.class)
 public class CommandTest {
-    private static CommandManagerImpl commandManager;
+    private static UserspaceCommandManager commandManager;
 
     @Inject
     private static Injector injector;
@@ -46,7 +46,7 @@ public class CommandTest {
         injector.getCurrentContext().registerModule(new OsuBotImpl(true, URLUtil.newURL("https://osu.ppy.sh/"), "BanchoBot", "irc.ppy.sh", 6667), true);
         injector.getCurrentContext().registerModule(new AccessorModule());
 
-        commandManager = new CommandManagerImpl();
+        commandManager = new UserspaceCommandManager();
     }
 
     @Test

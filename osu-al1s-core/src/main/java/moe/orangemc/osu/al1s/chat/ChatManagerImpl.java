@@ -25,7 +25,7 @@ import moe.orangemc.osu.al1s.api.event.chat.ChatEvent;
 import moe.orangemc.osu.al1s.api.event.chat.MultiplayerRoomChatEvent;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
-import moe.orangemc.osu.al1s.chat.command.CommandManagerImpl;
+import moe.orangemc.osu.al1s.chat.command.UserspaceCommandManager;
 import moe.orangemc.osu.al1s.chat.driver.ChatDriver;
 import moe.orangemc.osu.al1s.chat.driver.irc.IrcDriver;
 import moe.orangemc.osu.al1s.chat.driver.web.WebDriver;
@@ -51,7 +51,7 @@ public class ChatManagerImpl implements ChatMessageHandler, ChatManager {
         result.setMessageHandler(this);
         return result;
     });
-    private final CommandManagerImpl commandManager = new CommandManagerImpl();
+    private final UserspaceCommandManager commandManager = new UserspaceCommandManager();
 
     private String ircHost;
     private int ircPort;

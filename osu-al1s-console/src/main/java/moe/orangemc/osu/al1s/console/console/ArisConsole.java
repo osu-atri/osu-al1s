@@ -14,10 +14,25 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.console.terminal;
+package moe.orangemc.osu.al1s.console.console;
 
-import org.jline.terminal.Terminal;
+import net.minecrell.terminalconsole.SimpleTerminalConsole;
 
-public class TerminalController {
-    private Terminal terminal;
+public class ArisConsole extends SimpleTerminalConsole {
+    private final ConsoleCommandManager commandManager = new ConsoleCommandManager();
+
+    @Override
+    protected boolean isRunning() {
+        return false;
+    }
+
+    @Override
+    protected void runCommand(String s) {
+        commandManager.executeCommand(s);
+    }
+
+    @Override
+    protected void shutdown() {
+
+    }
 }

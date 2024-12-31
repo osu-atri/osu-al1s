@@ -45,12 +45,12 @@ public class CommandArgumentNode {
         return parameter;
     }
 
-    public static CommandArgumentNode build(List<Method> methods) {
+    public static CommandArgumentNode build(List<Method> methods, int beginParam) {
         CommandArgumentNode root = new CommandArgumentNode(null);
         for (Method method : methods) {
             Class<?>[] parameters = method.getParameterTypes();
             CommandArgumentNode current = root;
-            for (int i = 2; i < parameters.length; i++) { // Skip 1st sender argument
+            for (int i = beginParam; i < parameters.length; i++) { // Skip 1st sender argument
                 Class<?> parameter = parameters[i];
                 if (parameter.isPrimitive()) {
                     parameter = MethodType.methodType(parameter).wrap().returnType();

@@ -18,8 +18,34 @@ package moe.orangemc.osu.al1s.api.chat.command;
 
 import moe.orangemc.osu.al1s.api.chat.command.argument.ArgumentTypeAdapter;
 
-public interface CommandManager {
-    <T> void registerAdapter(Class<T> clazz, ArgumentTypeAdapter<T> adapter);
-    void registerCommand(CommandBase cmd);
-    <T> ArgumentTypeAdapter<T> getAdapter(Class<T> clazz);
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public abstract class CommandManager {
+    private final Map<Class<?>, ArgumentTypeAdapter<?>> adapterMap = new HashMap<>();
+    protected final Map<String, CommandBase> commandMap = new HashMap<>();
+
+    public final <T> void registerAdapter(Class<T> clazz, ArgumentTypeAdapter<T> adapter) {
+        adapterMap.put(clazz, adapter);
+    }
+
+    public final Set<CommandBase> getCommands() {
+        return commandMap.values().stream().collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Set<CommandBase> getCommands(List<String> providedArgs) {
+        return getCommands();
+    }
+
+    @SuppressWarnings("unchecked")
+    public final <T> ArgumentTypeAdapter<T> getAdapter(Class<T> clazz) {
+        return (ArgumentTypeAdapter<T>) adapterMap.get(clazz);
+    }
+
+    public final void registerCommand(CommandBase cmd) {
+        this.commandMap.put(cmd.getName().toLowerCase(), cmd);
+    }
 }

@@ -16,25 +16,19 @@
 
 package moe.orangemc.osu.al1s.chat.command;
 
-import moe.orangemc.osu.al1s.api.chat.command.argument.ArgumentTypeAdapter;
 import moe.orangemc.osu.al1s.api.chat.command.CommandBase;
 import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
 import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
-import moe.orangemc.osu.al1s.chat.command.accessor.CommandExecutorFactory;
+import moe.orangemc.osu.al1s.chat.command.accessor.UserspaceCommandExecutorFactory;
 import moe.orangemc.osu.al1s.chat.command.argument.*;
 import moe.orangemc.osu.al1s.user.UserImpl;
 
-import java.util.HashMap;
-import java.util.Map;
+public class UserspaceCommandManager extends CommandManager {
+    private final UserspaceCommandExecutorFactory executorFactory = new UserspaceCommandExecutorFactory();
 
-public class CommandManagerImpl implements CommandManager {
-    private final Map<Class<?>, ArgumentTypeAdapter<?>> adapterMap = new HashMap<>();
-    private final Map<String, CommandBase> commandMap = new HashMap<>();
-    private final CommandExecutorFactory executorFactory = new CommandExecutorFactory();
-
-    public CommandManagerImpl() {
+    public UserspaceCommandManager() {
         registerBuiltinAdapters();
     }
 
@@ -67,26 +61,10 @@ public class CommandManagerImpl implements CommandManager {
             return false;
         }
         try {
-            executorFactory.createExecutor(cmd).execute(sender, where, this, reader);
+            executorFactory.fetchExecutor(cmd).execute(sender, where, this, reader);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return true;
-    }
-
-    @Override
-    public <T> void registerAdapter(Class<T> clazz, ArgumentTypeAdapter<T> adapter) {
-        adapterMap.put(clazz, adapter);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> ArgumentTypeAdapter<T> getAdapter(Class<T> clazz) {
-        return (ArgumentTypeAdapter<T>) adapterMap.get(clazz);
-    }
-
-    @Override
-    public void registerCommand(CommandBase cmd) {
-        this.commandMap.put(cmd.getName().toLowerCase(), cmd);
     }
 }

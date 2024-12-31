@@ -19,8 +19,8 @@ package moe.orangemc.osu.al1s.chat.command.accessor;
 import moe.orangemc.osu.al1s.api.chat.OsuChannel;
 import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 import moe.orangemc.osu.al1s.api.user.User;
-import moe.orangemc.osu.al1s.chat.command.CommandManagerImpl;
+import moe.orangemc.osu.al1s.chat.command.UserspaceCommandManager;
 
-public interface GeneratedCommandExecutor {
-    void execute(User user, OsuChannel channel, CommandManagerImpl commandManager, StringReader command);
+public interface UserspaceGeneratedCommandExecutor {
+    void execute(User user, OsuChannel channel, UserspaceCommandManager commandManager, StringReader command);
 }
