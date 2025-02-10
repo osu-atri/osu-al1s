@@ -22,4 +22,7 @@ public interface CredentialProvider {
 
     Token loadToken(byte[] serialized);
     Token loadToken(byte[] serialized, byte[] key);
+
+    IrcCredential loadIrcCredential(byte[] serialized);
+    IrcCredential loadIrcCredential(byte[] serialized, byte[] key);
 }

@@ -47,4 +47,14 @@ public class CredentialProviderImpl implements CredentialProvider {
     public Token loadToken(byte[] serialized, byte[] key) {
         return TokenImpl.deserialize(serialized, key);
     }
+
+    @Override
+    public IrcCredential loadIrcCredential(byte[] serialized) {
+        return IrcCredentialImpl.deserialize(serialized);
+    }
+
+    @Override
+    public IrcCredential loadIrcCredential(byte[] serialized, byte[] key) {
+        return IrcCredentialImpl.deserialize(serialized, key);
+    }
 }

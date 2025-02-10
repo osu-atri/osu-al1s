@@ -23,12 +23,10 @@ import moe.orangemc.osu.al1s.auth.AuthenticationAPI;
 import moe.orangemc.osu.al1s.auth.credential.AuthorizationCodeGrantCredentialImpl;
 import moe.orangemc.osu.al1s.auth.credential.CredentialBase;
 import moe.orangemc.osu.al1s.auth.credential.RefreshingCredentialImpl;
+import moe.orangemc.osu.al1s.auth.util.CryptoUtil;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -113,10 +111,7 @@ public class TokenImpl implements Token {
                 dos.writeUTF(serverAuthData.refreshToken());
             }
 
-            SecretKey secretKey = new SecretKeySpec(key, "AES/EBC/PKCS5Padding");
-            Cipher cipher = Cipher.getInstance("AES/EBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return cipher.doFinal(baos.toByteArray());
+            return CryptoUtil.encrypt(baos.toByteArray(), key, "AES/EBC/PKCS5Padding");
         });
     }
 
@@ -127,10 +122,7 @@ public class TokenImpl implements Token {
 
     public static TokenImpl deserialize(byte[] serialized, byte[] key) {
         return SneakyExceptionHelper.call(() -> {
-            SecretKey secretKey = new SecretKeySpec(key, "AES/EBC/PKCS5Padding");
-            Cipher cipher = Cipher.getInstance("AES/EBC/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            byte[] decrypted = cipher.doFinal(serialized);
+            byte[] decrypted = CryptoUtil.decrypt(serialized, key, "AES/EBC/PKCS5Padding");
 
             ByteArrayInputStream bais = new ByteArrayInputStream(decrypted);
             DataInputStream dis = new DataInputStream(bais);

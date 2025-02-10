@@ -17,6 +17,12 @@
 package moe.orangemc.osu.al1s.auth.credential;
 
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
+import moe.orangemc.osu.al1s.auth.util.CryptoUtil;
+import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
+
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 public class IrcCredentialImpl implements IrcCredential {
     private String username;
@@ -40,5 +46,26 @@ public class IrcCredentialImpl implements IrcCredential {
 
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public byte[] serialize() {
+        return serialize(SneakyExceptionHelper.call(() -> MessageDigest.getInstance("SHA-256").digest(InetAddress.getLocalHost().getHostName().getBytes(StandardCharsets.UTF_8))));
+    }
+
+    @Override
+    public byte[] serialize(byte[] key) {
+        return CryptoUtil.encrypt(SneakyExceptionHelper.call(() -> {
+            return String.format("%s:%s", username, password).getBytes();
+        }), key, "AES");
+    }
+
+    public static IrcCredentialImpl deserialize(byte[] serialized, byte[] key) {
+        String[] data = new String(CryptoUtil.decrypt(serialized, key, "AES"), StandardCharsets.UTF_8).split(":");
+        return (IrcCredentialImpl) new IrcCredentialImpl().setIrcUsername(data[0]).setIrcPassword(data[1]);
+    }
+
+    public static IrcCredentialImpl deserialize(byte[] serialized) {
+        return deserialize(serialized, SneakyExceptionHelper.call(() -> MessageDigest.getInstance("SHA-256").digest(InetAddress.getLocalHost().getHostName().getBytes(StandardCharsets.UTF_8))));
     }
 }

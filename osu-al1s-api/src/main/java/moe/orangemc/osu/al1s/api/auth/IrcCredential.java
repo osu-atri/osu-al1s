@@ -19,4 +19,7 @@ package moe.orangemc.osu.al1s.api.auth;
 public interface IrcCredential {
     IrcCredential setIrcUsername(String username);
     IrcCredential setIrcPassword(String password);
+
+    byte[] serialize();
+    byte[] serialize(byte[] key);
 }
