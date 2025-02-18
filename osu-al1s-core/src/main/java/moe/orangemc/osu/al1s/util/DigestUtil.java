@@ -20,9 +20,13 @@ import java.security.MessageDigest;
 
 public class DigestUtil {
     public static String sha256sum(String target) {
+        return sha256sumBytes(target.getBytes());
+    }
+
+    public static String sha256sumBytes(byte[] target) {
         return SneakyExceptionHelper.call(() -> {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(target.getBytes());
+            byte[] hash = md.digest(target);
             StringBuilder sb = new StringBuilder();
             for (byte b : hash) {
                 sb.append(String.format("%02x", b));
