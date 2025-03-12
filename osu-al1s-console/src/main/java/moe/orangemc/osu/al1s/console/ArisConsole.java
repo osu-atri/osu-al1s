@@ -1,0 +1,45 @@
+/*
+ * Copyright 2025 Astro angelfish
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+package moe.orangemc.osu.al1s.console;
+
+import moe.orangemc.osu.al1s.console.command.ConsoleCommandManager;
+import net.minecrell.terminalconsole.SimpleTerminalConsole;
+
+public class ArisConsole extends SimpleTerminalConsole {
+    private final ConsoleCommandManager commandManager = new ConsoleCommandManager();
+
+    private final ArisBot bot;
+
+    public ArisConsole(ArisBot bot) {
+        this.bot = bot;
+    }
+
+    @Override
+    protected boolean isRunning() {
+        return this.bot.isRunning();
+    }
+
+    @Override
+    protected void runCommand(String s) {
+        commandManager.executeCommand(s);
+    }
+
+    @Override
+    protected void shutdown() {
+        this.bot.stop();
+    }
+}

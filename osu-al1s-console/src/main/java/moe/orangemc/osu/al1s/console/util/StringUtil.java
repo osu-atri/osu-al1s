@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Astro angelfish
+ * Copyright 2025 Astro angelfish
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,11 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.console.console;
+package moe.orangemc.osu.al1s.console.util;
 
-import net.minecrell.terminalconsole.SimpleTerminalConsole;
-
-public class ArisConsole extends SimpleTerminalConsole {
-    private final ConsoleCommandManager commandManager = new ConsoleCommandManager();
-
-    @Override
-    protected boolean isRunning() {
-        return false;
-    }
-
-    @Override
-    protected void runCommand(String s) {
-        commandManager.executeCommand(s);
-    }
-
-    @Override
-    protected void shutdown() {
-
+public class StringUtil {
+    // if any mismatches, go blame ppy. i'm not responsible for automated confusing.
+    public static boolean osuStyleLike(String a, String b) {
+        return a.replaceAll(" ", "_").equalsIgnoreCase(b.replaceAll(" ", "_"));
     }
 }

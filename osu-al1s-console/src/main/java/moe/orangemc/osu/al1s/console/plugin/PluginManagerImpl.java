@@ -115,4 +115,10 @@ public class PluginManagerImpl implements PluginManager {
     public Map<String, Plugin> getPluginNameMap() {
         return Collections.unmodifiableMap(pluginNameMap);
     }
+
+    public void enableAllPlugins() {
+        for (Plugin plugin : loadedPlugins) {
+            enablePlugin(plugin);
+        }
+    }
 }

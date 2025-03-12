@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Astro angelfish
+ * Copyright 2025 Astro angelfish
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package moe.orangemc.osu.al1s.console.console;
+package moe.orangemc.osu.al1s.console.command;
 
 import moe.orangemc.osu.al1s.api.chat.command.CommandBase;
 import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
