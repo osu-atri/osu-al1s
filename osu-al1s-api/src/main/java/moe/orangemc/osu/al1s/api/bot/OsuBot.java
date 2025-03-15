@@ -44,7 +44,6 @@ public interface OsuBot extends User {
     Token getToken();
     void useToken(Token token);
 
-    void execute(Runnable runnable);
     Beatmap findBeatmap(int beatmapId);
 
     @Override

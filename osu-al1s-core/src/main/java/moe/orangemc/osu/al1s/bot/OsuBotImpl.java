@@ -63,13 +63,11 @@ public class OsuBotImpl implements OsuBot {
         if (!token.getAllowedScopes().contains(Scope.IDENTIFY)) {
             throw new UnsupportedOperationException("No permission to identify self");
         }
-        this.execute(UserImpl::me);
         return UserImpl.me();
     });
 
     @Inject
     private Injector injector;
-    private final InjectionContext ctx;
 
     private final ChatManagerImpl chatManager;
 
@@ -77,23 +75,21 @@ public class OsuBotImpl implements OsuBot {
         this.debug = debug;
         this.baseURL = baseURL;
 
-        ctx = injector.derivativeContext();
+        InjectionContext ctx = injector.getCurrentContext();
         ctx.registerModule(this);
 
-        try (var _ = injector.setContext(ctx)) {
-            ctx.registerModule(new BeatmapRequestAPIModule());
-            ctx.registerModule(new UserRequestAPIModule());
-            ctx.registerModule(new AuthenticationAPIModule());
-            ctx.registerModule(new AccessorModule());
-            this.authenticationAPI = (AuthenticationAPI) ctx.mapField(AuthenticationAPI.class, "default");
-            this.eventBus = new EventBusImpl();
-            ctx.registerModule(this, true);
-            this.chatManager = new ChatManagerImpl(serverBotName);
-            this.chatManager.setIrcServer(ircServer, ircPort);
-            ctx.registerModule(this, true);
-            this.roomManager = new RoomManagerImpl();
-            ctx.registerModule(this, true);
-        }
+        ctx.registerModule(new BeatmapRequestAPIModule());
+        ctx.registerModule(new UserRequestAPIModule());
+        ctx.registerModule(new AuthenticationAPIModule());
+        ctx.registerModule(new AccessorModule());
+        this.authenticationAPI = (AuthenticationAPI) ctx.mapField(AuthenticationAPI.class, "default");
+        this.eventBus = new EventBusImpl();
+        ctx.registerModule(this, true);
+        this.chatManager = new ChatManagerImpl(serverBotName);
+        this.chatManager.setIrcServer(ircServer, ircPort);
+        ctx.registerModule(this, true);
+        this.roomManager = new RoomManagerImpl();
+        ctx.registerModule(this, true);
     }
 
     @Provides
@@ -121,9 +117,7 @@ public class OsuBotImpl implements OsuBot {
         Validate.isTrue(token == null, "Already authenticated");
         Validate.isTrue(credential instanceof CredentialBase, "Invalid credential type");
 
-        try (var _ = injector.setContext(ctx)) {
-            this.token = authenticationAPI.authorize((CredentialBase) credential);
-        }
+        this.token = authenticationAPI.authorize((CredentialBase) credential);
     }
 
     @Override
@@ -133,9 +127,7 @@ public class OsuBotImpl implements OsuBot {
 
     @Override
     public void authenticateSync(IrcCredential credential) {
-        try (var _ = injector.setContext(ctx)) {
-            chatManager.authenticateIrc((IrcCredentialImpl) credential);
-        }
+        chatManager.authenticateIrc((IrcCredentialImpl) credential);
     }
 
     @Provides
@@ -191,14 +183,6 @@ public class OsuBotImpl implements OsuBot {
     @Override
     public String getUsername() {
         return botUser.get().getUsername();
-    }
-
-    @Override
-    public void execute(Runnable runnable) {
-        try (var _ = injector.setContext(ctx)) {
-            ctx.registerModule(this, true);
-            runnable.run();
-        }
     }
 
     @Override
