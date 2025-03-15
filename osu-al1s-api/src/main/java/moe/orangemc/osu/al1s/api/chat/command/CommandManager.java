@@ -48,4 +48,8 @@ public abstract class CommandManager {
     public final void registerCommand(CommandBase cmd) {
         this.commandMap.put(cmd.getName().toLowerCase(), cmd);
     }
+
+    public final void unregisterCommand(CommandBase cmd) {
+        this.commandMap.remove(cmd.getName().toLowerCase());
+    }
 }
