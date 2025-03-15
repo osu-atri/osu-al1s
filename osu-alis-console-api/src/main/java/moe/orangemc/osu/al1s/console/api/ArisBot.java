@@ -16,5 +16,13 @@
 
 package moe.orangemc.osu.al1s.console.api;
 
-public interface Al1sConsoleProvider {
+import moe.orangemc.osu.al1s.api.bot.OsuBot;
+import moe.orangemc.osu.al1s.console.api.plugin.PluginManager;
+
+public interface ArisBot {
+    void addBot(OsuBot bot);
+    OsuBot findBot(String username);
+    void removeBot(OsuBot bot);
+
+    PluginManager getPluginManager();
 }

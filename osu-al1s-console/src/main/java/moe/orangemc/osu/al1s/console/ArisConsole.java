@@ -22,9 +22,9 @@ import net.minecrell.terminalconsole.SimpleTerminalConsole;
 public class ArisConsole extends SimpleTerminalConsole {
     private final ConsoleCommandManager commandManager = new ConsoleCommandManager();
 
-    private final ArisBot bot;
+    private final ArisBotImpl bot;
 
-    public ArisConsole(ArisBot bot) {
+    public ArisConsole(ArisBotImpl bot) {
         this.bot = bot;
     }
 
