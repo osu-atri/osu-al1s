@@ -102,7 +102,7 @@ public class AuthorizationCodeGrantCredentialImpl extends CredentialBase impleme
                     // HttpServer runs on another thread so we need to wait.
                     final Condition codeCondition = codeLock.newCondition();
                     HttpServer server = HttpServer.create(callbackAddr, 1);
-                    server.createContext("/", exchange -> {
+                    server.createContext(URLUtil.newURL(redirectUri).getPath(), exchange -> {
                         try {
                             Map<String, String> params = URLUtil.extractQueryParams(exchange.getRequestURI());
                             if (!params.get("state").equals(state.toString())) {
