@@ -63,7 +63,7 @@ public class EventBusImpl implements EventBus {
 
     @Override
     public void unregister(Object listener) {
-        handlers.forEach((_, evtHandlers) -> evtHandlers.removeIf(handler -> handler.getOwner() == listener));
+        handlers.forEach((nah, evtHandlers) -> evtHandlers.removeIf(handler -> handler.getOwner() == listener));
     }
 
     @SuppressWarnings("unchecked")
@@ -83,11 +83,9 @@ public class EventBusImpl implements EventBus {
         }
 
         for (Set<GeneratedHandlerDispatcher<Event>> handlers : layeredHandlers) {
-            bot.execute(() -> {
-                for (GeneratedHandlerDispatcher<Event> handler : handlers) {
-                    handler.dispatchEvent(event);
-                }
-            });
+            for (GeneratedHandlerDispatcher<Event> handler : handlers) {
+                handler.dispatchEvent(event);
+            }
         }
     }
 }

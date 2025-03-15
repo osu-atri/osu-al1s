@@ -66,19 +66,17 @@ public abstract class OsuChannelImpl implements OsuChannel {
 
         List<String> messages = List.copyOf(this.polledServerMessages);
 
-        bot.execute(() -> {
-            polledQueue.addAll(messages);
-            try {
-                pollLock.lock();
-                notEmpty.signalAll();
-                newArrival.signalAll();
-            } finally {
-                pollLock.unlock();
-            }
-            this.processServerMessages(messages);
-            eventBus.fire(new SystemMessagePoll(messages, this));
-            this.polledServerMessages.clear();
-        });
+        polledQueue.addAll(messages);
+        try {
+            pollLock.lock();
+            notEmpty.signalAll();
+            newArrival.signalAll();
+        } finally {
+            pollLock.unlock();
+        }
+        this.processServerMessages(messages);
+        eventBus.fire(new SystemMessagePoll(messages, this));
+        this.polledServerMessages.clear();
     }
 
     public void pollServerMessages(Consumer<List<String>> consumer) {

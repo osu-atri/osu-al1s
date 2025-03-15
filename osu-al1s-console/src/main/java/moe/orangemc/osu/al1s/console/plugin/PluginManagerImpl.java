@@ -106,7 +106,7 @@ public class PluginManagerImpl implements PluginManager {
             if (!file.isDirectory()) {
                 try {
                     loadedPlugins.add(loadPlugin(file));
-                } catch (IllegalArgumentException _) {
+                } catch (IllegalArgumentException nah) {
                 }
             }
         }

@@ -68,7 +68,7 @@ public class InjectionContextImpl implements InjectionContext {
             try {
                 method.setAccessible(true);
                 Object value = method.invoke(module);
-                Map<String, Object> map = fieldMap.computeIfAbsent(clazz, _ -> new HashMap<>());
+                Map<String, Object> map = fieldMap.computeIfAbsent(clazz, (nah) -> new HashMap<>());
                 if (map.containsKey(name) && !reload) {
                     throw new InvalidInjectModuleException(module.getClass(), "Duplicate @Provides name: " + clazz.getName() + ":" + name);
                 }

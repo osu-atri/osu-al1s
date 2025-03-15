@@ -25,7 +25,7 @@ public class LazyReference<T> {
     private final Function<T, Boolean> validator;
 
     public LazyReference(Supplier<T> initializer) {
-        this(initializer, _ -> true);
+        this(initializer, (nah) -> true);
     }
 
     public LazyReference(Supplier<T> initializer, Function<T, Boolean> validator) {

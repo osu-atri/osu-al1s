@@ -133,11 +133,6 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
 
     @Override
     public void refreshState() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException _) {
-
-        }
         this.clearUnprocessedMessages();
         this.sendMessage("!mp settings");
     }
@@ -358,8 +353,7 @@ public class RoomImpl extends OsuChannelImpl implements MultiplayerRoom {
                 try {
                     referees.add(UserImpl.get(msg));
                     iterator.remove();
-                } catch (Exception _) {
-
+                } catch (Exception nah) {
                 }
             }
         });

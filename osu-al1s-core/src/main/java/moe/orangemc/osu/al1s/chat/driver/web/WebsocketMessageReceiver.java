@@ -61,21 +61,16 @@ public class WebsocketMessageReceiver implements WebSocket.Listener, AutoCloseab
     @Override
     public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
         String message = data.toString();
-        bot.execute(() -> {
-            WebsocketEvent evt = gson.fromJson(message, WebsocketEvent.class);
-            if (!"chat.message.new".equals(evt.event())) {
-                webSocket.request(1);
-                return;
-            }
+        WebsocketEvent evt = gson.fromJson(message, WebsocketEvent.class);
+        if (!"chat.message.new".equals(evt.event())) {
+            return WebSocket.Listener.super.onText(webSocket, data, last);
+        }
 
-            for (InboundChatMessage msg : evt.data().messages()) {
-                scheduler.runTask(() -> handler.handle(String.valueOf(msg.channelId()), UserImpl.get(msg.senderUid()), msg.message()));
-            }
+        for (InboundChatMessage msg : evt.data().messages()) {
+            scheduler.runTask(() -> handler.handle(String.valueOf(msg.channelId()), UserImpl.get(msg.senderUid()), msg.message()));
+        }
 
-            webSocket.request(1);
-        });
-
-        return null;
+        return WebSocket.Listener.super.onText(webSocket, data, last);
     }
 
     @Override

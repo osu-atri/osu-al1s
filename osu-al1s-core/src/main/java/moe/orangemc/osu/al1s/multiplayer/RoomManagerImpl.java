@@ -39,7 +39,7 @@ public class RoomManagerImpl implements RoomManager {
     private final Set<MatchRoomImpl> managedRooms = new HashSet<>();
 
     public RoomManagerImpl() {
-        referee.execute(() -> injector.getCurrentContext().registerModule(new MatchRequestAPIModule()));
+        injector.getCurrentContext().registerModule(new MatchRequestAPIModule());
         scheduler.runTaskTimer(this::cleanupRoom, 20, 20, TimeUnit.SECONDS);
     }
 

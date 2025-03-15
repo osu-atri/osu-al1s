@@ -91,14 +91,14 @@ public class MatchRoomImpl extends OsuChannelImpl implements MatchRoom {
         String password = passwordBuilder.toString();
         setPassword(password);
 
-        scheduler.runTaskTimer(() -> manager.execute(this::refreshState), 2, 2, TimeUnit.MINUTES);
+        scheduler.runTaskTimer(this::refreshState, 2, 2, TimeUnit.MINUTES);
     }
 
     public MatchRoomImpl(int roomId) {
         this.id = roomId;
         this.refreshState();
 
-        scheduler.runTaskTimer(() -> manager.execute(this::refreshState), 2, 2, TimeUnit.MINUTES);
+        scheduler.runTaskTimer(this::refreshState, 2, 2, TimeUnit.MINUTES);
     }
 
     @Override
@@ -367,7 +367,7 @@ public class MatchRoomImpl extends OsuChannelImpl implements MatchRoom {
                 try {
                     referees.add(UserImpl.get(msg));
                     iterator.remove();
-                } catch (Exception _) {
+                } catch (Exception nah) {
 
                 }
             }

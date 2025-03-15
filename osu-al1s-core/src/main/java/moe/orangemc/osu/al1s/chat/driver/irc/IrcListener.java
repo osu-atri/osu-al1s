@@ -42,14 +42,14 @@ public class IrcListener {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        scheduler.runTask(() -> bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message)));
+        scheduler.runTask(() -> handler.handle(channelName, UserImpl.get(sender), message));
     }
 
     @Handler
     public void onPrivateMessage(PrivateMessageEvent event) {
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        scheduler.runTask(() -> bot.execute(() -> handler.handle(sender, UserImpl.get(sender), message)));
+        scheduler.runTask(() -> handler.handle(sender, UserImpl.get(sender), message));
     }
 
     @Handler
@@ -57,6 +57,6 @@ public class IrcListener {
         String channelName = event.getChannel().getName();
         String message = event.getMessage();
         String sender = event.getActor().getNick();
-        scheduler.runTask(() -> bot.execute(() -> handler.handle(channelName, UserImpl.get(sender), message)));
+        scheduler.runTask(() -> handler.handle(channelName, UserImpl.get(sender), message));
     }
 }

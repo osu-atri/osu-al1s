@@ -131,12 +131,7 @@ public class HttpUtil {
     }
 
     private static String performRequest(HttpURLConnection connection, String urlParameters, Map<String, String> headers) throws Exception {
-        connection.setRequestProperty("Content-Type",
-                "application/x-www-form-urlencoded");
-
-        connection.setRequestProperty("Content-Length",
-                Integer.toString(urlParameters.getBytes().length));
-        connection.setRequestProperty("Content-Language", "en-US");
+        applyDefaultHeaders(connection, urlParameters);
 
         if (referer != null && referer.getToken() != null) {
             connection.setRequestProperty("Authorization", ((TokenImpl) referer.getToken()).toHttpToken());
@@ -147,21 +142,29 @@ public class HttpUtil {
         connection.setUseCaches(false);
         connection.setDoOutput(true);
 
-        //Send request
         DataOutputStream wr = new DataOutputStream(
                 connection.getOutputStream());
         wr.writeBytes(urlParameters);
         wr.close();
 
-        //Get Response
         return readResponse(connection);
+    }
+
+    private static void applyDefaultHeaders(HttpURLConnection connection, String urlParameters) {
+        connection.setRequestProperty("Content-Type",
+                "application/x-www-form-urlencoded");
+
+        connection.setRequestProperty("Content-Length",
+                Integer.toString(urlParameters.getBytes().length));
+        connection.setRequestProperty("Content-Language", "en-US");
     }
 
     private static String readResponse(HttpURLConnection connection) throws IOException {
         try {
             connection.setDoInput(true);
-        } catch (IllegalStateException _) {
-
+        } catch (IllegalStateException e) {
+            // we are trying on a closed connection.
+            return "";
         }
 
         InputStream is = connection.getInputStream();
