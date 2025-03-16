@@ -16,9 +16,13 @@
 
 package moe.orangemc.osu.al1s.api.bot;
 
+import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
+
 /**
  * Initialization entry of the bot, literally.
  */
 public interface InitEntry {
     void main(String[] args);
+
+    CommandManager getConsoleCommandManager();
 }

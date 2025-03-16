@@ -25,45 +25,12 @@ import org.objectweb.asm.Type;
 
 public class UserspaceCommandExecutorFactory extends CommandExecutorFactory<UserspaceGeneratedCommandExecutor> {
     @Override
-    protected Class<UserspaceGeneratedCommandExecutor> getSuperClass() {
+    protected Class<UserspaceGeneratedCommandExecutor> getExecutorInterfaceClass() {
         return UserspaceGeneratedCommandExecutor.class;
-    }
-
-    @Override
-    protected int getParameterStart() {
-        return 2;
     }
 
     @Override
     protected Class<? extends CommandManager> getCommandManagerClass() {
         return UserspaceCommandManager.class;
-    }
-
-    @Override
-    protected void generateRootCommandInvocation(MethodVisitor mv, CommandArgumentNode node, String name, Type stringReaderType, Label lengthCheckpoint) {
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "canRead", Type.getMethodDescriptor(Type.BOOLEAN_TYPE), false);
-        mv.visitInsn(Opcodes.ICONST_0);
-        mv.visitJumpInsn(Opcodes.IF_ICMPNE, lengthCheckpoint);
-
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitFieldInsn(Opcodes.GETFIELD, name, "commandBase", Type.getDescriptor(node.getMethod().getDeclaringClass()));
-        mv.visitVarInsn(Opcodes.ALOAD, 1); // user
-        mv.visitVarInsn(Opcodes.ALOAD, 2); // channel
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(node.getMethod().getDeclaringClass()), node.getMethod().getName(), Type.getMethodDescriptor(node.getMethod()), false);
-        mv.visitInsn(Opcodes.RETURN);
-    }
-
-    protected void generateCommandInvocation(MethodVisitor mv, CommandArgumentNode node, int depth, String name) {
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitFieldInsn(Opcodes.GETFIELD, name, "commandBase", Type.getDescriptor(node.getMethod().getDeclaringClass()));
-        mv.visitVarInsn(Opcodes.ALOAD, 1); // user
-        mv.visitVarInsn(Opcodes.ALOAD, 2); // channel
-        for (int i = 0; i < depth; i++) {
-            mv.visitVarInsn(Opcodes.ALOAD, getGeneratedParameterStart() + i);
-            Class<?> parameterType = node.getMethod().getParameterTypes()[i + getParameterStart()];
-            visitConversion(mv, parameterType);
-        }
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(node.getMethod().getDeclaringClass()), node.getMethod().getName(), Type.getMethodDescriptor(node.getMethod()), false);
-        mv.visitInsn(Opcodes.RETURN);
     }
 }

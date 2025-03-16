@@ -61,7 +61,7 @@ public class UserspaceCommandManager extends CommandManager {
             return false;
         }
         try {
-            executorFactory.fetchExecutor(cmd).execute(sender, where, this, reader);
+            executorFactory.fetchExecutor(cmd).execute(this, reader, sender, where);
         } catch (Exception e) {
             e.printStackTrace();
         }

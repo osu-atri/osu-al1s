@@ -66,7 +66,7 @@ public class JvmPluginClassLoader extends ClassLoader {
         }
 
         try (InputStream is = target.getInputStream(entry)) {
-            return parent.transform(is.readAllBytes());
+            return parent.applyInjectorTransformation(is.readAllBytes());
         }
     }
 }

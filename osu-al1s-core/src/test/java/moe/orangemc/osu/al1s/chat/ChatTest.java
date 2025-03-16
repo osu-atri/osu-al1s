@@ -81,7 +81,7 @@ public class ChatTest {
 
         Assertions.assertDoesNotThrow(() -> osuBot.authenticateSync(credential));
         ircCredential.setIrcUsername(osuBot.getUsername());
-        osuBot.execute(() -> osuBot.getEventBus().register(new MessageListener()));
+        osuBot.getEventBus().register(new MessageListener());
     }
 
     private void spamStopper() {
@@ -97,10 +97,8 @@ public class ChatTest {
     public void testNewPrivateMsg() {
         spamStopper();
 
-        osuBot.execute(() -> {
-            UserImpl target = UserImpl.get(targetUser);
-            target.sendMessage("Test message via web API. Please respond me.");
-        });
+        UserImpl target = UserImpl.get(targetUser);
+        target.sendMessage("Test message via web API. Please respond me.");
         try {
             Thread.sleep(2147483647);
         } catch (InterruptedException e) {
@@ -114,10 +112,8 @@ public class ChatTest {
 
         osuBot.authenticateSync(ircCredential);
 
-        osuBot.execute(() -> {
-            UserImpl target = UserImpl.get(targetUser);
-            target.sendMessage("Test message via IRC. Please respond me.");
-        });
+        UserImpl target = UserImpl.get(targetUser);
+        target.sendMessage("Test message via IRC. Please respond me.");
         try {
             Thread.sleep(2147483647);
         } catch (InterruptedException e) {

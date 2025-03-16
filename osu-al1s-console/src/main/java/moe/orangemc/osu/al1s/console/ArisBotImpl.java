@@ -23,12 +23,12 @@ import moe.orangemc.osu.al1s.api.bot.BotFactory;
 import moe.orangemc.osu.al1s.api.bot.InitEntry;
 import moe.orangemc.osu.al1s.api.bot.OsuBot;
 import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
-import moe.orangemc.osu.al1s.auth.CredentialProviderModule;
 import moe.orangemc.osu.al1s.auth.credential.IrcCredentialImpl;
 import moe.orangemc.osu.al1s.bot.BotFactoryImpl;
 import moe.orangemc.osu.al1s.console.api.ArisBot;
 import moe.orangemc.osu.al1s.console.api.plugin.PluginManager;
 import moe.orangemc.osu.al1s.console.command.ConsoleCommandManager;
+import moe.orangemc.osu.al1s.console.command.builtin.HelpCommand;
 import moe.orangemc.osu.al1s.console.command.builtin.LoginCommand;
 import moe.orangemc.osu.al1s.console.command.builtin.LogoutCommand;
 import moe.orangemc.osu.al1s.console.plugin.PluginManagerImpl;
@@ -56,7 +56,6 @@ public class ArisBotImpl implements InitEntry, ArisBot {
 
     @Inject
     private Injector injector;
-    private ArisConsole console;
     private TokenStorage tokenStorage;
     private BotFactory botFactory;
 
@@ -68,6 +67,7 @@ public class ArisBotImpl implements InitEntry, ArisBot {
 
     @Override
     public void main(String[] args) {
+        long startTime = System.currentTimeMillis();
         if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--debug"))) {
             this.debug = true;
         }
@@ -94,13 +94,13 @@ public class ArisBotImpl implements InitEntry, ArisBot {
         logger.info("Authenticate stored bots");
         authenticateBots();
 
-        logger.info("Done.");
+        logger.info("Done ({}s)", (System.currentTimeMillis() - startTime) / 1000.0);
     }
 
     private void initiateConsole() {
-        console = new ArisConsole(this);
+        ArisConsole console = new ArisConsole(this);
 
-        Thread consoleThread = new Thread(this.console::start);
+        Thread consoleThread = new Thread(console::start);
         consoleThread.setName("Aris Console");
         consoleThread.setDaemon(false);
         consoleThread.start();
@@ -110,6 +110,7 @@ public class ArisBotImpl implements InitEntry, ArisBot {
         consoleCommandManager = new ConsoleCommandManager();
         consoleCommandManager.registerCommand(new LoginCommand());
         consoleCommandManager.registerCommand(new LogoutCommand());
+        consoleCommandManager.registerCommand(new HelpCommand());
     }
 
     private void initiateBotFactory() {
@@ -192,6 +193,11 @@ public class ArisBotImpl implements InitEntry, ArisBot {
     @Override
     public PluginManager getPluginManager() {
         return pluginManager;
+    }
+
+    @Override
+    public CommandManager getConsoleCommandManager() {
+        return consoleCommandManager;
     }
 
     public class Provider {

@@ -18,9 +18,11 @@ package moe.orangemc.osu.al1s.console;
 
 import moe.orangemc.osu.al1s.console.command.ConsoleCommandManager;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ArisConsole extends SimpleTerminalConsole {
-    private final ConsoleCommandManager commandManager = new ConsoleCommandManager();
+    private static final Logger logger = LogManager.getLogger(ArisConsole.class);
 
     private final ArisBotImpl bot;
 
@@ -35,7 +37,14 @@ public class ArisConsole extends SimpleTerminalConsole {
 
     @Override
     protected void runCommand(String s) {
-        commandManager.executeCommand(s);
+        try {
+            // the method is also opened as an API. im lazy to open another method.
+            if (!((ConsoleCommandManager) bot.getConsoleCommandManager()).executeCommand(s)) {
+                logger.warn("Unknown command: {}", s);
+            }
+        } catch (Exception e) {
+            logger.warn("Error while executing command: {}", s, e);
+        }
     }
 
     @Override

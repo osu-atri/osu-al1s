@@ -22,5 +22,5 @@ import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.chat.command.UserspaceCommandManager;
 
 public interface UserspaceGeneratedCommandExecutor {
-    void execute(User user, OsuChannel channel, UserspaceCommandManager commandManager, StringReader command);
+    void execute(UserspaceCommandManager commandManager, StringReader command, User user, OsuChannel channel);
 }

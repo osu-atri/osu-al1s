@@ -49,6 +49,8 @@ public class InjectorClassLoader extends ClassLoader {
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
+        // We do not want to get into a loop, skip classes that have nothing to inject.
+        // These classes are confirmed to have nothing to inject.
         if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("moe.orangemc.osu.al1s.inject.") || injector.getCurrentContext().getMappedClass(name) != null) {
             return Class.forName(name);
         }
@@ -60,15 +62,10 @@ public class InjectorClassLoader extends ClassLoader {
             Class<?> found = null;
             for (File file : classPath) {
                 byte[] classByte = null;
-                if (file.isDirectory()) {
-                    classByte = findFromDirectory(file, name);
-                }
-                if (file.getName().endsWith(".jar") || file.getName().endsWith(".war")) {
-                    classByte = readClassFromJar(file, name);
-                }
+                classByte = readClassBytes(name, file, classByte);
 
                 if (classByte != null) {
-                    byte[] transformed = transform(classByte);
+                    byte[] transformed = applyInjectorTransformation(classByte);
                     found = defineClass(name, transformed, 0, transformed.length);
                     break;
                 }
@@ -85,21 +82,26 @@ public class InjectorClassLoader extends ClassLoader {
         }
     }
 
+    private byte[] readClassBytes(String name, File file, byte[] classByte) {
+        if (file.isDirectory()) {
+            classByte = findFromDirectory(file, name);
+        }
+        if (file.getName().endsWith(".jar") || file.getName().endsWith(".war")) {
+            classByte = readClassFromJar(file, name);
+        }
+        return classByte;
+    }
+
     private byte[] findFromDirectory(File file, String name) {
         File classFile = new File(file, name.replace('.', File.separatorChar) + ".class");
 
         if (classFile.exists()) {
-            byte[] bytes = readClassFromFile(classFile);
-            if (bytes == null) {
-                return null;
-            }
-
-            return bytes;
+            return readClassFromFile(classFile);
         }
         return null;
     }
 
-    public byte[] transform(byte[] from) {
+    public byte[] applyInjectorTransformation(byte[] from) {
         ClassReader cr = new ClassReader(from);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 

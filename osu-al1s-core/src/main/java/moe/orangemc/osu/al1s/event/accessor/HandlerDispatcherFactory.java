@@ -24,6 +24,7 @@ import moe.orangemc.osu.al1s.util.DigestUtil;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.apache.commons.lang3.Validate;
 import org.objectweb.asm.*;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -47,7 +48,8 @@ public class HandlerDispatcherFactory {
             return SneakyExceptionHelper.call(() -> cache.get(m).getConstructor(m.getDeclaringClass()).newInstance(handler));
         }
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        ClassWriter originalClassWrite = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        CheckClassAdapter cw = new CheckClassAdapter(originalClassWrite);
 
         String generatedName = "moe/orangemc/osu/al1s/event/accessor/HandlerDispatcherImpl_" + DigestUtil.sha256sum(Type.getType(m.getDeclaringClass()) + "." + m.getName() + "@" + Type.getMethodDescriptor(m) + ":" + ignoreCancelled);
 
@@ -150,7 +152,7 @@ public class HandlerDispatcherFactory {
             mv.visitEnd();
         }
 
-        byte[] classBytes = cw.toByteArray();
+        byte[] classBytes = originalClassWrite.toByteArray();
 
         Class<GeneratedHandlerDispatcher<?>> clazz = (Class<GeneratedHandlerDispatcher<?>>) classLoader.makeClass(generatedName.replace('/', '.'), classBytes);
         cache.put(m, clazz);

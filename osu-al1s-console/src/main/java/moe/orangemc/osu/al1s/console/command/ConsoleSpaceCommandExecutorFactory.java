@@ -21,13 +21,8 @@ import moe.orangemc.osu.al1s.chat.command.accessor.CommandExecutorFactory;
 
 public class ConsoleSpaceCommandExecutorFactory extends CommandExecutorFactory<ConsoleSpaceCommandGeneratedExecutor> {
     @Override
-    protected Class<ConsoleSpaceCommandGeneratedExecutor> getSuperClass() {
+    protected Class<ConsoleSpaceCommandGeneratedExecutor> getExecutorInterfaceClass() {
         return ConsoleSpaceCommandGeneratedExecutor.class;
-    }
-
-    @Override
-    protected int getParameterStart() {
-        return 0;
     }
 
     @Override

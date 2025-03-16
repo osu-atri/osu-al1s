@@ -55,6 +55,8 @@ public class InjectClassTransformer extends ClassVisitor {
             skip = true;
             return;
         }
+
+        // All fields marked by @Inject will fetch its value from the injected context
         super.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "injectorContext@" + me.hashCode(), contextType.getDescriptor(), null, null);
     }
 
@@ -188,7 +190,6 @@ public class InjectClassTransformer extends ClassVisitor {
                 }
 
                 Type fieldType = Type.getType(field.descriptor());
-
                 putFieldMappingInstruction(field, fieldType, putFieldOpcode);
             }
         }

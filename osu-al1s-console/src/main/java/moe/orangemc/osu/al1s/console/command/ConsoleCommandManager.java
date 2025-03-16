@@ -67,7 +67,7 @@ public class ConsoleCommandManager extends CommandManager {
     }
 
     public boolean executeCommand(String command) {
-        StringReader reader = new StringReader(command);
+        StringReader reader = new StringReader("!" + command);
         String cmdName = reader.getRootCommand().toLowerCase();
         CommandBase cmd = commandMap.get(cmdName);
         if (cmd == null) {
