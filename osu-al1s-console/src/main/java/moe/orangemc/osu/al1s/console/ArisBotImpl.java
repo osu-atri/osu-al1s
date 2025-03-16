@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.console;
 
+import moe.orangemc.osu.al1s.accessor.AccessorClassLoader;
 import moe.orangemc.osu.al1s.api.auth.IrcCredential;
 import moe.orangemc.osu.al1s.api.auth.Token;
 import moe.orangemc.osu.al1s.api.bot.BotFactory;
@@ -37,6 +38,8 @@ import moe.orangemc.osu.al1s.console.util.StringUtil;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.inject.api.Injector;
 import moe.orangemc.osu.al1s.inject.api.Provides;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -46,6 +49,8 @@ import java.util.*;
  * Stub class (launcher base) used by {@link KeiBootstrap}.
  */
 public class ArisBotImpl implements InitEntry, ArisBot {
+    private static final Logger logger = LogManager.getLogger(ArisBotImpl.class);
+
     private boolean running = true;
     private boolean debug = false;
 
@@ -55,11 +60,11 @@ public class ArisBotImpl implements InitEntry, ArisBot {
     private TokenStorage tokenStorage;
     private BotFactory botFactory;
 
-    private final Settings settings = new Settings(new File("config.yml"));
-    private final PluginManagerImpl pluginManager = new PluginManagerImpl();
+    private Settings settings;
+    private PluginManagerImpl pluginManager;
     private final Set<OsuBot> bots = new HashSet<>();
 
-    private final CommandManager consoleCommandManager = new ConsoleCommandManager();
+    private CommandManager consoleCommandManager;
 
     @Override
     public void main(String[] args) {
@@ -67,28 +72,42 @@ public class ArisBotImpl implements InitEntry, ArisBot {
             this.debug = true;
         }
 
-        initiateBotFactory();
         initiateInjectionContext();
 
         initiateConsole();
 
+        pluginManager = new PluginManagerImpl();
+        settings = new Settings();
+
+        initiateBotFactory();
+
+        logger.info("Loading plugins");
         pluginManager.loadPlugins();
+
         tokenStorage = new TokenStorage();
 
         registerBuiltinConsoleCommands();
 
+        logger.info("Enabling plugins");
         pluginManager.enableAllPlugins();
 
+        logger.info("Authenticate stored bots");
         authenticateBots();
+
+        logger.info("Done.");
     }
 
     private void initiateConsole() {
         console = new ArisConsole(this);
 
-        new Thread(this::runConsole).start();
+        Thread consoleThread = new Thread(this.console::start);
+        consoleThread.setName("Aris Console");
+        consoleThread.setDaemon(false);
+        consoleThread.start();
     }
 
     private void registerBuiltinConsoleCommands() {
+        consoleCommandManager = new ConsoleCommandManager();
         consoleCommandManager.registerCommand(new LoginCommand());
         consoleCommandManager.registerCommand(new LogoutCommand());
     }
@@ -102,15 +121,10 @@ public class ArisBotImpl implements InitEntry, ArisBot {
     }
 
     private void initiateInjectionContext() {
+        injector.getCurrentContext().registerModule(new CwdProvider());
         injector.getCurrentContext().registerModule(this.new Provider());
-        injector.getCurrentContext().registerModule(new CredentialProviderModule());
-        injector.getCurrentContext().registerModule(this.new BotFactoryProvider());
-    }
-
-    private void runConsole() {
-        Thread.currentThread().setName("ArisConsole");
-        Thread.currentThread().setDaemon(true);
-        console.start();
+        injector.getCurrentContext().registerModule(new AccessorClassLoaderProvider());
+        injector.getCurrentContext().registerModule(this.new BotFactoryProvider(), true);
     }
 
     private void authenticateBots() {
@@ -198,6 +212,22 @@ public class ArisBotImpl implements InitEntry, ArisBot {
         @Provides
         public ArisBot provideArisBot() {
             return ArisBotImpl.this;
+        }
+    }
+
+    public static class CwdProvider {
+        @Provides(name = "cwd")
+        public File provideCwd() {
+            return new File("").getAbsoluteFile(); // current working directory
+        }
+    }
+
+    public static class AccessorClassLoaderProvider {
+        private final AccessorClassLoader accessorClassLoader = new AccessorClassLoader();
+
+        @Provides
+        public AccessorClassLoader provideAccessorClassLoader() {
+            return accessorClassLoader;
         }
     }
 }

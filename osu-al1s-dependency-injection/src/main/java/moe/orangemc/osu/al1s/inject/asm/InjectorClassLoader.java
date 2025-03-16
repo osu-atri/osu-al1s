@@ -68,7 +68,8 @@ public class InjectorClassLoader extends ClassLoader {
                 }
 
                 if (classByte != null) {
-                    found = defineClass(name, transform(classByte), 0, classByte.length);
+                    byte[] transformed = transform(classByte);
+                    found = defineClass(name, transformed, 0, transformed.length);
                     break;
                 }
             }
@@ -93,7 +94,7 @@ public class InjectorClassLoader extends ClassLoader {
                 return null;
             }
 
-            return transform(bytes);
+            return bytes;
         }
         return null;
     }

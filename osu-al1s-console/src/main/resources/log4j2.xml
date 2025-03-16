@@ -18,8 +18,5 @@
             <AppenderRef ref="CONSOLE" level="WARN"/>
             <AppenderRef ref="MAIN"/>
         </Root>
-        <Logger name="org.example" level="DEBUG">
-            <AppenderRef ref="DEBUG_LOG"/>
-        </Logger>
     </Loggers>
 </Configuration>

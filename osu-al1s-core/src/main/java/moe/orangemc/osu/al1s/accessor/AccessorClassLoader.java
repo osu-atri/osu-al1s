@@ -29,9 +29,6 @@ import java.util.Map;
 public class AccessorClassLoader extends ClassLoader {
     private final Map<String, Class<?>> madeClassCache = new HashMap<>();
 
-    @Inject
-    private OsuBotImpl osuBot;
-
     public AccessorClassLoader() {
         super(GeneratedHandlerDispatcher.class.getClassLoader());
     }
@@ -55,10 +52,6 @@ public class AccessorClassLoader extends ClassLoader {
     }
 
     private void dumpClass(byte[] data) {
-        if (!osuBot.debug) {
-            return;
-        }
-
         try {
             File tmp = File.createTempFile("dump", ".class");
             System.out.println("Dumping class to " + tmp.getAbsolutePath());

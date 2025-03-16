@@ -25,7 +25,9 @@ import java.io.File;
 import java.util.*;
 
 public class PluginManagerImpl implements PluginManager {
-    @Inject
+    @Inject(name = "cwd")
+    private File cwd;
+
     private File pluginDir;
 
     private final Set<Plugin> loadedPlugins = new HashSet<>();
@@ -34,6 +36,13 @@ public class PluginManagerImpl implements PluginManager {
     private final Set<Plugin> enabledPlugins = new HashSet<>();
 
     private final Map<String, Plugin> pluginNameMap = new HashMap<>();
+
+    public PluginManagerImpl() {
+        this.pluginDir = new File(cwd, "plugins");
+        if (!pluginDir.exists()) {
+            pluginDir.mkdirs();
+        }
+    }
 
     @SuppressWarnings("unchecked")
     @Override

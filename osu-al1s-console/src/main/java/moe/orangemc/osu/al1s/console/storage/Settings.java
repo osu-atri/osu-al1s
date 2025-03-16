@@ -16,6 +16,7 @@
 
 package moe.orangemc.osu.al1s.console.storage;
 
+import moe.orangemc.osu.al1s.inject.api.Inject;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import org.yaml.snakeyaml.Yaml;
 
@@ -27,12 +28,17 @@ import java.net.URL;
 import java.util.Map;
 
 public class Settings {
+    @Inject(name="cwd")
+    private File cwd;
+
     private URL serverUrl;
     private String serverBotName;
     private String ircHost;
     private int ircPort;
 
-    public Settings(File settingsFile) {
+    public Settings() {
+        File settingsFile = new File(cwd, "settings.yml");
+
         if (settingsFile.exists()) {
             loadFromFile(settingsFile);
         } else {
