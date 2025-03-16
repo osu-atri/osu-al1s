@@ -16,9 +16,7 @@
 
 package moe.orangemc.osu.al1s.accessor;
 
-import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.event.accessor.GeneratedHandlerDispatcher;
-import moe.orangemc.osu.al1s.inject.api.Inject;
 
 import java.io.File;
 import java.io.FileOutputStream;

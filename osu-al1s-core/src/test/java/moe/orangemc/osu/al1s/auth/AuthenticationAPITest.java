@@ -32,7 +32,6 @@ import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 import moe.orangemc.osu.al1s.util.URLUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

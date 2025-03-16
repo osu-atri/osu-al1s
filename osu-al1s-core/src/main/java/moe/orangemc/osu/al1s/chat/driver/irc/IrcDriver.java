@@ -33,6 +33,9 @@ import org.kitteh.irc.client.library.defaults.feature.network.NettyConnection;
 import org.kitteh.irc.client.library.event.connection.ClientConnectionEstablishedEvent;
 
 import java.lang.reflect.Field;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 public class IrcDriver implements ChatDriver {
     private final Client client;
@@ -41,6 +44,8 @@ public class IrcDriver implements ChatDriver {
     private OsuBotImpl bot;
     @Inject
     private Scheduler scheduler;
+
+    private Queue<QueuedMessage> messages = new ConcurrentLinkedQueue<>();
 
     public IrcDriver(String host, int port, IrcCredentialImpl credential) {
         var builder = Client.builder()
@@ -61,11 +66,19 @@ public class IrcDriver implements ChatDriver {
 
             ((Client.WithManagement) client).startSending();
         });
+
+        // respect ppy's limit.
+        scheduler.runTaskTimer(() -> {
+            QueuedMessage nextToSend = messages.poll();
+            if (nextToSend != null) {
+                client.sendMessage(nextToSend.channel, nextToSend.message);
+            }
+        }, 500, 500, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void sendMessage(String channel, String message) {
-        scheduler.runTask(() -> client.sendMessage(channel, message));
+        messages.add(new QueuedMessage(channel, message));
     }
 
     @Override
@@ -116,4 +129,6 @@ public class IrcDriver implements ChatDriver {
         Channel channel = SneakyExceptionHelper.call(() -> (Channel) channelField.get(connection));
         channel.pipeline().replace("[INPUT] Line splitter", "[INPUT] Line splitter", new LineBasedFrameDecoder(9001));
     }
+
+    private record QueuedMessage(String channel, String message) {}
 }

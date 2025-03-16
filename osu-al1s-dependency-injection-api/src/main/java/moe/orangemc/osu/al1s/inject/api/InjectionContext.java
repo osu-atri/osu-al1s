@@ -16,8 +16,6 @@
 
 package moe.orangemc.osu.al1s.inject.api;
 
-import java.util.Collection;
-
 public interface InjectionContext {
     void registerModule(Object module);
     void registerModule(Object module, boolean reload);

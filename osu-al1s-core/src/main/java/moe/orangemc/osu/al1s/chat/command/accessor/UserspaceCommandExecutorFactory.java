@@ -18,10 +18,6 @@ package moe.orangemc.osu.al1s.chat.command.accessor;
 
 import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
 import moe.orangemc.osu.al1s.chat.command.UserspaceCommandManager;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 public class UserspaceCommandExecutorFactory extends CommandExecutorFactory<UserspaceGeneratedCommandExecutor> {
     @Override

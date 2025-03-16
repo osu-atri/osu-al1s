@@ -17,12 +17,9 @@
 package moe.orangemc.osu.al1s;
 
 import moe.orangemc.osu.al1s.api.spi.ArisBootstrapService;
-import moe.orangemc.osu.al1s.auth.CredentialProviderModule;
-import moe.orangemc.osu.al1s.bot.BotFactoryModule;
 import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.Injector;
-import moe.orangemc.osu.al1s.util.GsonProvider;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
 
 import java.lang.reflect.Constructor;

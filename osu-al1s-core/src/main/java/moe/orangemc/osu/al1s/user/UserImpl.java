@@ -22,7 +22,6 @@ import moe.orangemc.osu.al1s.bot.OsuBotImpl;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
 import moe.orangemc.osu.al1s.inject.api.Inject;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

@@ -18,7 +18,6 @@ package moe.orangemc.osu.al1s.inject.context;
 
 import moe.orangemc.osu.al1s.inject.InjectorImpl;
 import moe.orangemc.osu.al1s.inject.api.ContextSession;
-import moe.orangemc.osu.al1s.inject.api.InjectionContext;
 import moe.orangemc.osu.al1s.inject.api.Injector;
 
 public class ContextSessionImpl implements ContextSession {
