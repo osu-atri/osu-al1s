@@ -20,15 +20,19 @@ import moe.orangemc.osu.al1s.console.api.plugin.Plugin;
 import moe.orangemc.osu.al1s.console.api.plugin.PluginLoader;
 import moe.orangemc.osu.al1s.console.api.plugin.PluginManager;
 import moe.orangemc.osu.al1s.inject.api.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
 
 public class PluginManagerImpl implements PluginManager {
+    private static final Logger logger = LogManager.getLogger(PluginManagerImpl.class);
+
     @Inject(name = "cwd")
     private File cwd;
 
-    private File pluginDir;
+    private final File pluginDir;
 
     private final Set<Plugin> loadedPlugins = new HashSet<>();
     private final Set<PluginLoader> loaders = new HashSet<>();
@@ -47,6 +51,10 @@ public class PluginManagerImpl implements PluginManager {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Plugin> T getPlugin(String id) {
+        if (!pluginNameMap.containsKey(id)) {
+            throw new NoSuchElementException(id);
+        }
+
         return (T) pluginNameMap.get(id);
     }
 
@@ -54,7 +62,12 @@ public class PluginManagerImpl implements PluginManager {
     public <T extends Plugin> T loadPlugin(File file) {
         for (PluginLoader loader : loaders) {
             if (file.getName().endsWith("." + loader.getAcceptableSuffix())) {
-                return loader.loadPlugin(file);
+                T plugin = loader.loadPlugin(file);
+
+                if (pluginNameMap.containsKey(plugin.getDescriptor().name())) {
+                    throw new IllegalArgumentException("Duplicated plugin id: " + plugin.getDescriptor().name());
+                }
+                pluginNameMap.put(plugin.getDescriptor().name(), plugin);
             }
         }
 
@@ -63,7 +76,7 @@ public class PluginManagerImpl implements PluginManager {
 
     @Override
     public void disablePlugin(String id) {
-        this.disablePlugin((Plugin) getPlugin(id));
+        this.disablePlugin(getPlugin(id));
     }
 
     @Override
@@ -72,13 +85,15 @@ public class PluginManagerImpl implements PluginManager {
             return;
         }
 
+        logger.info("Disabling plugin " + plugin.getDescriptor().name());
+
         plugin.onDisable();
         enabledPlugins.remove(plugin);
     }
 
     @Override
     public void enablePlugin(String id) {
-        this.enablePlugin((Plugin) getPlugin(id));
+        this.enablePlugin(getPlugin(id));
     }
 
     @Override
@@ -86,6 +101,8 @@ public class PluginManagerImpl implements PluginManager {
         if (enabledPlugins.contains(plugin)) {
             return;
         }
+
+        logger.info("Enabling plugin: " + plugin.getDescriptor().name());
 
         plugin.onEnable();
         enabledPlugins.add(plugin);
@@ -102,7 +119,12 @@ public class PluginManagerImpl implements PluginManager {
             throw new IllegalArgumentException("No such plugin: " + id);
         }
 
-        return enabledPlugins.contains(pluginNameMap.get(id));
+        return isPluginEnabled(pluginNameMap.get(id));
+    }
+
+    @Override
+    public <T extends Plugin> boolean isPluginEnabled(T plugin) { // ok why don't use Plugin#isEnabled.
+        return enabledPlugins.contains(plugin);
     }
 
     public void loadPlugins() {
@@ -115,7 +137,8 @@ public class PluginManagerImpl implements PluginManager {
             if (!file.isDirectory()) {
                 try {
                     loadedPlugins.add(loadPlugin(file));
-                } catch (IllegalArgumentException nah) {
+                } catch (IllegalArgumentException e) {
+                    logger.error("Error while loading plugin from file: {}", file.getName(), e);
                 }
             }
         }

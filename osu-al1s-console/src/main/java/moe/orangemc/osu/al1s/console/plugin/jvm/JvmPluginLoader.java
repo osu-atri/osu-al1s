@@ -22,6 +22,8 @@ import moe.orangemc.osu.al1s.console.api.plugin.PluginLoader;
 import moe.orangemc.osu.al1s.console.plugin.PluginManagerImpl;
 import moe.orangemc.osu.al1s.inject.asm.InjectorClassLoader;
 import moe.orangemc.osu.al1s.util.SneakyExceptionHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -32,6 +34,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class JvmPluginLoader extends PluginLoader {
+    private static final Logger logger = LogManager.getLogger(JvmPluginLoader.class);
+
     private final PluginManagerImpl pm;
     private final Map<Plugin, JvmPluginClassLoader> loaderMap = new HashMap<>();
 
@@ -53,6 +57,7 @@ public class JvmPluginLoader extends PluginLoader {
     public <T extends Plugin> T loadPlugin(File target) {
         return SneakyExceptionHelper.callAutoClose(() -> new JarFile(target), jarFile -> {
             PluginDescriptor descriptor = readPluginDescriptor(target, jarFile);
+            logger.info("Loading JVM plugin: {} v{}", descriptor.name(), descriptor.version());
 
             JvmPluginClassLoader loader = makeClassLoader(jarFile);
 

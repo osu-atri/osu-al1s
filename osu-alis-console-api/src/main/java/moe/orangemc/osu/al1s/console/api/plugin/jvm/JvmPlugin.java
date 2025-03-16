@@ -18,46 +18,25 @@ package moe.orangemc.osu.al1s.console.api.plugin.jvm;
 
 import moe.orangemc.osu.al1s.console.api.plugin.Plugin;
 import moe.orangemc.osu.al1s.console.api.plugin.PluginDescriptor;
+import moe.orangemc.osu.al1s.console.api.plugin.PluginManager;
 
 import java.io.File;
 
-public abstract class JvmPlugin implements Plugin {
-    private PluginDescriptor descriptor;
+public abstract class JvmPlugin extends Plugin {
     private File dataFolder;
 
-    private boolean enabled = false;
+    protected JvmPlugin(PluginDescriptor descriptor, PluginManager pluginManager) {
+        super(descriptor, pluginManager);
+    }
 
-    public final void load(PluginDescriptor descriptor) {
-        this.descriptor = descriptor;
-        this.dataFolder = new File("plugins/" + descriptor.name());
+    public final void load() {
+        this.dataFolder = new File("plugins/" + getDescriptor().name());
 
-        if (!getClass().getName().equals(descriptor.main())) {
+        if (!getClass().getName().equals(getDescriptor().main())) {
             throw new IllegalArgumentException("Main class name does not match the plugin descriptor");
         }
 
         onLoad();
-    }
-
-    @Override
-    public void onLoad() {
-    }
-
-    @Override
-    public void onDisable() {
-    }
-
-    public final void setEnabled(boolean enabled) {
-        if (this.enabled == enabled) {
-            return;
-        }
-
-        this.enabled = enabled;
-
-        if (enabled) {
-            onEnable();
-        } else {
-            onDisable();
-        }
     }
 
     public final File getDataFolder() {
@@ -71,13 +50,5 @@ public abstract class JvmPlugin implements Plugin {
         }
 
         return this.dataFolder;
-    }
-
-    public final PluginDescriptor getDescriptor() {
-        return descriptor;
-    }
-
-    public final boolean isEnabled() {
-        return enabled;
     }
 }

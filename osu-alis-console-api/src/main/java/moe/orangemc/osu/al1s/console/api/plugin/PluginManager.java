@@ -32,4 +32,6 @@ public interface PluginManager {
     void registerPluginLoader(PluginLoader loader);
 
     boolean isPluginEnabled(String id);
+
+    <T extends Plugin> boolean isPluginEnabled(T plugin);
 }

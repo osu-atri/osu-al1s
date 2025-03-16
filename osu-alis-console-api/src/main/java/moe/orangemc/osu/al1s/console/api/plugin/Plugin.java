@@ -16,8 +16,28 @@
 
 package moe.orangemc.osu.al1s.console.api.plugin;
 
-public interface Plugin {
-    void onLoad();
-    void onEnable();
-    void onDisable();
+public abstract class Plugin {
+    private final PluginDescriptor descriptor;
+    private final PluginManager pluginManager;
+
+    protected Plugin(PluginDescriptor descriptor, PluginManager pluginManager) {
+        this.descriptor = descriptor;
+        this.pluginManager = pluginManager;
+    }
+
+    public void onLoad() {}
+    public void onEnable() {}
+    public void onDisable() {}
+
+    public final PluginDescriptor getDescriptor() {
+        return descriptor;
+    }
+
+    public final PluginManager getPluginManager() {
+        return pluginManager;
+    }
+
+    public final boolean isEnabled() {
+        return pluginManager.isPluginEnabled(this);
+    }
 }
