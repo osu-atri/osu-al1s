@@ -228,15 +228,16 @@ public abstract class CommandExecutorFactory<I> {
         // | . | ...                 |
         // +---+---------------------+
 
-        // length checkpoint will be set at the end of other deeper argument parsing and calls
+        // `me` will be set at the end of other deeper argument parsing and calls
         // we will reuse the stack, and create a frame for them
-        // root->lengthCheckPoint defaults null.
         me = new Label();
         sibling = new Label();
 
         lookForChildren(mv, node, depth + 1, name, owner, me, sibling);
 
-        // blocks flow, avoids verify error.
+        // blocks flow, avoids verify error
+        // usually happens when string reading have something to do but
+        // nothing accepts its input.
         if (node.getMethod() == null) {
             mv.visitLabel(me);
         }
