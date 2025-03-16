@@ -190,8 +190,6 @@ public abstract class CommandExecutorFactory<I> {
         Type commandManagerImplType = Type.getType(getCommandManagerClass());
         Type typeAdapterType = Type.getType(ArgumentTypeAdapter.class);
 
-        generateParameterParserFetch(mv, node, commandManagerImplType);
-
         Label tryStart = new Label();
         Label tryEnd = new Label();
 
@@ -199,8 +197,11 @@ public abstract class CommandExecutorFactory<I> {
         mv.visitTryCatchBlock(tryStart, tryEnd, sibling, "java/lang/IllegalArgumentException");
         mv.visitTryCatchBlock(tryStart, tryEnd, sibling, "java/lang/StringIndexOutOfBoundsException");
 
-        // we are not going to fallback to parents, eg: "fal" is bad for boolean adapter, but ok for string adapter.
-        generateNodeParameterParse(mv, node, tryStart, stringReaderType, typeAdapterType, tryEnd);
+        // we are not going to fall back to parents, eg: "fal" is bad for boolean adapter, but ok for string adapter.
+        mv.visitLabel(tryStart);
+        generateParameterParserFetch(mv, node, commandManagerImplType);
+        generateNodeParameterParse(mv, node, stringReaderType, typeAdapterType);
+        mv.visitLabel(tryEnd);
 
         // 3. If succeeded, do as the root.
         visitCurrentAsRoot(mv, node, depth, name, owner);
@@ -235,13 +236,14 @@ public abstract class CommandExecutorFactory<I> {
 
         lookForChildren(mv, node, depth + 1, name, owner, me, sibling);
 
+        // blocks flow, avoids verify error.
+        generateUnknownExceptionRaiser(mv);
+
         // we've waited for soo long
         if (node.getMethod() != null) {
             mv.visitLabel(me);
             generateCommandInvocation(mv, node);
             mv.visitInsn(Opcodes.RETURN);
-        } else {
-            generateUnknownExceptionRaiser(mv);
         }
     }
 
@@ -320,7 +322,7 @@ public abstract class CommandExecutorFactory<I> {
         mv.visitInsn(Opcodes.ATHROW);
     }
 
-    private void generateNodeParameterParse(MethodVisitor mv, CommandArgumentNode node, Label tryStart, Type stringReaderType, Type typeAdapterType, Label tryEnd) {
+    private void generateNodeParameterParse(MethodVisitor mv, CommandArgumentNode node, Type stringReaderType, Type typeAdapterType) {
         // +---+------------------+
         // | 1 | Command Manager  |
         // | 2 | StringReader     |
@@ -330,7 +332,6 @@ public abstract class CommandExecutorFactory<I> {
 
         // here to parse arguments,
         // and positioning string reader to the start of next, or the end.
-        mv.visitLabel(tryStart);
         mv.visitVarInsn(Opcodes.ALOAD, 2);
         // throws IllegalArgumentException if bad things happens, and helps to jump to siblings.
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, typeAdapterType.getInternalName(), "parse", Type.getMethodDescriptor(SneakyExceptionHelper.call(() -> ArgumentTypeAdapter.class.getMethod("parse", StringReader.class))), true);
@@ -341,7 +342,6 @@ public abstract class CommandExecutorFactory<I> {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, stringReaderType.getInternalName(), "skip", Type.getMethodDescriptor(Type.VOID_TYPE), false);
 
         visitConversion(mv, node.getParameter());
-        mv.visitLabel(tryEnd);
     }
 
     private void visitConversion(MethodVisitor mv, Class<?> parameterType) {
