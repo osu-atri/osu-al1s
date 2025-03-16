@@ -4,7 +4,7 @@
         <TerminalConsole name="CONSOLE">
             <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg%n"/>
         </TerminalConsole>
-        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingRandomAccessFile name="FILE" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy />
@@ -16,7 +16,7 @@
     <Loggers>
         <Root level="INFO">
             <AppenderRef ref="CONSOLE" level="INFO"/>
-            <AppenderRef ref="MAIN"/>
+            <AppenderRef ref="FILE"/>
         </Root>
     </Loggers>
 </Configuration>
