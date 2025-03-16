@@ -237,6 +237,9 @@ public abstract class CommandExecutorFactory<I> {
         lookForChildren(mv, node, depth + 1, name, owner, me, sibling);
 
         // blocks flow, avoids verify error.
+        if (node.getMethod() == null) {
+            mv.visitLabel(me);
+        }
         generateUnknownExceptionRaiser(mv);
 
         // we've waited for soo long
