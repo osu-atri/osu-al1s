@@ -52,6 +52,10 @@ public class AccessorClassLoader extends ClassLoader {
     }
 
     private void dumpClass(byte[] data) {
+        if (!Boolean.getBoolean(System.getProperty("AL1S-DEBUG", "false"))) {
+            return;
+        }
+
         try {
             File tmp = File.createTempFile("dump", ".class");
             System.out.println("Dumping class to " + tmp.getAbsolutePath());

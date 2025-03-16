@@ -31,6 +31,7 @@ import moe.orangemc.osu.al1s.console.command.ConsoleCommandManager;
 import moe.orangemc.osu.al1s.console.command.builtin.HelpCommand;
 import moe.orangemc.osu.al1s.console.command.builtin.LoginCommand;
 import moe.orangemc.osu.al1s.console.command.builtin.LogoutCommand;
+import moe.orangemc.osu.al1s.console.command.builtin.StopCommand;
 import moe.orangemc.osu.al1s.console.plugin.PluginManagerImpl;
 import moe.orangemc.osu.al1s.console.storage.Settings;
 import moe.orangemc.osu.al1s.console.storage.TokenStorage;
@@ -70,6 +71,7 @@ public class ArisBotImpl implements InitEntry, ArisBot {
         long startTime = System.currentTimeMillis();
         if (Arrays.stream(args).anyMatch(s -> s.equalsIgnoreCase("--debug"))) {
             this.debug = true;
+            System.setProperty("AL1S-DEBUG", "true");
         }
 
         initiateInjectionContext();
@@ -94,6 +96,7 @@ public class ArisBotImpl implements InitEntry, ArisBot {
         logger.info("Authenticate stored bots");
         authenticateBots();
 
+        Thread.currentThread().setName("Aris bootstrapper");
         logger.info("Done ({}s)", (System.currentTimeMillis() - startTime) / 1000.0);
     }
 
@@ -102,7 +105,6 @@ public class ArisBotImpl implements InitEntry, ArisBot {
 
         Thread consoleThread = new Thread(console::start);
         consoleThread.setName("Aris Console");
-        consoleThread.setDaemon(false);
         consoleThread.start();
     }
 
@@ -111,6 +113,7 @@ public class ArisBotImpl implements InitEntry, ArisBot {
         consoleCommandManager.registerCommand(new LoginCommand());
         consoleCommandManager.registerCommand(new LogoutCommand());
         consoleCommandManager.registerCommand(new HelpCommand());
+        consoleCommandManager.registerCommand(new StopCommand());
     }
 
     private void initiateBotFactory() {
@@ -159,8 +162,10 @@ public class ArisBotImpl implements InitEntry, ArisBot {
     }
 
     public void stop() {
+        logger.info("Stopping aris");
         running = false;
 
+        logger.info("Saving tokens");
         this.tokenStorage.save();
     }
 

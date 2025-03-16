@@ -23,6 +23,7 @@ import moe.orangemc.osu.al1s.api.ArisService;
  */
 public class KeiBootstrap {
     public static void main(String[] args) {
+        Thread.currentThread().setName("Kei bootstrapper");
         ArisService.bootstrap("moe.orangemc.osu.al1s.console.ArisBotImpl", args);
     }
 }

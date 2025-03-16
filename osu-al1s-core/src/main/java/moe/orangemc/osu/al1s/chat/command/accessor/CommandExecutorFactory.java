@@ -233,8 +233,11 @@ public abstract class CommandExecutorFactory<I> {
         me = new Label();
         sibling = new Label();
 
-        lookForChildren(mv, node, depth + 1, name, owner, me, sibling);
-
+        if (!node.getChildren().isEmpty()) {
+            lookForChildren(mv, node, depth + 1, name, owner, me, sibling);
+        } else {
+            mv.visitJumpInsn(Opcodes.GOTO, me);
+        }
         // blocks flow, avoids verify error
         // usually happens when string reading have something to do but
         // nothing accepts its input.
