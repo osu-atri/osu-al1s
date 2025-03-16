@@ -34,7 +34,19 @@ public class CommandArgumentNode {
     }
 
     public List<CommandArgumentNode> getChildren() {
-        return Collections.unmodifiableList(new ArrayList<>(children.values()));
+        // Sort string related things to bottom, they are way too common and can lead to parsing issues.
+        List<CommandArgumentNode> children = new ArrayList<>(this.children.values());
+        children.sort(Comparator.comparingInt(node -> {
+            if (node.parameter == String.class) {
+                return 2;
+            }
+            if (node.parameter == String[].class) { // less common than String
+                return 1;
+            }
+            return 0;
+        }));
+
+        return Collections.unmodifiableList(children);
     }
 
     public Method getMethod() {
