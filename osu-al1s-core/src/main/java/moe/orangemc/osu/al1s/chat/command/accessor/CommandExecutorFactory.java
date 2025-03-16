@@ -40,6 +40,33 @@ public abstract class CommandExecutorFactory<I> {
 
     private final List<Class<?>> proxiedParameters = new ArrayList<>();
 
+    public CommandExecutorFactory() {
+        collectProxiedParameters();
+    }
+
+    private void collectProxiedParameters() {
+        try {
+            Method proxyExecutorMethod = Arrays.stream(getExecutorInterfaceClass().getMethods()).filter(m -> m.getName().equals("execute")).findFirst().orElseThrow();
+            Parameter[] parameters = proxyExecutorMethod.getParameters();
+            if (parameters.length < 2) {
+                throw new IllegalStateException("Bad method signature, you need at least execute(CommandManager, StringReader) in your executor interface.");
+            }
+
+            if (!CommandManager.class.isAssignableFrom(parameters[0].getType())) {
+                throw new IllegalStateException("The first parameter of the execute method must be of type CommandManager.");
+            }
+            if (!StringReader.class.isAssignableFrom(parameters[1].getType())) {
+                throw new IllegalStateException("The second parameter of the execute method must be of type StringReader.");
+            }
+
+            for (int i = 2; i < parameters.length; i++) {
+                proxiedParameters.add(parameters[i].getType());
+            }
+        } catch (NoSuchElementException | IllegalStateException e) {
+            throw new IllegalStateException("The executor interface must have an execute method with the correct signature.", e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public I fetchExecutor(CommandBase commandBase) {
         if (cache.containsKey(commandBase)) {
