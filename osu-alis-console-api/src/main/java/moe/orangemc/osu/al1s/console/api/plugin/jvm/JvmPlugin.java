@@ -21,6 +21,9 @@ import moe.orangemc.osu.al1s.console.api.plugin.PluginDescriptor;
 import moe.orangemc.osu.al1s.console.api.plugin.PluginManager;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public abstract class JvmPlugin extends Plugin {
     private File dataFolder;
@@ -50,5 +53,26 @@ public abstract class JvmPlugin extends Plugin {
         }
 
         return this.dataFolder;
+    }
+
+    public final void saveResource(String res) {
+        File file = new File(getDataFolder(), res);
+        if (!file.exists()) {
+            try (InputStream in = getClass().getResourceAsStream("/" + res)) {
+                if (in == null) {
+                    throw new IllegalArgumentException("Resource not found: " + res);
+                }
+                file.getParentFile().mkdirs();
+                try (FileOutputStream out = new FileOutputStream(file)) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, length);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save resource: " + res, e);
+            }
+        }
     }
 }

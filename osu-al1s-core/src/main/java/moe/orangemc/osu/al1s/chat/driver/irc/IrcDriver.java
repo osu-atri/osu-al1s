@@ -45,7 +45,7 @@ public class IrcDriver implements ChatDriver {
     @Inject
     private Scheduler scheduler;
 
-    private Queue<QueuedMessage> messages = new ConcurrentLinkedQueue<>();
+    private final Queue<QueuedMessage> messages = new ConcurrentLinkedQueue<>();
 
     public IrcDriver(String host, int port, IrcCredentialImpl credential) {
         var builder = Client.builder()
