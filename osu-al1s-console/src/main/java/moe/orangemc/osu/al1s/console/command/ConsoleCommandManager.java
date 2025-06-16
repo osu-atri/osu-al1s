@@ -20,6 +20,7 @@ import moe.orangemc.osu.al1s.api.chat.command.CommandBase;
 import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
 import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 import moe.orangemc.osu.al1s.api.user.User;
+import moe.orangemc.osu.al1s.chat.command.CommandExecutor;
 import moe.orangemc.osu.al1s.chat.command.argument.*;
 
 import java.util.List;
@@ -27,8 +28,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ConsoleCommandManager extends CommandManager {
-    private final ConsoleSpaceCommandExecutorFactory executorFactory = new ConsoleSpaceCommandExecutorFactory();
-
     public ConsoleCommandManager() {
         registerBuiltinAdapters();
     }
@@ -74,7 +73,7 @@ public class ConsoleCommandManager extends CommandManager {
             return false;
         }
         try {
-            executorFactory.fetchExecutor(cmd).execute(this, reader);
+            CommandExecutor.callCommand(this, cmd, reader);
         } catch (Exception e) {
             e.printStackTrace();
         }

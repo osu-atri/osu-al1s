@@ -43,3 +43,4 @@ tmpCredentialFile
 settings.yml
 plugins/
 logs/
+token/

@@ -176,4 +176,9 @@ public class StringReader {
     public void reset() {
         this.pos = this.checkpoint;
     }
+
+    @Override
+    public String toString() {
+        return "StringReader{input=" + this.command + '}';
+    }
 }

@@ -21,13 +21,10 @@ import moe.orangemc.osu.al1s.api.chat.command.CommandManager;
 import moe.orangemc.osu.al1s.api.chat.command.StringReader;
 import moe.orangemc.osu.al1s.api.user.User;
 import moe.orangemc.osu.al1s.chat.OsuChannelImpl;
-import moe.orangemc.osu.al1s.chat.command.accessor.UserspaceCommandExecutorFactory;
 import moe.orangemc.osu.al1s.chat.command.argument.*;
 import moe.orangemc.osu.al1s.user.UserImpl;
 
 public class UserspaceCommandManager extends CommandManager {
-    private final UserspaceCommandExecutorFactory executorFactory = new UserspaceCommandExecutorFactory();
-
     public UserspaceCommandManager() {
         registerBuiltinAdapters();
     }
@@ -61,7 +58,7 @@ public class UserspaceCommandManager extends CommandManager {
             return false;
         }
         try {
-            executorFactory.fetchExecutor(cmd).execute(this, reader, sender, where);
+            CommandExecutor.callCommand(this, cmd, reader, sender, where);
         } catch (Exception e) {
             e.printStackTrace();
         }
